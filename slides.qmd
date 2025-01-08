@@ -2,11 +2,11 @@
 title: "Slides"
 ---
 
-[Course overview](overview25.qmd)
+[Course overview](/slides/overview25.qmd)
 
-[Matrix algebra basics](matrix25.qmd)
+[Matrix algebra basics](/slides/matrix25.qmd)
 
-[Probability basics](probability25.qmd)
+[Probability basics](/slides/probability25.qmd)
 
 <!-- [Thinking about data](thinkingdata24.qmd) -->
 
