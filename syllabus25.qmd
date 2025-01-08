@@ -23,7 +23,7 @@ library(pander)
 <!-- ::: {.grid .course-details .course-details-smaller} -->
 
 <!-- ::: g-col-6 -->
-# Syllabus
+<!-- # Syllabus -->
 ::: {layout-ncol="2"}
 ## Instructor
 
