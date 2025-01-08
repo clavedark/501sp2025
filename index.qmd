@@ -1,0 +1,12 @@
+---
+title: "PLSC 501, Spring 2025"
+---
+
+This is the course website for PLSC 501 - it is a data science course focused on data management, coding in R, and learning basic regression techniques in OLS and MLE.
+
+-   [Syllabus](501syllabus25.qmd)
+
+-   [Slides](slides.qmd)
+
+-   [Code](code.qmd)
+

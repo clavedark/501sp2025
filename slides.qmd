@@ -1,0 +1,35 @@
+---
+title: "Slides"
+---
+
+[Course overview](overview25.qmd)
+
+[Matrix algebra basics](matrix25.qmd)
+
+[Probability basics](probability25.qmd)
+
+<!-- [Thinking about data](thinkingdata24.qmd) -->
+
+<!-- [Bivariate model](bivariate24.qmd) -->
+
+<!-- [Multivariate model](multivariate24.qmd) -->
+
+<!-- [Prediction methods](predictionmethods24.qmd) -->
+
+<!-- [Normality](normality24.qmd) -->
+
+<!-- [Inference](inference24.qmd) -->
+
+<!-- [Model specification](specification24.qmd) -->
+
+<!-- [Dummy variables and interactions](interactions24.qmd) -->
+
+<!-- [Limited dependent variables](limiteddv24.qmd) -->
+
+<!-- [Panel data](panel24.qmd) -->
+
+<!-- [Time Series](time24.qmd) -->
+
+<!-- [Variance](variance24.qmd) -->
+
+<!-- [Instrumental variables](causal24.qmd) -->
