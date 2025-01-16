@@ -121,7 +121,7 @@ What do you need at the start?
 
 You should be able to make sense of this in terms of dimensions and operations:
 
-$$\beta = (X'X)^{-1} X'y$$ where $X$ is a data matrix of rows and columns; these are the variables in a regression. $y$ is the outcome variable, the same number of rows as $X$. Define the dimensions of $X$, $y$, and $\beta$, of $(X'X)^-1$ and $X'y$.
+$$\beta = (X'X)^{-1} X'y$$ where $X$ is a data matrix of rows and columns; these are the variables in a regression. $y$ is the outcome variable, the same number of rows as $X$. Define the dimensions of $X$, $y$, and $\beta$, of $(X'X)^{-1}$ and $X'y$.
 
 ## Probability theory
 
@@ -229,17 +229,82 @@ stateviol$rollmean<-rollmean(stateviol$perday,k=7, fill=NA)
 protests <- protests %>% filter(protests$event_date < "2022-06-25")
 stateviol <- stateviol %>% filter(stateviol$event_date < "2022-06-25")
 
-protestplot <- ggplot(data=protests, aes(x=event_date, y=rollmean)) +
-  geom_line()+
-  geom_smooth() +
-  geom_vline(xintercept=as.numeric(as.Date("2020-03-15")), color="red") +
-  scale_x_date(date_breaks = "6 months", date_labels = '%b %Y')  +
-  labs(x="Date", y="Protests", caption="7 day rolling averages; smoothed loess trend lines; red lines indicate 3.15.2020 COVID onset; 'ACLED data retrieved 7.18.22, http://acleddata.com") + 
-  ggtitle("Protests During the Pandemic") 
-   
+# protestplot <- ggplot(data=protests, aes(x=event_date, y=rollmean)) +
+#   geom_line()+
+#   geom_smooth() +
+#   geom_vline(xintercept=as.numeric(as.Date("2020-03-15")), color="red") +
+#   scale_x_date(date_breaks = "6 months", date_labels = '%b %Y')  +
+#   labs(x="Date", y="Protests", caption="7 day rolling averages; smoothed loess trend lines; red lines indicate 3.15.2020 COVID onset; 'ACLED data retrieved 7.18.22, http://acleddata.com") + 
+#   ggtitle("Protests During the Pandemic") 
+#    
+# 
+# protestplot
 
-protestplot
 
+library(highcharter)
+library(dplyr)
+
+# First handle potential NA values and ensure data is properly ordered
+protests <- protests %>%
+  arrange(event_date) %>%
+  # Optionally remove NA values if present
+  filter(!is.na(rollmean), !is.na(event_date))
+
+# Calculate the smoothed trend line with explicit handling of the data points
+x_vals <- as.numeric(protests$event_date)
+smooth_fit <- loess(rollmean ~ x_vals, data = protests, span = 0.75)
+protests$smooth_trend <- predict(smooth_fit, x_vals)
+
+bucolors<-list("#005A43","#6CC24A", "#A7DA92", "#BDBEBD", "#000000" )
+
+# Create the highchart
+hchart <- highchart() %>%
+  hc_add_series(
+    data = protests,
+    type = "line",
+    hcaes(x = event_date, y = rollmean),
+    color= "#000000",
+    name = "Rolling Average"
+  ) %>%
+  hc_add_series(
+    data = protests,
+    type = "line",
+    hcaes(x = event_date, y = smooth_trend),
+    name = "Trend",
+    dashStyle = "Solid",
+    color = "#005A43",
+    opacity = 0.7
+  ) %>%
+  hc_xAxis(
+    plotLines = list(list(
+      value = as.numeric(as.POSIXct("2020-03-15")) * 1000,
+      color = "red",
+      width = 2,
+      zIndex = 3
+    )),
+    type = "datetime",
+    dateTimeLabelFormats = list(month = "%b %Y"),
+    tickInterval = 6 * 30 * 24 * 3600 * 1000
+  ) %>%
+  hc_yAxis(
+    title = list(text = "Protests")
+  ) %>%
+  hc_title(
+    text = "Protests During the Pandemic"
+  ) %>%
+  hc_caption(
+    text = "7 day rolling averages; smoothed loess trend lines; red line indicates 3.15.2020 COVID onset; ACLED data retrieved 7.18.22",
+    align = "left",
+    style = list(fontStyle = "italic")
+  ) %>%
+  hc_tooltip(
+    shared = TRUE,
+    crosshairs = TRUE
+  ) %>%
+  hc_credits(enabled = FALSE)
+
+# Display the chart
+hchart
 ```
 
 ------------------------------------------------------------------------
@@ -251,15 +316,77 @@ protestplot
 #| code-fold: true
 #| code-summary: "code" 
 
-repressionplot <- ggplot(data=stateviol, aes(x=event_date, y=rollmean)) +
-  geom_line()+
-  geom_smooth() +
-  geom_vline(xintercept=as.numeric(as.Date("2020-03-15")), color="red") +
-  scale_x_date(date_breaks = "6 months", date_labels = '%b %Y')  +
-  labs(x="Date", y="Violence against civilians", caption="7 day rolling averages; smoothed loess trend lines; red lines indicate 3.15.2020 COVID onset; ACLED data retrieved 7.18.22, http://acleddata.com") + 
-  ggtitle("Violence Against Civilians During the Pandemic") 
-  
-repressionplot
+# repressionplot <- ggplot(data=stateviol, aes(x=event_date, y=rollmean)) +
+#   geom_line()+
+#   geom_smooth() +
+#   geom_vline(xintercept=as.numeric(as.Date("2020-03-15")), color="red") +
+#   scale_x_date(date_breaks = "6 months", date_labels = '%b %Y')  +
+#   labs(x="Date", y="Violence against civilians", caption="7 day rolling averages; smoothed loess trend lines; red lines indicate 3.15.2020 COVID onset; ACLED data retrieved 7.18.22, http://acleddata.com") + 
+#   ggtitle("Violence Against Civilians During the Pandemic") 
+#   
+# repressionplot
+
+# First handle potential NA values and ensure data is properly ordered
+stateviol <- stateviol %>%
+  arrange(event_date) %>%
+  # Optionally remove NA values if present
+  filter(!is.na(rollmean), !is.na(event_date))
+
+# Calculate the smoothed trend line with explicit handling of the data points
+x_vals <- as.numeric(stateviol$event_date)
+smooth_fit <- loess(rollmean ~ x_vals, data = stateviol, span = 0.75)
+stateviol$smooth_trend <- predict(smooth_fit, x_vals)
+
+bucolors<-list("#005A43","#6CC24A", "#A7DA92", "#BDBEBD", "#000000" )
+
+# Create the highchart
+hchart <- highchart() %>%
+  hc_add_series(
+    data = stateviol,
+    type = "line",
+    hcaes(x = event_date, y = rollmean),
+    color= "#000000",
+    name = "Rolling Average"
+  ) %>%
+  hc_add_series(
+    data = stateviol,
+    type = "line",
+    hcaes(x = event_date, y = smooth_trend),
+    name = "Trend",
+    dashStyle = "Solid",
+    color = "#005A43",
+    opacity = 0.7
+  ) %>%
+  hc_xAxis(
+    plotLines = list(list(
+      value = as.numeric(as.POSIXct("2020-03-15")) * 1000,
+      color = "red",
+      width = 2,
+      zIndex = 3
+    )),
+    type = "datetime",
+    dateTimeLabelFormats = list(month = "%b %Y"),
+    tickInterval = 6 * 30 * 24 * 3600 * 1000
+  ) %>%
+  hc_yAxis(
+    title = list(text = "Violence Against Civilians")
+  ) %>%
+  hc_title(
+    text = "Violence Against Civilians During the Pandemic"
+  ) %>%
+  hc_caption(
+    text = "7 day rolling averages; smoothed loess trend lines; red line indicates 3.15.2020 COVID onset; ACLED data retrieved 7.18.22",
+    align = "left",
+    style = list(fontStyle = "italic")
+  ) %>%
+  hc_tooltip(
+    shared = TRUE,
+    crosshairs = TRUE
+  ) %>%
+  hc_credits(enabled = FALSE)
+
+# Display the chart
+hchart
 
 ```
 
@@ -582,4 +709,4 @@ The increase in violence occurs almost entirely between zero and 5000 COVID deat
 
 $~$ $~$
 
-That's the primary question we'll ask this semester.
+Much of our focus this semester will be on evaluating how useful models are, and figuring out ways to build useful models.
