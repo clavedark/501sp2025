@@ -1,0 +1,659 @@
+---
+title: "Linear Regression in OLS" 
+author: "Dave Clark"
+institute: "Binghamton University"
+date: today
+date-format: long
+title-block-banner: TRUE
+format: html
+editor: source
+embed-resources: true
+#number-sections: true
+#cache: true
+#execute:
+# freeze: true  # never re-render during project render
+---
+  
+  ```{=html}
+<style>
+  table, th, td {
+    font-size: 18px;
+  }
+</style>
+  ```
+```{r setup, include=FALSE ,echo=FALSE}
+options(htmltools.dir.version = FALSE)
+
+knitr::opts_chunk$set(fig.retina = 2, fig.align = "center", warning=FALSE, error=FALSE, message=FALSE) 
+
+library(leaflet.extras)
+library(tidyverse)
+library(ggthemes)
+library(ggplot2)
+library(leaflet)
+library(lubridate)
+library(haven) #read stata w/labels
+library(ggridges) # multiple densities
+library(tmap)
+library(countrycode)
+library(acled.api)
+library(patchwork)
+library(zoo)
+library(countrycode)
+library(mvtnorm)
+library(modelsummary)
+library("GGally")
+library(stargazer)
+library(highcharter)
+
+```
+
+
+
+## OLS Estimation
+
+These slides are aimed at estimating and interpreting the linear model in OLS by walking through all the various pieces and parts of the model. The goal here is to start with some data and to use those data to manually generate OLS estimates of $\beta$ and $\sigma^2$ and to compare those estimates to the output from R's `lm()` function. I want to show you how the estimates are generated and how they relate to the data, and to start the semester demystifying what `lm()` is doing.
+
+Think of these slides as describing much of what we'll study in the next few weeks - I don't expect you to "get" all this right now. But I do want you to see where we're going and to start to get the intuition of OLS estimation.
+
+--------------------------------------------
+
+### Data Matrix
+
+Let's create a very small data set (n=6) - just so we have some nouns to use, we're going to call the $y$ variable "social insurance spending" as a percent of total spending, and the $x$ variable "gdp". We'll also include a dummy variable for democracy.
+
+
+```{r create_data}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code" 
+#| 
+data <- c(.18, 1, 28, .05, 0, 11, .23, 1, 45, .07, 0, 20, .12, 1, 30, .12, 1, 5)
+dm <- matrix(data, nrow = 6, ncol = 3, byrow = TRUE)
+colnames(dm) <- c('socins', 'dem', 'gdp')
+df <- as.data.frame(dm)
+
+#print the data in a table using kableextra; add a title to the table; add bootstrap styling to the table; make the table responsive.Title the table "Data".
+
+library(kableExtra)
+kable(df, 
+      "html", 
+      row.names = FALSE,
+      caption = "Data",
+      col.names = c("Social Insurance", "Democracy", "GDP")) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), full_width = F)
+
+
+
+
+```
+
+## Interpreting the Linear Model
+
+Let's estimate three models using R's `lm()` function. The first model is a simple constant-only model, and the second model includes GDP as a predictor of social insurance spending. The third includes democracy.
+
+
+```{r bivariate_model}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code" 
+
+
+ols0 <- lm(socins ~ 1, data = df)
+
+ols1 <- lm(socins ~ gdp, data = df)
+
+ols2 <- lm(socins ~ dem , data = df)
+
+modelsummary(
+  models = list(ols0, ols1, ols2),
+  stars = TRUE,
+  title = "OLS Estimates",
+  gof_map = c("n", "r.squared", "adj.r.squared", "fstatistic", "p.value")
+)
+
+```
+
+The constant-only model (or null model) only estimates an intercept. The value of the intercept is the mean of the $y$ variable as you can see below: 
+
+```{r}
+
+# mean of social insurance 
+
+mean(df$socins)
+
+```
+
+In the null model, the estimate of the intercept is our best guess about $y$ absent any other information - the sample mean of $y$. 
+
+Let's look at the bivariate model including "democracy." The coefficient on "democracy" is the difference in the mean of social insurance spending between democracies and non-democracies. Recall the "democracy" variable is binary, so the coefficient is the difference in the mean of social insurance spending between democracies and non-democracies - the difference between democracies and non-democracies in social insurance spending is 0.103, so 10%. 
+
+We can also compute predictions or expected values of social insurance spending. If "democracy" is zero (so the country is a non-democracy), the expected value of social insurance spending is 0.06 - so just the intercept, or 6%. 
+
+If "democracy" is one (so the country is a democracy), the expected value of social insurance spending is 0.16. So our best guess about non-democratic social spending is 16%; for democratic countries, it's 16% (the intercept, .06 plus the democracy coefficient, .10).
+
+
+::: {.callout-note}
+### Differential Intercepts
+
+We can call the coefficient on a dummy variable (like "democracy") a **differential intercept** - it's measuring the *difference in the y-axis between two groups*.
+
+:::
+
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+library(kableExtra)
+
+interpret_df <- data.frame(
+  Coefficient = c(
+    "Intercept (β₀ = 0.06)",
+    "Democracy Coefficient (β₁ = 0.1025)",
+    "Predicted Value when Democracy = 0",
+    "Predicted Value when Democracy = 1"
+  ),
+  Interpretation = c(
+    "When Democracy = 0, the predicted social insurance spending is 0.06 (6% of GDP)",
+    "Moving from non-democracy (0) to democracy (1) is associated with an increase of 0.1025 (10.25 percentage points) in social insurance spending as a share of GDP",
+    "0.06 or 6% of GDP",
+    "0.1625 or 16.25% of GDP"
+  )
+)
+
+kable(interpret_df, 
+      "html",
+      col.names = c("Component", "Interpretation"),
+      caption = "Interpreting Differential Intercepts") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), full_width = F) %>%
+  column_spec(1, border_right = TRUE)
+
+```
+ 
+
+
+
+
+## Predictions and Residuals
+
+The predictions from this model we'll call $\widehat{y}$ - the predicted value of social insurance spending given a value of GDP. The residuals are the difference between the actual value of social insurance spending and the predicted value, $y-\widehat{y}$. 
+
+First, let's generate and plot the predictions from the bivariate model. We'll have $N$ predicted values, one for each observation in the model, compuated as $\widehat{y} = \hat{\beta}_0 + \hat{\beta}_1 x$. So let's just plug the values of "gdp" in for $x$ and compute the predicted values of social insurance spending. You can see the predictions in the table below and the plot of the predictions and actual values in the figure below.
+
+### Bivariate model predictions
+
+```{r bivariate_predictions}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code" 
+
+
+fit1 <- predict(ols1, interval = "confidence", se.fit = TRUE)
+predictions <- cbind(df, fit1)
+predictions$res <- predictions$socins - predictions$fit.fit
+
+#table of predictions and the y variable social insurance spending; only include these two columns, exclude row numbers.
+
+kable(predictions[,c('socins', 'fit.fit')], 
+      "html", 
+      row.names = FALSE,
+      col.names = c("Social Insurance", "Predicted Values")) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), full_width = F)
+
+
+
+```
+
+
+
+The regression line (line of best fit) is the line that minimizes the sum of the squared residuals. The residuals are the vertical distances between the actual values and the predicted values. The residuals are shown in the plot below as the vertical bars between the actual values and the predicted values. 
+
+
+### Bivariate model predictions and residuals {#sec-predictions}
+```{r residual_plot}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+
+#plot prediction line, scatter of actuals, and residuals as segment bars between prediction line and actual
+
+# First, create a helper function to create segment data
+create_segment_data <- function(df) {
+  segments <- lapply(1:nrow(df), function(i) {
+    list(
+      data = list(
+        list(x = df$gdp[i], y = df$socins[i]),
+        list(x = df$gdp[i], y = df$fit.fit[i])
+      )
+    )
+  })
+  return(segments)
+}
+
+bucolors<-list("#005A43","#6CC24A", "#A7DA92", "#BDBEBD", "#000000" )
+
+# Create the chart
+highchart() %>%
+  # Add the fitted line
+  hc_add_series(
+    data = predictions,
+    type = "line",
+    hcaes(x = gdp, y = fit.fit),
+    name = "Fitted Line",
+    color = "#005A43"
+  ) %>%
+  # Add the actual points
+  hc_add_series(
+    data = predictions,
+    type = "scatter",
+    hcaes(x = gdp, y = socins),
+    name = "Actual Values",
+    color = "#6CC24A"
+  ) %>%
+  # Add the connecting segments
+  hc_add_series_list(
+    create_segment_data(predictions) %>%
+      lapply(function(x) {
+        x$type <- "line"
+        x$dashStyle <- "Dash"
+        x$color <- "#005A43"
+        x$showInLegend <- FALSE
+        x$enableMouseTracking <- FALSE
+        x$linkedTo <- ":previous"
+        return(x)
+      })
+  ) %>%
+  # Customize the chart
+  hc_xAxis(
+    title = list(text = "GDP")
+  ) %>%
+  hc_yAxis(
+    title = list(text = "Social Insurance Spending")
+  ) %>%
+  hc_tooltip(
+    shared = TRUE,
+    crosshairs = TRUE
+  ) 
+
+```
+The distances between observed and predicted values of $y$ are the residuals. Since the regression line minimizes the sum of these squared distances, it might be apparent the positive and negative residuals are balanced around the line, and so cancel each other out. Here's another way to visualize the residuals emphasizing that intuition. You'll see the residuals sum to zero.
+
+
+## Residuals sum to zero
+
+```{r lm_residuals_plot}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+#| 
+# plot residuals as bars around zero with a reference line at zero. Compute the sum of the residuals. Round to 3 decimals and print this on the plot space.
+
+e <- sum(predictions$res)
+e <- round(e, 3)
+
+
+highchart() %>%
+  hc_add_series(predictions, type = "column", hcaes(x = gdp, y = res), name = "Residuals", color="#005A43") %>%
+  hc_xAxis(title = list(text = "GDP")) %>%
+  hc_yAxis(title = list(text = "Residuals")) %>%
+  hc_title(text = "Residuals") %>%
+  hc_plotOptions(column = list(stacking = "normal")) %>%
+  hc_yAxis(plotLines = list(list(value = 0, color = "#000000", width = 2, zIndex = 4))) %>%
+  hc_add_annotation(
+    labels = list(
+      list(
+        point = list(x = 0, y = 0),
+        text = paste("Sum of residuals: ", e)
+      )
+    )
+  )
+
+
+```
+
+## Measuring Uncertainty
+
+The most important quantities we get from any regression model are those measuring uncertainty. For all sorts of reasons, we should doubt our estimates - the model is probably specified incorrectly in a number of ways; the variables are mismeasured; the assumptions we make in the model are unreasonable; and so on. The residuals which we now know how to compute are the key to measuring uncertainty about the estimates of $\widehat{\beta}$.
+
+
+### Residuals
+
+Let's sum the residuals and verify they sum to zero:
+
+```{r}
+
+e <- sum(predictions$res)
+print(e)
+
+```
+
+If the sum is zero, so is the mean. This is a property of the OLS estimator, and the reason we sum the **squared** residuals - this gives us the **sum squared error**:
+
+```{r}
+SSE <- sum(predictions$res^2)
+print(SSE)
+
+```
+
+If we average the sum squared residuals over the degrees of freedom, we get the variance of the residuals. This is our estimate of the variance of the error term, $\sigma^2$. If we take the square root of this, we get the *residual standard error* or **RSE** (also called the *root mean squared error*). This is the average distance between the observed values and the predicted values. 
+
+
+```{r}
+#variance of the residuals or sigma^2
+sigma2 <- SSE / (6 - 2)
+print(sigma2)
+
+#residual standard error or root mean squared error
+rse <- sqrt(sigma2)
+print(rse)
+
+#verify same as lm() output
+summary(ols1) # Compare RSE
+```
+
+The **RSE** is a measure of the typical size of a residual, and it's in the units of the $y$ variable, so useful in telling us how large or small our average error is. 
+
+Now that we know where residuals come from, let's move backwards and repeat what we've just done but in matrix notation - this will give us the same estimates as `lm()` but we'll see how they're generated, and it'll give us some insight into where our **standard errors** come from.
+
+
+
+## Matrix Estimation
+
+Using the same data as above, let's think about this in matrix terms - so we have a column vector, $y$ (social insurance), and a matrix $X$ of predictors (a column of ones for the intercept and a column for GDP). For the bivariate model, we'll exclude "democracy" for now.
+
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code" 
+
+df <- df %>% mutate(cons = 1)
+kable(df, 
+      "html", 
+      row.names = FALSE,
+      caption = "Data",
+      col.names = c("Social Insurance", "Democracy", "GDP", "Constant")) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), full_width = F)
+
+```
+
+We can estimate the coefficients of the bivariate model using matrix algebra. The formula for the OLS estimator is 
+
+$$\widehat{\beta} = (X'X)^{-1}X'y$$ 
+
+First, let's arrange the data into a matrix $X$ and a vector $y$ - note that our $X$ matrix includes a column of ones to estimate the intercept. 
+
+
+```{r matrix_estimation_bivariate}
+#make the data matrix X and the outcome vector y
+y <- df$socins
+cons <- rep(1, length(y))
+X <- cbind(cons, df$gdp)
+colnames(X) <- c('cons', 'gdp')
+```
+
+```{r}
+# Calculate coefficients using matrix algebra
+b <- solve(t(X) %*% X) %*% t(X) %*% y
+print(b)
+
+# Compare with lm() coefficients
+coef(ols1)  
+```
+
+You can see our matrix estimates are the same as the `lm()` estimates.
+
+Let's continue by computing the residuals - the difference between the observed values of $y$ and the predicted values of $y$ - so we'll need to compute the predictions too:
+
+```{r}
+# Calculate residuals
+e <- y - X %*% b
+print(e)
+
+# compute the sum of the residuals squared, compare to above
+
+SSEm <- t(e) %*% e
+print(SSEm)
+print(SSE)
+
+#compute sigma^2 and compare to above
+
+sigma2m <- (t(e) %*% e) * 1 / (6 - 2)
+print(sigma2m)
+print(sigma2)
+
+```
+
+So we've just replicated in matrix form what we did above in scalar form. Let's now compute the standard errors of the coefficients. To do that, we need to compute the variance-covariance matrix of the coefficients. This is given by:
+
+$$V(\widehat{\beta}) = \sigma^2(X'X)^{-1}$$
+
+The estimated error variance multiplied by the inverse of the $X'X$ matrix gives us the variance-covariance matrix of the coefficients. We're effectively weighting error variance, $\sigma^2$, by the covariance of the $X$ variables. 
+
+Compute the variance-covariance matrix of the coefficients and compare to the `lm()` output:
+
+```{r}
+
+# variance-covariance matrix of the coefficients
+vcb <- drop(sigma2) * solve(t(X) %*% X)
+print(vcb)
+
+# Compare with lm() vcov
+vcov(ols1)  
+```
+
+The main diagonal elements of the variance-covariance matrix are the variances of the coefficients. The square roots of these are the standard errors of the coefficients. Let's compute the standard errors and compare to the `lm()` output:
+
+
+```{r}
+# Calculate standard errors
+se_b <- sqrt(diag(vcb))
+print(se_b)
+
+# Compare with lm() standard errors
+summary(ols1)
+```
+
+So we've just replicated the `lm()` output using matrix algebra. We've seen how the estimates are generated and how the standard errors are computed.
+
+
+--------------------------------------------
+
+## Predictions with Confidence Intervals
+
+Let's return to the predictions from the bivariate model. In the @sec-predictions above, we plotted $\widehat{y}$ against $x$ and the actual values of $y$ but we didn't express any uncertainty about those predictions - we did not compute standard error of the $\widehat{y}$ values, or compute confidence intervals. Let's do that now. 
+
+We can compute the confidence intervals for the predictions using the formula:
+
+$$\widehat{y} \pm t_{\alpha/2, n-2} \times \text{SE}(\widehat{y})$$
+
+Where do we get the standard errors of the predictions? We can compute these using the formula:
+
+$$\text{SE}(\widehat{y}) = \sqrt{diag(\text{X}V\text{X}')}$$. 
+
+This is the square root of the diagonal elements of the matrix product of the $X$ matrix, the variance-covariance matrix of the coefficients, and the transpose of the $X$ matrix.
+
+
+```{r confidence_intervals}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+predictions <- predictions %>% mutate(ub = fit.fit + 1.96 * se.fit, lb = fit.fit - 1.96 * se.fit)
+#order predictions by gdp
+predictions <- predictions[order(predictions$gdp),]
+highchart() %>%
+  hc_add_series(predictions, type = "arearange", hcaes(x = gdp, low = lb, high = ub), name = "Confidence Interval", color = "#005A43", fillOpacity = 0.5) %>%
+  hc_add_series(predictions, type = "line", hcaes(x = gdp, y = fit.fit), name = "Predicted", color="black") %>%
+  #hc_add_series(predictions, type = "scatter", hcaes(x = gdp, y = socins), name = "Actual") %>%
+  hc_xAxis(title = list(text = "GDP")) %>%
+  hc_yAxis(title = list(text = "Social Spending"))
+
+```
+
+The confidence intervals are wider where the data are more dispersed, and narrower where the data are more tightly clustered. The confidence intervals are a measure of the uncertainty in our predictions. One thing to notice is that, scanning from left-to-right, we could draw a horizontal line from the left-most upper bound to the right-most lower bound - which is to say we can't say the change in social insurance spending is statistically significant across the range of GDP because the interval contains a line with slope=0. 
+
+
+## Multivariate Model and Quantities
+
+Let's now estimate a multivariate model. We'll include both "democracy" and "gdp" as predictors of social insurance spending. The model is:
+
+
+```{r multivariate_model}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+
+#refresh data
+df <- as.data.frame(dm)
+
+ols3 <- lm(socins ~ dem + gdp, data = df)
+#summary(ols2)
+
+modelsummary(
+  models = ols3,
+  stars = TRUE,
+  format="pipe",
+#  output = "html",
+  title = "OLS Estimates",
+  gof_map = c("n", "r.squared", "adj.r.squared", "fstatistic", "p.value")
+)
+
+
+
+```
+
+To generate predictions in the multivariate model, we need to hold variables other than our variable of interest constant at some meaningful value (often, central tendency). In this case, I'm going to vary GDP (my x-axis representing my variable of interest), and compute predictions at both values of "democracy" (0 and 1). 
+
+
+```{r predictions}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+#compute average predictions for dem=0 and dem=1
+
+dfpreds <- df
+dfpreds$dem <- 0
+fit <- data.frame(predict(ols3, newdata = dfpreds, interval = "confidence", se.fit = TRUE))
+df$nondemxb <- fit$fit.fit
+dfpreds$dem <- 1
+fit <- data.frame(predict(ols3, newdata = dfpreds, interval = "confidence", se.fit = TRUE))
+df$demxb <- fit$fit.fit
+
+
+#plot predictions
+highchart() %>%
+  hc_add_series(df, type = "line", hcaes(x = gdp, y = demxb), name = "Dem = 1", color="#005A43") %>%
+  hc_add_series(df, type = "line", hcaes(x = gdp, y = nondemxb), name = "Dem = 0", color="#6CC24A") %>%
+  #hc_add_series(df, type = "scatter", hcaes(x = gdp, y = socins), name = "Actual") %>%
+  hc_xAxis(title = list(text = "GDP")) %>%
+  hc_yAxis(title = list(text = "Social Spending"))
+
+```
+
+The upper line reports the predicted social insurance spending for democracies over GDP; the lower line reports the predicted social insurance spending for non-democracies over GDP.  The distance between the two lines is the difference in the mean of social insurance spending between democracies and non-democracies; it's the value of the "democracy" coefficient, 0.074. Also, note that the lines are parellel - this is by construction since we've only estimated one slope (GDP) despite having two regime groups. This is the *structural stability assumption*, something we'll explore in the coming weeks.
+
+## Real Data: Boston Housing Values
+
+Let's now turn to a real data set - the Boston housing data set. We'll estimate a model of median home value as a function of crime rate, age of the house, tax rate, black population, distance to employment centers, and pupil-teacher ratio. In the end, I want to plot predictions and confidence intervals over the range of pupil-teacher ratios. 
+ 
+Let's present the results two different ways: in a table and in a coefficient plot.
+
+```{r boston_data_and_model}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+
+
+library(MASS)
+boston <- data.frame(Boston)
+
+inmodel <- subset(boston, select = c(medv, crim, age, tax, black, dis, ptratio))
+
+hvmodel1 <- lm(medv ~ crim + age + tax + black + dis + ptratio, data = boston)
+
+modelsummary(
+  models = hvmodel1,
+  stars = TRUE,
+  title = "Boston Housing Values, OLS estimates",
+  gof_map = c("n", "r.squared", "adj.r.squared", "fstatistic", "p.value")
+)
+
+modelplot(hvmodel1, stars = TRUE, title = "Boston Housing Values, OLS estimates", coef_omit = c("Intercept"))
+
+
+
+```
+
+Let's generate predicted housing values across the values of pupil-teacher ratio. We'll hold the other variables at means, medians, or modes, and compute the predictions and confidence intervals. 
+
+```{r boston_predictions}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+# make some data for at-means predictions 
+#summary(boston$ptratio)
+
+oos1 <- data.frame(Intercept=1, crim=.25, age=77.5, tax=330,black=391.44, dis=3.2, ptratio= c(seq(12,22,1)))
+
+boston.predict <- data.frame(oos1, predict(hvmodel1, interval="confidence", se.fit=TRUE, level=.05, newdata=oos1))
+
+# confidence bounds by end point transformation
+boston.predict <- boston.predict %>% mutate(ub=fit.fit+1.96*se.fit) %>% mutate(lb=fit.fit-1.96*se.fit)
+
+
+highchart() %>%
+  hc_add_series(boston.predict, type = "arearange", hcaes(x = ptratio, low = lb, high = ub), name = "Confidence Interval", color = "#005A43", fillOpacity = 0.2) %>%
+  hc_add_series(boston.predict, type = "line", hcaes(x = ptratio, y = fit.fit), name = "Predicted", color="#6CC24A") %>%
+  hc_xAxis(title = list(text = "Pupil-teacher ratio")) %>%
+  hc_yAxis(title = list(text = "Predicted Housing Value"))
+
+```
+
+## Predictions using matrix algebra
+
+Let's do this one last time computing the predictions and confidence intervals for the Boston housing data set using matrix algebra. 
+
+
+```{r boston_matrix}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+# generate xb and st. errs of predictions by matrix: 
+
+# get b vector
+b <- coef(hvmodel1)
+
+# set up out of sample data, making sure vars in same order as in model
+oos1 <- data.frame(Intercept=1, crim=.25, age=77.5, tax=330,black=391.44, dis=3.2, ptratio= c(seq(12,22,1)))
+X <- as.matrix(oos1)
+
+xb <- X%*%b
+
+# now, get the var-cov matrix of b : var(p) = XVX'
+V <- vcov(hvmodel1)
+vcp = X%*%V%*%t(X)
+varp<- diag(vcp, names = TRUE)
+
+# compute upper and lower bounds by end point transformation
+oos1 <-data.frame(oos1, sep= sqrt(varp), xb, ub=xb+1.96*sqrt(varp), lb=xb-1.96*sqrt(varp))
+
+# plot
+highchart() %>%
+  hc_add_series(oos1, type = "arearange", hcaes(x = ptratio, low = lb, high = ub), name = "Confidence Interval", color = "#005A43", fillOpacity = 0.2) %>%
+  hc_add_series(oos1, type = "line", hcaes(x = ptratio, y = xb), name = "Predicted", color="#6CC24A") %>%
+  hc_xAxis(title = list(text = "Pupil/Teacher Ratio")) %>%
+  hc_yAxis(title = list(text = "Predicted Home Value"))
+
+
+```
+
+

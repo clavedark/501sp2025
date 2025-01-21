@@ -599,11 +599,11 @@ ggcoef_model(
 
 The estimates indicate:
 
--   if all the $X$ variables are set to zero, the expected violence against civilians is 1.16 (the intercept). *Can we reasonably set all the* $X$ variables to zero?
+-   if all the $X$ variables are set to zero, the expected violence against civilians is 0.93 (the intercept). *Can we reasonably set all the* $X$ variables to zero?
 
--   the difference between a state with a SoE and without is different from zero, but quite small; 0.13 uses of violence.
+-   the difference between a state with a SoE and without is different from zero, but quite small; 0.26 uses of violence.
 
--   more deaths from COVID are associated with more violence against civilians; $ln(\beta) = .05$. Exponentiate that, and the effect on violence is 1.05, so large compared to anything else in the model.
+-   more deaths from COVID are associated with more violence against civilians; $ln(\beta) = .02$. Exponentiate that, and the effect on violence is 1.02, so large compared to anything else in the model.
 
 ------------------------------------------------------------------------
 

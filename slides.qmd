@@ -8,7 +8,9 @@ title: "Slides"
 
 [Probability basics](/slides/probability25.qmd)
 
-<!-- [Thinking about data](thinkingdata24.qmd) -->
+[A First Look at OLS](/slides/linearmodelfirstlook.qmd)
+
+[Thinking about data](/slides/thinkingdata25.qmd)
 
 <!-- [Bivariate model](bivariate24.qmd) -->
 

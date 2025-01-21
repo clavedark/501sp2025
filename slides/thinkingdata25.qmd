@@ -60,6 +60,9 @@ polity <- read_dta("/Users/dave/Documents/2023/PITF/slides/polity5.dta")
 
 ## Get to know your data, explore etc
 
+These slides are intended to get you thinking about the data you are using, what it tells us, what it doesn't etc., and to think carefully about what we're trying to measure, and what we're actually measuring. 
+
+
 ::: panel-tabset
 ## Anscombe's Quartet
 
