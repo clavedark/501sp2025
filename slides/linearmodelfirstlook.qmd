@@ -73,7 +73,7 @@ dm <- matrix(data, nrow = 6, ncol = 3, byrow = TRUE)
 colnames(dm) <- c('socins', 'dem', 'gdp')
 df <- as.data.frame(dm)
 
-#print the data in a table using kableextra; add a title to the table; add bootstrap styling to the table; make the table responsive.Title the table "Data".
+#print the data in a table using kableextra; add bootstrap styling to the table; make the table responsive.Title the table "Data".
 
 library(kableExtra)
 kable(df, 
