@@ -1,0 +1,733 @@
+---
+title: "Introduction to Bivariate Linear Regression"
+author: "Dave Clark"
+institute: "Binghamton University"
+date: today
+date-format: long
+title-block-banner: TRUE
+format:
+  html:
+    embed-resources: true
+  pdf: default
+editor: source  
+#number-sections: true
+#cache: true
+#execute:
+# freeze: true  # never re-render during project render
+---
+  
+  ```{=html}
+<style>
+  table, th, td {
+    font-size: 18px;
+  }
+</style>
+  ```
+```{r setup, include=FALSE ,echo=FALSE}
+options(htmltools.dir.version = FALSE)
+
+knitr::opts_chunk$set(fig.retina = 2, fig.align = "center", warning=FALSE, error=FALSE, message=FALSE) 
+
+library(leaflet.extras)
+library(tidyverse)
+library(ggthemes)
+library(ggplot2)
+library(leaflet)
+library(lubridate)
+library(haven) #read stata w/labels
+library(ggridges) # multiple densities
+library(tmap)
+library(countrycode)
+library(acled.api)
+library(patchwork)
+library(zoo)
+library(mvtnorm)
+library(stargazer)
+library(highcharter)
+library(GGally)
+library(dplyr)
+library(modelsummary)
+
+#read in data
+censor <- read.csv("/Users/dave/Documents/teaching/501/2023/data/censorcy.csv", header=TRUE)
+
+```
+
+
+
+These slides introduce the basics of bivariate OLS regression using cross-sectional data. We'll analyze how infant mortality rates (IMR) vary across countries based on their political systems and economic development. Until the end, we'll focus on bivariate models. The goal is just to think through some of the elements of the model and questions we face when modeling - you'll benefit from having reviewed the matrix derivation slides, and the thinking about data slides. 
+
+
+## Data Exploration
+
+Let's examine the dataset's structure and summary statistics. The data include one observation for each country, and measures of infant mortality, GDP per capit and its natural log, deaths from natural disasters, whether there's systematic censorship, and the polity scale. Here are a few ways to look at the data.
+
+```{r data_explore}
+tibble(censor)
+datasummary_skim(censor)
+
+censor %>%
+   summarise_if(is.numeric, median, na.rm=TRUE)
+  
+ggpairs(censor, columns = 3:7)
+```
+
+## Constant-Only Model
+
+Let's start with the constant-only, or null model: 
+
+```{r constant_model}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+
+m0 <- lm(IMR ~ 1, data = censor)
+
+modelsummary(
+  models = m0,
+  stars = TRUE,
+  title = "Null Model",
+  gof_omit = 'AIC|Log.Lik|R2|BIC|RMSE',
+  #gof_map = c("nobs", "r.squared", "adj.r.squared", "f.statistic", "p.value", "sigma")
+)
+```
+
+The estimate of $\beta_0$ is the mean of the dependent variable, IMR. The constant-only model is a simple way to understand the data's central tendency.
+
+```{r}
+summary(censor$IMR)
+```
+
+
+## Political System and Infant Mortality
+
+Now we'll examine how a country's political system (measured by the Polity score) affects infant mortality. The Polity score ranges from -10 (most autocratic) to +10 (most democratic). Let's look at the Polity variable:
+
+```{r polity}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+# Calculate counts by polity score
+polity_counts <- table(censor$polity)
+polity_df <- data.frame(
+  polity = as.numeric(names(polity_counts)),
+  count = as.numeric(polity_counts)
+)
+
+# Create highchart
+highchart() %>%
+  hc_chart(type = "column") %>%
+  hc_xAxis(categories = polity_df$polity, title = list(text = "Polity Score")) %>%
+  hc_yAxis(title = list(text = "Count")) %>%
+  hc_add_series(
+    data = polity_df$count,
+    name = "Countries",
+    color = "#005A43",
+    dataLabels = list(
+      enabled = TRUE,
+      format = "{y}"
+    )
+  ) %>%
+  hc_title(text = "Distribution of Polity Scores") %>%
+  hc_plotOptions(column = list(
+    borderRadius = 3,
+    borderWidth = 0
+  ))
+#     
+#     
+```
+
+Polity is categorical and ordered. It's commonly (mis)treated as a continuous variable in the literature - we'll start there: 
+
+
+```{r polity_model}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+#| 
+
+m1 <- lm(IMR ~ polity, data=censor)
+
+summary(m1)
+```
+
+The estimated coefficient of -2.7999 suggests that, on average, each unit increase in the Polity score is associated with a 2.7999 decrease in the IMR; the estimate is statistically different from zero. 
+
+Let's take a brief detour to think about the errors in our model. First, let's compute the sum of squared residuals, $\sigma^2$, and the residual standard error. Remember the residuals are given by $y - \hat{y}$; $\sigma^2$ is the sum of squared residuals divided by $n-k-1$; and the residual standard error is the square root of $\sigma^2$.
+
+
+```{r residuals1}
+sse <- sum(residuals(m1)^2)
+sigma2 <- sse / m1$df.residual
+rse <- sqrt(sigma2)
+
+cat("Sum of Squared Residuals:", sse, "\n")
+cat("Sigma^2:", sigma2, "\n")
+cat("Residual Standard Error:", rse, "\n")
+
+```
+
+Comparing this to the estimates above, you'll see our estimate of the RSE is the same as R's estimate. This is the average residual in the model in terms of the $y$ variable, IMR - so on average, we're off by about 41 infant deaths per 1000 live births.
+
+
+## Generate predictions
+
+Let's compute $\widehat{y}$ for each category of Polity and plot along with the actual observed value of IMR for each country. 
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+predictions <- data.frame(polity=numeric(0), xb=numeric(0))
+
+for (i in seq(1,21,1)){
+  xb = 68.4898 + -2.7999*(i-11)
+  predictions[i:i,] <- data.frame(i-11, xb)
+}
+
+# # Visualize predictions with actual data
+# ggplot(data=censor, aes(x=polity, y=IMR)) +
+#   geom_point(color="green") + 
+#   geom_text(label=censor$ctry, size=3) +
+#   geom_line(data=predictions, aes(x=polity, y=xb)) +
+#   labs(x="Polity", y="Infant Mortality Rate")
+
+library(highcharter)
+
+# Generate predictions dataframe
+predictions <- data.frame(
+ polity = seq(-10, 10, 1),
+ xb = 68.4898 + -2.7999 * (seq(1, 21, 1) - 11)
+)
+
+highchart() %>%
+ hc_add_series(
+   data = censor,
+   name = "Observed IMR",
+   type = "scatter",
+   hcaes(x = polity, y = IMR),
+   color = "#005A43",
+   dataLabels = list(enabled = TRUE, format = "{point.ctry}")
+ ) %>%
+ hc_add_series(
+   data = predictions,
+   name = "Predicted IMR",
+   type = "line", 
+   color="#6CC24A",
+   hcaes(x = polity, y = xb)
+ ) %>%
+ hc_xAxis(title = list(text = "Polity")) %>%
+ hc_yAxis(title = list(text = "Infant Mortality Rate"))
+
+```
+
+## Rethinking Polity
+
+Since Polity is categorical, we don't know the intervals between categories, so interpreting this coefficient (-2.79) as an effect of a 1 unit change on $y$ really doesn't make much sense. We are assuming the effect of a change in Polity is the same across all unit changes in the Polity scale - not only are we assuming the change is the same magnitude, but that it's in the same direction - that the effect is linear. 
+
+Another way to treat Polity in this model is to include it as a factor variable. This allows us to estimate the effect of each level of Polity on IMR, relative to a reference level. In effect, we are including a dummy variable for all but one of the cetegories of Polity. Let's look at such a model:
+
+```{r polity_factor}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+m1f <- lm(IMR ~ factor(polity), data=censor)
+
+modelsummary(
+  models = m1f,
+  stars = TRUE,
+  title = "OLS Estimates",
+  gof_omit = 'AIC|Log.Lik|R2|BIC|RMSE',
+  #gof_map = c("nobs", "r.squared", "adj.r.squared", "f.statistic", "p.value", "sigma")
+)
+```
+
+Let's generate predictions from the factor model. Each bar represents the 95% confidence interval for the predicted IMR at each level of Polity; the dots are the predictions.
+
+```{r factor_predictions}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+
+# Predictions for factor model
+new_data <- data.frame(polity = factor(seq(-10, 10), 
+                                     levels = sort(unique(censor$polity))))
+predictions <- predict(m1f, newdata = new_data, interval = "confidence")
+results <- data.frame(
+  polity = as.numeric(as.character(new_data$polity)),
+  fit = predictions[,"fit"],
+  lwr = predictions[,"lwr"],
+  upr = predictions[,"upr"]
+)
+
+results <- results[!is.na(results$fit), ]
+results <- results[order(results$polity), ]
+
+highchart() %>%
+  hc_chart(type = "errorbar") %>%
+  hc_xAxis(
+    categories = results$polity,
+    title = list(text = "Polity Score")
+  ) %>%
+  hc_yAxis(
+    title = list(text = "Predicted IMR")
+  ) %>%
+  hc_add_series(
+    type = "errorbar",
+    data = list_parse(
+      data.frame(
+        low = results$lwr,
+        high = results$upr
+      )
+    ),
+    name = "95% CI",
+    color = "#005A43",
+    stemWidth = 3,
+    whiskerLength = 10
+  ) %>%
+  hc_add_series(
+    type = "scatter",
+    data = results$fit,
+    name = "Predicted IMR",
+    color = "#005A43",
+    marker = list(
+      symbol = "circle",
+      radius = 6
+    ),
+    dataLabels = list(
+      enabled = TRUE,
+      format = "{point.y:.1f}",
+      verticalAlign = "bottom",
+      y = -10
+    )
+  ) %>%
+  hc_title(text = "Predicted Infant Mortality Rates by Polity Score")
+
+
+```
+
+A couple of things to note regarding these predictions. Because Polity is categorical, we cannot draw a continuous line across the categories. You'll notice that it appears from the coefficients and from the predictions that the effect of Polity on IMR is not linear. The common practice of treating Polity as a continuous variable would be problematic in this model (and in most). Also, notice the ranges of the confidence intervals vary quite a lot. The variability within Polity category raises potentially interesting questions about development and regime. 
+
+
+
+## Economic Development and Infant Mortality
+
+Let's examine how GDP per capita affects infant mortality rates, exploring different functional forms.
+
+### Linear Relationship
+
+```{r gdp_linear}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+m2 <- lm(IMR ~ gdppc, data=censor)
+
+modelsummary(
+  models = m2,
+  stars = TRUE,
+  title = "OLS Estimates",
+  gof_omit = 'AIC|Log.Lik|R2|BIC|RMSE',
+  #gof_map = c("nobs", "r.squared", "adj.r.squared", "f.statistic", "p.value", "sigma")
+)
+
+
+```
+Looking at the predictions, it's pretty clear the scatterplot of IMR and GDP per capita doesn't suggest a linear relationship.
+
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+# Generate predictions
+analysisdata <- censor %>%
+  mutate(xb = coef(m2)[1] + coef(m2)[2]*gdppc)
+
+pred <- predict(m2, interval="confidence", se.fit=TRUE)
+analysisdata <- cbind(analysisdata, pred)
+# 
+# # Plot with predictions
+# ggplot(analysisdata, aes(x=gdppc, y=IMR)) +
+#   geom_point(color="green") + 
+#   geom_text(label=censor$ctry, size=2) +
+#   geom_line(aes(x=gdppc, y=xb)) +
+#   labs(x="GDP per capita", y="Infant Mortality Rate")
+
+# same as above using highcharter 
+
+highchart() %>%
+  hc_add_series(
+    data = censor,
+    name = "Observed IMR",
+    type = "scatter",
+    hcaes(x = gdppc, y = IMR),
+    color = "#005A43",
+    dataLabels = list(enabled = TRUE, format = "{point.ctry}")
+  ) %>%
+  hc_add_series(
+    data = analysisdata,
+    name = "Predicted IMR",
+    type = "line", 
+    color="#6CC24A",
+    hcaes(x = gdppc, y = xb)
+  ) %>%
+  hc_xAxis(title = list(text = "GDP per capita")) %>%
+  hc_yAxis(title = list(text = "Infant Mortality Rate"))
+
+
+
+```
+
+### Residuals
+
+Let's examine the residuals from this model - recall the residuals are the differences between the observed and predicted values of $y$.
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+# Calculate residuals
+analysisdata <- analysisdata %>%
+  mutate(res = IMR - xb)
+# 
+# ggplot(analysisdata, aes(x=gdppc, y=res)) +
+#   geom_point(color="green") + 
+#   geom_text(label=censor$ctry, size=3) +
+#   geom_abline(slope=0, intercept=0) +
+#   labs(x="GDP per capita", y="Residuals")
+
+# same plot in highcharter
+
+highchart() %>%
+ hc_add_series(
+   data = analysisdata,
+   name = "Residuals",
+   type = "scatter",
+   hcaes(x = gdppc, y = res),
+   color = "#005A43",
+   dataLabels = list(enabled = TRUE, format = "{point.ctry}")
+ ) %>%
+ hc_add_series(
+   data = list(list(x = min(analysisdata$gdppc), y = 0), 
+               list(x = max(analysisdata$gdppc), y = 0)),
+   type = "line",
+   color = "red",
+   enableMouseTracking = FALSE,
+   showInLegend = FALSE
+ ) %>%
+ hc_xAxis(title = list(text = "GDP per capita")) %>%
+ hc_yAxis(title = list(text = "Residuals"))
+
+```
+Both the predictions and the residuals suggest the relationship between GDP and IMR is not linear. Let's consider some alternatives that might fit the data better. 
+
+### Log-transformed GDP
+
+Let's try a log transformation of GDP per capita $ln(GDP_{pc})$ and see if that improves the model. 
+
+
+```{r log_gdp}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+
+analysisdata2 <- censor %>%
+  mutate(lngdp = log(gdppc))
+
+m3 <- lm(IMR ~ lngdp, data=analysisdata2)
+
+modelsummary(
+  models = m3,
+  stars = TRUE,
+  title = "OLS Estimates",
+  gof_omit = 'AIC|Log.Lik|R2|BIC|RMSE',
+  #gof_map = c("nobs", "r.squared", "adj.r.squared", "f.statistic", "p.value", "sigma")
+)
+
+```
+and take a look at the predictions from this model: 
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+
+# Generate predictions
+analysisdata2 <- analysisdata2 %>%
+  mutate(xb = coef(m3)[1] + coef(m3)[2]*lngdp)
+#sort by lngdp
+analysisdata2 <- analysisdata2[order(analysisdata2$lngdp),]
+
+
+# plot using highcharter
+
+highchart() %>%
+  hc_add_series(
+    data = analysisdata2,
+    name = "Observed IMR",
+    type = "scatter",
+    hcaes(x = gdppc, y = IMR),
+    color = "#005A43",
+    dataLabels = list(enabled = TRUE, format = "{point.ctry}")
+  ) %>%
+  hc_add_series(
+    data = analysisdata2,
+    name = "Predicted IMR",
+    type = "line", 
+    color="#6CC24A",
+    hcaes(x = gdppc, y = xb)
+  ) %>%
+  hc_xAxis(title = list(text = "GDP per capita")) %>%
+  hc_yAxis(title = list(text = "Infant Mortality Rate"))
+
+```
+
+The log-transformed model seems to fit the data better than the linear model. The residuals are also more evenly distributed around zero, though still appear correlated with GDP per capita.
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+# Calculate residuals
+analysisdata2 <- analysisdata2 %>%
+  mutate(res = IMR - xb)
+
+# Plot using highcharter
+
+highchart() %>%
+  hc_add_series(
+    data = analysisdata2,
+    name = "Residuals",
+    type = "scatter",
+    hcaes(x = gdppc, y = res),
+    color = "#005A43",
+    dataLabels = list(enabled = TRUE, format = "{point.ctry}")
+  ) %>%
+  hc_add_series(
+    data = list(list(x = min(analysisdata2$gdppc), y = 0), 
+                list(x = max(analysisdata2$gdppc), y = 0)),
+    type = "line",
+    color = "red",
+    enableMouseTracking = FALSE,
+    showInLegend = FALSE
+  ) %>%
+  hc_xAxis(title = list(text = "GDP per capita")) %>%
+  hc_yAxis(title = list(text = "Residuals"))
+
+
+```
+
+### Polynomials
+
+Finally, let's try a polynomial model to see if we can improve the fit further. We'll try a quadratic model, $IMR = \beta_0 + \beta_1 \times GDP_{pc} + \beta_2 \times GDP_{pc}^2$.
+
+
+```{r poly_gdp}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+censor$gdp2 = censor$gdppc^2
+
+m4 <- lm(IMR ~ gdppc + gdp2, data=censor, na.action = na.omit)
+
+modelsummary(
+  models = m4,
+  stars = TRUE,
+  title = "OLS Estimates",
+  gof_omit = 'AIC|Log.Lik|R2|BIC|RMSE',
+)
+
+```
+
+GDP per capita is negatively related to IMR, then positively related at higher values. Here are predictions from the polynomial model (including a 95% confidence interval) and the actual data points: 
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+
+fit2 <- predict(m4, interval="confidence", se.fit=TRUE)
+
+predictions2 <- cbind(censor, fit2)
+
+# sort predictions2 by gdppc
+predictions2 <- predictions2[order(predictions2$gdppc),]
+
+# ggplot(data=predictions2, aes(x=gdppc, y=IMR))+
+#   geom_point(color="green") +   geom_text(label=predictions2$ctry, size=2) +
+#   geom_line(aes(x=gdppc, y=fit.fit)) +
+#   geom_ribbon(aes(ymin = fit.lwr, ymax = fit.upr), alpha = 0.2) 
+
+#plot using highcharter
+
+highchart() %>%
+  hc_add_series(
+    data = predictions2,
+    name = "Observed IMR",
+    type = "scatter",
+    hcaes(x = gdppc, y = IMR),
+    color = "#005A43",
+    dataLabels = list(enabled = TRUE, format = "{point.ctry}")
+  ) %>%
+  hc_add_series(
+    data = predictions2,
+    name = "Predicted IMR",
+    type = "line", 
+    color="#6CC24A",
+    hcaes(x = gdppc, y = fit.fit)
+  ) %>%
+  hc_add_series(
+    data = predictions2,
+    type = "arearange",
+    name = "95% CI",
+    hcaes(x = gdppc, low = fit.lwr, high = fit.upr),
+    color = "#005A43",
+    fillOpacity = 0.2
+  ) %>%
+  hc_xAxis(title = list(text = "GDP per capita")) %>%
+  hc_yAxis(title = list(text = "Infant Mortality Rate"))
+
+
+
+
+```
+
+And let's look at the residuals from the polynomial model:
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+# Calculate residuals
+
+predictions2 <- predictions2 %>%
+  mutate(res = IMR - fit.fit)
+
+# Plot using highcharter
+
+highchart() %>%
+  hc_add_series(
+    data = predictions2,
+    name = "Residuals",
+    type = "scatter",
+    hcaes(x = gdppc, y = res),
+    color = "#005A43",
+    dataLabels = list(enabled = TRUE, format = "{point.ctry}")
+  ) %>%
+  hc_add_series(
+    data = list(list(x = min(predictions2$gdppc), y = 0), 
+                list(x = max(predictions2$gdppc), y = 0)),
+    type = "line",
+    color = "red",
+    enableMouseTracking = FALSE,
+    showInLegend = FALSE
+  ) %>%
+  hc_xAxis(title = list(text = "GDP per capita")) %>%
+  hc_yAxis(title = list(text = "Residuals"))
+
+
+```
+The residuals exhibit less pattern than the linear model, but seem to overfit some of the nonlinearity in the sense that the residuals appear nonlinear and perhaps in the opposite direction of the observed data.
+
+
+
+## Multivariate Model: Combined Effects of Economics and Politics
+
+Finally, let's examine how both economic development and political system jointly affect infant mortality rates. This multivariate model is somewhat more realistic insofar as we don't believe either of these variables acts alone in shaping infant mortality rates. Here, we'll use the logged GDP per capita measure as that functional form seemed to fit the data best (informally). 
+
+
+
+```{r multivariate}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+
+# Fit multivariate model
+m5 <- lm(IMR ~ lngdp + polity, data=censor)
+modelsummary(m4)
+
+```
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+
+# Generate predictions for different political systems
+gdp_range <- seq(min(censor$gdppc), max(censor$gdppc), length.out=100)
+predictions_df <- data.frame(
+  gdppc = rep(gdp_range, 2),
+  lngdp = log(rep(gdp_range, 2)),
+  polity = c(rep(-10, 100), rep(10, 100))
+)
+
+
+# Calculate predicted values
+predictions_df$predicted <- predict(m5, newdata=predictions_df)
+
+
+library(highcharter)
+library(dplyr)
+
+# Generate predictions for different political systems
+gdp_range <- seq(min(censor$gdppc), max(censor$gdppc), length.out=100)
+predictions_df <- data.frame(
+  gdppc = rep(gdp_range, 2),
+  lngdp = log(rep(gdp_range, 2)),
+  polity = c(rep(-10, 100), rep(10, 100))
+)
+
+# Calculate predicted values
+predictions_df$predicted <- predict(m5, newdata=predictions_df)
+
+# Create highchart
+highchart() %>%
+  hc_add_series(data = predictions_df[predictions_df$polity == -10,],
+                hcaes(x = gdppc, y = predicted),
+                type = "line",
+                color = "#005A43",
+                name = "Polity = -10") %>%
+  hc_add_series(data = predictions_df[predictions_df$polity == 10,],
+                hcaes(x = gdppc, y = predicted),
+                type = "line",
+                color = "black",
+                name = "Polity = 10") %>%
+  hc_add_series(data = censor,
+                hcaes(x = gdppc, y = IMR),
+                type = "scatter",
+                name = "Observed Values",
+                marker = list(symbol = "circle"),
+                color = "#6CC24A",
+                dataLabels = list(enabled = TRUE, format = "{point.ctry}"))%>%
+  # hc_add_series(data = censor,
+  #               hcaes(x = gdppc, y = IMR),
+  #               type = "scatter",
+  #               name = "Country Labels",
+  #               dataLabels = list(
+  #                 enabled = TRUE,
+  #                 format = "{point.ctry}",
+  #                 style = list(fontSize = "8px")
+  #               )) %>%
+  hc_xAxis(title = list(text = "GDP per capita")) %>%
+  hc_yAxis(title = list(text = "Predicted Infant Mortality Rate")) %>%
+  hc_title(text = "Predicted IMR by GDP and Political System") %>%
+  hc_legend(title = list(text = "Polity Score")) %>%
+  hc_tooltip(shared = FALSE)
+```
+
+This final plot shows how infant mortality rates are predicted to vary with GDP per capita for both highly autocratic (Polity = -10) and highly democratic (Polity = +10) countries. The actual observed values are shown as green points with country labels.

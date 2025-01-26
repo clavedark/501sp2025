@@ -1,0 +1,485 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
+%
+\documentclass[
+  letterpaper,
+  DIV=11,
+  numbers=noendperiod]{scrartcl}
+
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else  
+    % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+% Make \paragraph and \subparagraph free-standing
+\makeatletter
+\ifx\paragraph\undefined\else
+  \let\oldparagraph\paragraph
+  \renewcommand{\paragraph}{
+    \@ifstar
+      \xxxParagraphStar
+      \xxxParagraphNoStar
+  }
+  \newcommand{\xxxParagraphStar}[1]{\oldparagraph*{#1}\mbox{}}
+  \newcommand{\xxxParagraphNoStar}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+  \let\oldsubparagraph\subparagraph
+  \renewcommand{\subparagraph}{
+    \@ifstar
+      \xxxSubParagraphStar
+      \xxxSubParagraphNoStar
+  }
+  \newcommand{\xxxSubParagraphStar}[1]{\oldsubparagraph*{#1}\mbox{}}
+  \newcommand{\xxxSubParagraphNoStar}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+\makeatother
+
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+
+\KOMAoption{captions}{tableheading}
+\makeatletter
+\@ifpackageloaded{tcolorbox}{}{\usepackage[skins,breakable]{tcolorbox}}
+\@ifpackageloaded{fontawesome5}{}{\usepackage{fontawesome5}}
+\definecolor{quarto-callout-color}{HTML}{909090}
+\definecolor{quarto-callout-note-color}{HTML}{0758E5}
+\definecolor{quarto-callout-important-color}{HTML}{CC1914}
+\definecolor{quarto-callout-warning-color}{HTML}{EB9113}
+\definecolor{quarto-callout-tip-color}{HTML}{00A047}
+\definecolor{quarto-callout-caution-color}{HTML}{FC5300}
+\definecolor{quarto-callout-color-frame}{HTML}{acacac}
+\definecolor{quarto-callout-note-color-frame}{HTML}{4582ec}
+\definecolor{quarto-callout-important-color-frame}{HTML}{d9534f}
+\definecolor{quarto-callout-warning-color-frame}{HTML}{f0ad4e}
+\definecolor{quarto-callout-tip-color-frame}{HTML}{02b875}
+\definecolor{quarto-callout-caution-color-frame}{HTML}{fd7e14}
+\makeatother
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\AtBeginDocument{%
+\ifdefined\contentsname
+  \renewcommand*\contentsname{Table of contents}
+\else
+  \newcommand\contentsname{Table of contents}
+\fi
+\ifdefined\listfigurename
+  \renewcommand*\listfigurename{List of Figures}
+\else
+  \newcommand\listfigurename{List of Figures}
+\fi
+\ifdefined\listtablename
+  \renewcommand*\listtablename{List of Tables}
+\else
+  \newcommand\listtablename{List of Tables}
+\fi
+\ifdefined\figurename
+  \renewcommand*\figurename{Figure}
+\else
+  \newcommand\figurename{Figure}
+\fi
+\ifdefined\tablename
+  \renewcommand*\tablename{Table}
+\else
+  \newcommand\tablename{Table}
+\fi
+}
+\@ifpackageloaded{float}{}{\usepackage{float}}
+\floatstyle{ruled}
+\@ifundefined{c@chapter}{\newfloat{codelisting}{h}{lop}}{\newfloat{codelisting}{h}{lop}[chapter]}
+\floatname{codelisting}{Listing}
+\newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
+\makeatother
+\makeatletter
+\makeatother
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\@ifpackageloaded{subcaption}{}{\usepackage{subcaption}}
+\makeatother
+
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\usepackage{bookmark}
+
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same} % disable monospaced font for URLs
+\hypersetup{
+  pdftitle={The Bivariate Model},
+  pdfauthor={Dave Clark},
+  colorlinks=true,
+  linkcolor={blue},
+  filecolor={Maroon},
+  citecolor={Blue},
+  urlcolor={Blue},
+  pdfcreator={LaTeX via pandoc}}
+
+
+\title{The Bivariate Model}
+\author{Dave Clark}
+\date{January 26, 2025}
+
+\begin{document}
+\maketitle
+
+
+\section{Regression}\label{regression}
+
+These slides aim to describe the elements of OLS regression - they
+attempt to connect the data structure to the matrix algebra that
+underlies the estimation of the coefficients.
+
+Regression in any form is based on the conditional expectation of \(y\)
+- the expected value of \$Yy is conditional on some \(X\)s, but we don't
+know the actual conditions or effects of those \(X\)s. So we can write
+the regression like this:
+
+\[E[y|X_{1}, \ldots,X_{k}]= \beta_{0}+\beta_{1}X_{1}+\ldots+\beta_{k}X_{k}\]
+
+\subsection{Estimating equation}\label{estimating-equation}
+
+\noindent Let \(y\) be a linear function of the \(X\)s and the unknowns,
+\(\beta\), so the following produces a straight line:
+
+\[y_{i}=\beta_{0}+\beta_{1}X_{1} + \epsilon \]
+
+and \(\epsilon\) are the errors or disturbances.
+
+\subsection{Linear predictions}\label{linear-predictions}
+
+The predicted points that form the line are \(\widehat{y_{i}}\)
+
+\[\widehat{y_{i}}=\widehat{\beta_{0}}+\widehat{\beta_{1}}X_{1,i}\]
+
+\(\widehat{y_{i}}\) is the sum of the \(\beta\)s multiplied by each
+value of the appropriate \(X_i\), for \(i=1 \ldots N\).
+
+\textbf{\(\widehat{y_{i}}\) is referred to as the ``linear prediction''
+or as \(x\hat{\beta}\).}
+
+\subsection{Residuals}\label{residuals}
+
+The differences between those predicted points, \(\widehat{y_{i}}\) and
+the observed values \(y_i\) are:
+
+\[
+\begin{align}
+  \widehat{u} = y_{i}-\widehat{y_{i}} \\ 
+= y_{i}-\widehat{\beta_{0}}-\widehat{\beta_{1}}X_{1,i}\\
+= y_{i}-\mathbf{x_i\widehat{\beta}}  \nonumber 
+\end{align}
+\]
+
+These are the residuals, \(\widehat{u}\) - the observed measure of the
+unobserved disturbances, \(\epsilon\).
+
+\subsection{In matrix notation}\label{in-matrix-notation}
+
+Restating in matrix notation:
+
+\[
+\begin{align}
+y_{i} = \mathbf{X_i}  \beta_{k}  +\varepsilon_i \nonumber \\
+\widehat{y_{i}}= \mathbf{X_i} \widehat{\beta_{k}}   \nonumber \\
+\widehat{u_{i}} = y_i - \mathbf{X_i} \beta_k  \nonumber \\
+\widehat{u_i} = y_i - \widehat{y_{i}}  \nonumber
+\end{align}
+\]
+
+\subsection{Matrix components}\label{matrix-components}
+
+Begin with the estimating equation:
+
+\[
+y_{i} = \mathbf{X_i}  \widehat{\beta}  +\epsilon \nonumber
+\]
+
+We can solve for \(\widehat{\beta}\) by minimizing the sum of the
+squared errors and arrive at:
+
+\[ \widehat{\beta} = \mathbf{X'X}^{-1} \mathbf{X'}y\] We'll do this
+below.
+
+\subsubsection{Components of the estimating
+equation}\label{components-of-the-estimating-equation}
+
+\[
+\left[
+\begin{matrix}
+  y_1 \\
+  y_2\\
+  y_3  \\
+  \vdots \\
+  y_n    \nonumber
+\end{matrix}  \right] 
+= \left[
+\begin{matrix}
+  1& X_{1,2} & X_{1,3} & \cdots & X_{1,k} \\
+  1 & X_{2,2} & X_{2,3} &\cdots & X_{2,k} \\
+  1 & X_{3,2} & X_{3,3} &\cdots & X_{3,k} \\
+  \vdots & \vdots & \vdots & \vdots & \vdots \\
+  1 & X_{n,2} & X_{n,3} & \cdots & X_{n,k}  \nonumber
+\end{matrix}  \right] 
+\left[
+\begin{matrix}
+  \beta_1 \\
+  \beta_2\\
+  \beta_3  \\
+  \vdots \\
+  \beta_k    \nonumber
+\end{matrix}  \right] 
++
+\left[
+\begin{matrix}
+  \epsilon_1 \\
+  \epsilon_2\\
+  \epsilon_3  \\
+  \vdots \\
+  \epsilon_n    \nonumber
+\end{matrix}  \right] 
+\]
+
+\subsubsection{\texorpdfstring{Components - Covariation
+\(\mathbf{X'X}\)}{Components - Covariation \textbackslash mathbf\{X\textquotesingle X\}}}\label{components---covariation-mathbfxx}
+
+\[
+\mathbf{X'X}= \left[
+\begin{matrix}
+  N& \sum X_{2,i} & \sum X_{3,i} & \cdots & \sum X_{k,i} \\
+  \sum X_{2,i}&\sum X_{2,2}^{2} & \sum X_{2,i} X_{3,i} &\cdots & \sum X_{2,i}X_{k,i} \\
+  \sum X_{3,i} & \sum X_{3,i}X_{2,i}& \sum X_{3,i}^{2} &\cdots & \sum X_{3,i}X_{k,i} \\
+  \vdots & \vdots & \vdots & \vdots & \vdots \\
+  \sum X_{k,i} & \sum X_{k,i}X_{2,i} & \sum X_{k,i}X_{3,i} & \cdots & \sum X_{k,i}^{2}  \nonumber
+\end{matrix}  \right] 
+\]
+
+\noindent In \(\mathbf{X'X}\), the main diagonal is the sums of squares
+and the offdiagonals are the cross-products.
+
+\subsubsection{\texorpdfstring{Components - Covariation
+\(\mathbf{X'y}\)}{Components - Covariation \textbackslash mathbf\{X\textquotesingle y\}}}\label{components---covariation-mathbfxy}
+
+\[
+\mathbf{X'y}= \left[
+\begin{matrix}
+\sum Y_{i}\\
+\sum X_{2,i}Y_{i}\\
+\sum X_{3,i}Y_{i}\\
+\vdots \\
+\sum X_{k,i}Y_{i} \nonumber
+\end{matrix}  \right] 
+\]
+
+When we compute \(\widehat{\beta}\), \(\mathbf{X'y}\) is the covariation
+of \(X\) and \(Y\), and we pre-multiply by the inverse of
+\(\mathbf{(X'X)^{-1}}\) to control for the relationship between
+\(X_{1}\), \(X_{2}\), etc.
+
+\section{Deriving the OLS estimator}\label{deriving-the-ols-estimator}
+
+\subsection{\texorpdfstring{Deriving
+\(\hat{\beta}\)}{Deriving \textbackslash hat\{\textbackslash beta\}}}\label{deriving-hatbeta}
+
+Start with: \[y = X\beta + \epsilon\]
+
+Minimize sum of squared errors:
+\[\min_{\beta} \epsilon'\epsilon = \min_{\beta} (y - X\beta)'(y - X\beta)\]
+
+Expand:
+\[(y - X\beta)'(y - X\beta) = y'y - y'X\beta - \beta'X'y + \beta'X'X\beta\]
+
+Simplify using symmetry (\(y'X\beta = \beta'X'y\) as they're scalars):
+\[= y'y - 2\beta'X'y + \beta'X'X\beta\]
+
+Take derivative with respect to \(\beta\) and set to zero:
+\[\frac{\partial}{\partial\beta}(y'y - 2\beta'X'y + \beta'X'X\beta) = 0\]
+\[-2X'y + 2X'X\beta = 0\]
+
+Solve for \(\beta\): \[X'X\beta = X'y\] \[\hat{\beta} = (X'X)^{-1}X'y\]
+
+\subsection{Variance-Covariance
+Matrix}\label{variance-covariance-matrix}
+
+Start with \(\hat{\beta} = (X'X)^{-1}X'y\) and substitute
+\(y = X\beta + \epsilon\):
+
+\[\hat{\beta} = (X'X)^{-1}X'(X\beta + \epsilon)\]
+\[= \beta + (X'X)^{-1}X'\epsilon\]
+
+Therefore: \[\hat{\beta} - \beta = (X'X)^{-1}X'\epsilon\]
+
+The variance-covariance matrix is:
+\[Var(\hat{\beta}) = E[(\hat{\beta} - \beta)(\hat{\beta} - \beta)']\]
+\[= E[(X'X)^{-1}X'\epsilon\epsilon'X(X'X)^{-1}]\]
+
+Under homoskedasticity (\(E[\epsilon\epsilon'] = \sigma^2I\)):
+\[Var(\hat{\beta}) = \sigma^2(X'X)^{-1}\]
+
+\subsection{\texorpdfstring{Variance-Covariance of
+\(\widehat{\beta}\)}{Variance-Covariance of \textbackslash widehat\{\textbackslash beta\}}}\label{variance-covariance-of-widehatbeta}
+
+\[ E[(\widehat{\beta}-\beta)(\widehat{\beta}-\beta)'] = \] \(~\)
+
+\[\left[
+\begin{array}{cccc}
+var(\beta_1) & cov(\beta_1,\beta_2) &\cdots &cov(\beta_1,\beta_k)\\
+cov(\beta_2,\beta_1)& var(\beta_2) &\cdots &cov(\beta_2,\beta_k)\\
+\vdots&\vdots&\ddots& \vdots\\
+cov(\beta_k,\beta_1) &cov(\beta_2,\beta_k) &\cdots & var(\beta_k)\\
+\end{array} \right] \]
+
+\subsection{\texorpdfstring{Standard Errors of
+\(\beta_k\)}{Standard Errors of \textbackslash beta\_k}}\label{standard-errors-of-beta_k}
+
+\[
+\left[
+\begin{array}{cccc}
+\sqrt{var(\beta_1)} & cov(\beta_1,\beta_2) &\cdots &cov(\beta_1,\beta_k)\\
+cov(\beta_2,\beta_1)& \sqrt{var(\beta_2)} &\cdots &cov(\beta_2,\beta_k)\\
+\vdots&\vdots&\ddots& \vdots\\
+cov(\beta_k,\beta_1) &cov(\beta_k,\beta_2) &\cdots & \sqrt{var(\beta_k)}\\
+\end{array} \right] 
+\]
+
+\section{Properties of OLS}\label{properties-of-ols}
+
+Return to the normal equation:
+
+\[
+\begin{align}
+\widehat{\mathbf{\beta}}=\mathbf{(X'X)^{-1}} \mathbf{X'y} \\ \\
+\mathbf{(X'X)} \widehat{\mathbf{\beta}} = \mathbf{X'y} \nonumber \\ \\
+\mathbf{(X'X)} \widehat{\mathbf{\beta}}  = \mathbf{X'(X\widehat{\beta}} + \mathbf{\widehat{\epsilon}}) \nonumber \\ \\
+\mathbf{X' \widehat{\epsilon}}  = 0 \nonumber
+\end{align}
+\]
+
+\subsection{Property 1}\label{property-1}
+
+If \(X' \widehat{\epsilon}  = 0\) holds, then the following properties
+exist:
+
+\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-note-color-frame, coltitle=black, arc=.35mm, colbacktitle=quarto-callout-note-color!10!white, left=2mm, rightrule=.15mm, bottomrule=.15mm, opacitybacktitle=0.6, leftrule=.75mm, colback=white, toptitle=1mm, toprule=.15mm, titlerule=0mm, title={Proposition}, bottomtitle=1mm, opacityback=0, breakable]
+
+Each \(x\) variable (each column vector of \(\mathbf{X}\)) is
+uncorrelated with \(\epsilon\).
+
+\end{tcolorbox}
+
+\subsection{Property 2}\label{property-2}
+
+Assuming a constant in the matrix \(\mathbf{X}\),
+
+\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-note-color-frame, coltitle=black, arc=.35mm, colbacktitle=quarto-callout-note-color!10!white, left=2mm, rightrule=.15mm, bottomrule=.15mm, opacitybacktitle=0.6, leftrule=.75mm, colback=white, toptitle=1mm, toprule=.15mm, titlerule=0mm, title={Proposition}, bottomtitle=1mm, opacityback=0, breakable]
+
+\(\sum\limits_{i-1}^{n} \epsilon_i = 0\)
+
+because each element of the matrix \(X' \widehat{\epsilon}\) would be
+nonzero due to the constant; only by multiplying by \(\epsilon_i=0\)
+would each element equal zero, and then the sum must be zero.
+
+\end{tcolorbox}
+
+\subsection{Property 3}\label{property-3}
+
+\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-note-color-frame, coltitle=black, arc=.35mm, colbacktitle=quarto-callout-note-color!10!white, left=2mm, rightrule=.15mm, bottomrule=.15mm, opacitybacktitle=0.6, leftrule=.75mm, colback=white, toptitle=1mm, toprule=.15mm, titlerule=0mm, title={Proposition}, bottomtitle=1mm, opacityback=0, breakable]
+
+The mean of the residuals is zero.
+
+If the sum of the residuals is zero, that sum divided by \(N\) must also
+be zero.
+
+\end{tcolorbox}
+
+\subsection{Property 4}\label{property-4}
+
+\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-note-color-frame, coltitle=black, arc=.35mm, colbacktitle=quarto-callout-note-color!10!white, left=2mm, rightrule=.15mm, bottomrule=.15mm, opacitybacktitle=0.6, leftrule=.75mm, colback=white, toptitle=1mm, toprule=.15mm, titlerule=0mm, title={Proposition}, bottomtitle=1mm, opacityback=0, breakable]
+
+The regression line (in the bivariate case) or the hyperplane (in the
+multivariate case) passes through the means of the observed variables,
+\(\mathbf{X}\) and \(y\).
+
+\[
+\begin{align}
+\epsilon = y - X\widehat{\beta} \nonumber \\ \\
+\text{multiplying by} ~  N^{-1} \nonumber \\ \\
+\bar{\epsilon} = \bar{y} - \bar{X} \widehat{\beta} = 0  \nonumber 
+\end{align}
+\]
+
+\(\bar{y} - \bar{X} \widehat{\beta}=0\) implies
+\(\bar{y} = \bar{X} \widehat{\beta}\), and therefore implies the
+intersection of the means with the regression line. Moreover, at the
+point or plane \(\bar{y} - \bar{X} \widehat{\beta}\), the mean of the
+residuals equals zero, implying the regression line or hyperplane passes
+through it.
+
+\end{tcolorbox}
+
+\subsection{Properties}\label{properties}
+
+Note that these properties are true because we are minimizing the sum of
+the squared residuals. They do not have particular meaning otherwise
+regarding the errors, whether we meet assumptions of the model, etc. The
+next step is to make a set of assumptions regarding the error term in
+order to facilitate statements about \(\widehat{\beta}\), and inferences
+about those estimates.
+
+
+
+
+\end{document}
