@@ -12,9 +12,9 @@ title: "Slides"
 
 [Thinking about data](/slides/thinkingdata25.qmd)
 
-[Bivariate model](bivariate25.qmd)
+[Bivariate model](/slides/bivariate25.qmd)
 
-[Bivariate example](bivariateexample25.qmd)
+[Bivariate example](/slides/bivariateexample25.qmd)
 
 <!-- [Multivariate model](multivariate24.qmd) -->
 
