@@ -1,0 +1,97 @@
+---
+title: "Deriving the OLS Estimator" 
+author: "Dave Clark"
+institute: "Binghamton University"
+date: today
+date-format: long
+title-block-banner: TRUE
+format: html
+editor: source
+embed-resources: true
+#number-sections: true
+#cache: true
+#execute:
+# freeze: true  # never re-render during project render
+---
+  
+  ```{=html}
+<style>
+  table, th, td {
+    font-size: 18px;
+  }
+</style>
+  ```
+```{r setup, include=FALSE ,echo=FALSE}
+options(htmltools.dir.version = FALSE)
+
+knitr::opts_chunk$set(fig.retina = 2, fig.align = "center", warning=FALSE, error=FALSE, message=FALSE) 
+
+library(leaflet.extras)
+library(tidyverse)
+library(ggthemes)
+library(ggplot2)
+library(leaflet)
+library(lubridate)
+library(haven) #read stata w/labels
+library(ggridges) # multiple densities
+library(tmap)
+library(countrycode)
+library(acled.api)
+library(patchwork)
+library(zoo)
+library(countrycode)
+library(mvtnorm)
+library(modelsummary)
+library("GGally")
+library(stargazer)
+library(highcharter)
+
+```
+
+
+
+# Deriving OLS via Minimization
+
+## Deriving $\hat{\beta}$
+
+Start with:
+$$y = X\beta + \epsilon$$
+
+Minimize sum of squared errors:
+$$\min_{\beta} \epsilon'\epsilon = \min_{\beta} (y - X\beta)'(y - X\beta)$$
+
+Expand:
+$$(y - X\beta)'(y - X\beta) = y'y - y'X\beta - \beta'X'y + \beta'X'X\beta$$
+
+Simplify using symmetry ($y'X\beta = \beta'X'y$ as they're scalars):
+$$= y'y - 2\beta'X'y + \beta'X'X\beta$$
+
+Take derivative with respect to $\beta$ and set to zero:
+$$\frac{\partial}{\partial\beta}(y'y - 2\beta'X'y + \beta'X'X\beta) = 0$$
+$$-2X'y + 2X'X\beta = 0$$
+
+Solve for $\beta$:
+$$X'X\beta = X'y$$
+$$\hat{\beta} = (X'X)^{-1}X'y$$
+
+## Variance-Covariance Matrix
+
+Start with $\hat{\beta} = (X'X)^{-1}X'y$ and substitute $y = X\beta + \epsilon$:
+
+$$\hat{\beta} = (X'X)^{-1}X'(X\beta + \epsilon)$$
+$$= \beta + (X'X)^{-1}X'\epsilon$$
+
+Therefore:
+$$\hat{\beta} - \beta = (X'X)^{-1}X'\epsilon$$
+
+The variance-covariance matrix is:
+$$Var(\hat{\beta}) = E[(\hat{\beta} - \beta)(\hat{\beta} - \beta)']$$
+$$= E[(X'X)^{-1}X'\epsilon\epsilon'X(X'X)^{-1}]$$
+
+Under homoskedasticity ($E[\epsilon\epsilon'] = \sigma^2I$):
+$$Var(\hat{\beta}) = \sigma^2(X'X)^{-1}$$
+
+### Notes:
+- This approach yields identical results to the algebraic method
+- Minimization ensures we find the global minimum as the objective function is strictly convex
+- The second derivative confirms this is a minimum
