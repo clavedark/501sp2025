@@ -338,7 +338,7 @@ print(SSE)
 
 ```
 
-If we average the sum squared residuals over the degrees of freedom, we get the variance of the residuals. This is our estimate of the variance of the error term, $\sigma^2$. If we take the square root of this, we get the *residual standard error* or **RSE** (also called the *root mean squared error*). This is the average distance between the observed values and the predicted values. 
+If we average the sum squared residuals over the degrees of freedom, we get the variance of the residuals. This is our estimate of the variance of the error term, $\sigma^2$. If we take the square root of this, we get the *residual standard error* or **RSE**. This is the average distance between the observed values and the predicted values. 
 
 
 ```{r}
@@ -346,7 +346,7 @@ If we average the sum squared residuals over the degrees of freedom, we get the 
 sigma2 <- SSE / (6 - 2)
 print(sigma2)
 
-#residual standard error or root mean squared error
+#residual standard error
 rse <- sqrt(sigma2)
 print(rse)
 

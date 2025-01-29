@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Dave Clark">
-<meta name="dcterms.date" content="2025-01-26">
+<meta name="dcterms.date" content="2025-01-29">
 
 <title>Deriving the OLS Estimator – 501 - Spring 2025</title>
 <style>
@@ -4941,7 +4941,7 @@ window.Quarto = {
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">January 26, 2025</p>
+        <p class="date">January 29, 2025</p>
       </div>
     </div>
     
@@ -4957,13 +4957,10 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#deriving-ols-via-minimization" id="toc-deriving-ols-via-minimization" class="nav-link active" data-scroll-target="#deriving-ols-via-minimization">Deriving OLS via Minimization</a>
+  <li><a href="#deriving-the-ols-estimator" id="toc-deriving-the-ols-estimator" class="nav-link active" data-scroll-target="#deriving-the-ols-estimator">Deriving the OLS estimator</a>
   <ul class="collapse">
   <li><a href="#deriving-hatbeta" id="toc-deriving-hatbeta" class="nav-link" data-scroll-target="#deriving-hatbeta">Deriving <span class="math inline">\(\hat{\beta}\)</span></a></li>
-  <li><a href="#variance-covariance-matrix" id="toc-variance-covariance-matrix" class="nav-link" data-scroll-target="#variance-covariance-matrix">Variance-Covariance Matrix</a>
-  <ul class="collapse">
-  <li><a href="#notes" id="toc-notes" class="nav-link" data-scroll-target="#notes">Notes:</a></li>
-  </ul></li>
+  <li><a href="#variance-covariance-matrix" id="toc-variance-covariance-matrix" class="nav-link" data-scroll-target="#variance-covariance-matrix">Variance-Covariance Matrix</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -4980,8 +4977,8 @@ table, th, td {
 font-size: 18px;
 }
 </style>
-<section id="deriving-ols-via-minimization" class="level1">
-<h1>Deriving OLS via Minimization</h1>
+<section id="deriving-the-ols-estimator" class="level1">
+<h1>Deriving the OLS estimator</h1>
 <section id="deriving-hatbeta" class="level2">
 <h2 class="anchored" data-anchor-id="deriving-hatbeta">Deriving <span class="math inline">\(\hat{\beta}\)</span></h2>
 <p>Start with: <span class="math display">\[y = X\beta + \epsilon\]</span></p>
@@ -4998,16 +4995,39 @@ font-size: 18px;
 <p>Therefore: <span class="math display">\[\hat{\beta} - \beta = (X&#39;X)^{-1}X&#39;\epsilon\]</span></p>
 <p>The variance-covariance matrix is: <span class="math display">\[Var(\hat{\beta}) = E[(\hat{\beta} - \beta)(\hat{\beta} - \beta)&#39;]\]</span> <span class="math display">\[= E[(X&#39;X)^{-1}X&#39;\epsilon\epsilon&#39;X(X&#39;X)^{-1}]\]</span></p>
 <p>Under homoskedasticity (<span class="math inline">\(E[\epsilon\epsilon&#39;] = \sigma^2I\)</span>): <span class="math display">\[Var(\hat{\beta}) = \sigma^2(X&#39;X)^{-1}\]</span></p>
-<section id="notes" class="level3">
-<h3 class="anchored" data-anchor-id="notes">Notes:</h3>
-<ul>
-<li>This approach yields identical results to the algebraic method</li>
-<li>Minimization ensures we find the global minimum as the objective function is strictly convex</li>
-<li>The second derivative confirms this is a minimum</li>
-</ul>
+<!-- --- -->
+<!-- title: "OLS Derivation and Normal PDF Plot" -->
+<!-- format: html -->
+<!-- --- -->
+<!-- ## OLS Derivation -->
+<!-- We start with the linear regression model in matrix form: -->
+<!-- $y = X\beta + \epsilon$ -->
+<!-- where: -->
+<!-- * $y$ is an $(n \times 1)$ vector of observed dependent variables. -->
+<!-- * $X$ is an $(n \times k)$ matrix of observed independent variables (including a constant term if applicable). -->
+<!-- * $\beta$ is a $(k \times 1)$ vector of unknown coefficients to be estimated. -->
+<!-- * $\epsilon$ is an $(n \times 1)$ vector of unobserved error terms. -->
+<!-- The Ordinary Least Squares (OLS) estimator aims to minimize the sum of squared residuals: -->
+<!-- $\min_\beta (y - X\beta)^T(y - X\beta)$ -->
+<!-- To find the minimum, we take the derivative with respect to $\beta$, set it to zero, and solve for $\beta$: -->
+<!-- 1. **Derivative:** -->
+<!-- $\frac{d}{d\beta} [(y - X\beta)^T(y - X\beta)] = -2X^Ty + 2X^TX\beta$ -->
+<!-- 2. **Set to zero and solve:** -->
+<!-- $-2X^Ty + 2X^TX\beta = 0$ -->
+<!-- $X^TX\beta = X^Ty$ -->
+<!-- $\hat{\beta} = (X^TX)^{-1}X^Ty$ (assuming $X^TX$ is invertible) -->
+<!-- This is the OLS estimator for $\beta$. -->
+<!-- ## Variance-Covariance Matrix of $\hat{\beta}$ -->
+<!-- The variance-covariance matrix of $\hat{\beta}$ is given by: -->
+<!-- $Var(\hat{\beta}) = E[(\hat{\beta} - \beta)(\hat{\beta} - \beta)^T]$ -->
+<!-- Under the classical OLS assumptions (including homoscedasticity and no autocorrelation of errors), this simplifies to: -->
+<!-- $Var(\hat{\beta}) = \sigma^2 (X^TX)^{-1}$ -->
+<!-- where $\sigma^2$ is the variance of the error term, $\epsilon$.  An unbiased estimator of $\sigma^2$ is given by: -->
+<!-- $s^2 = \frac{(y - X\hat{\beta})^T(y - X\hat{\beta})}{(n - k)}$ -->
+<!-- Thus, an estimator of the variance-covariance matrix is: -->
+<!-- $\widehat{Var}(\hat{\beta}) = s^2 (X^TX)^{-1}$ -->
 
 
-</section>
 </section>
 </section>
 

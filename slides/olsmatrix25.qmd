@@ -50,7 +50,7 @@ library(highcharter)
 
 
 
-# Deriving OLS via Minimization
+# Deriving the OLS estimator
 
 ## Deriving $\hat{\beta}$
 
@@ -91,7 +91,61 @@ $$= E[(X'X)^{-1}X'\epsilon\epsilon'X(X'X)^{-1}]$$
 Under homoskedasticity ($E[\epsilon\epsilon'] = \sigma^2I$):
 $$Var(\hat{\beta}) = \sigma^2(X'X)^{-1}$$
 
-### Notes:
-- This approach yields identical results to the algebraic method
-- Minimization ensures we find the global minimum as the objective function is strictly convex
-- The second derivative confirms this is a minimum
+
+<!-- --- -->
+<!-- title: "OLS Derivation and Normal PDF Plot" -->
+<!-- format: html -->
+<!-- --- -->
+
+<!-- ## OLS Derivation -->
+
+<!-- We start with the linear regression model in matrix form: -->
+
+<!-- $y = X\beta + \epsilon$ -->
+
+<!-- where: -->
+
+<!-- * $y$ is an $(n \times 1)$ vector of observed dependent variables. -->
+<!-- * $X$ is an $(n \times k)$ matrix of observed independent variables (including a constant term if applicable). -->
+<!-- * $\beta$ is a $(k \times 1)$ vector of unknown coefficients to be estimated. -->
+<!-- * $\epsilon$ is an $(n \times 1)$ vector of unobserved error terms. -->
+
+<!-- The Ordinary Least Squares (OLS) estimator aims to minimize the sum of squared residuals: -->
+
+<!-- $\min_\beta (y - X\beta)^T(y - X\beta)$ -->
+
+<!-- To find the minimum, we take the derivative with respect to $\beta$, set it to zero, and solve for $\beta$: -->
+
+<!-- 1. **Derivative:** -->
+
+<!-- $\frac{d}{d\beta} [(y - X\beta)^T(y - X\beta)] = -2X^Ty + 2X^TX\beta$ -->
+
+<!-- 2. **Set to zero and solve:** -->
+
+<!-- $-2X^Ty + 2X^TX\beta = 0$ -->
+<!-- $X^TX\beta = X^Ty$ -->
+<!-- $\hat{\beta} = (X^TX)^{-1}X^Ty$ (assuming $X^TX$ is invertible) -->
+
+<!-- This is the OLS estimator for $\beta$. -->
+
+
+<!-- ## Variance-Covariance Matrix of $\hat{\beta}$ -->
+
+<!-- The variance-covariance matrix of $\hat{\beta}$ is given by: -->
+
+<!-- $Var(\hat{\beta}) = E[(\hat{\beta} - \beta)(\hat{\beta} - \beta)^T]$ -->
+
+<!-- Under the classical OLS assumptions (including homoscedasticity and no autocorrelation of errors), this simplifies to: -->
+
+<!-- $Var(\hat{\beta}) = \sigma^2 (X^TX)^{-1}$ -->
+
+<!-- where $\sigma^2$ is the variance of the error term, $\epsilon$.  An unbiased estimator of $\sigma^2$ is given by: -->
+
+<!-- $s^2 = \frac{(y - X\hat{\beta})^T(y - X\hat{\beta})}{(n - k)}$ -->
+
+<!-- Thus, an estimator of the variance-covariance matrix is: -->
+
+<!-- $\widehat{Var}(\hat{\beta}) = s^2 (X^TX)^{-1}$ -->
+
+
+

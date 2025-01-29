@@ -1278,7 +1278,7 @@
     "href": "slides/linearmodelfirstlook.html#measuring-uncertainty",
     "title": "Linear Regression in OLS",
     "section": "Measuring Uncertainty",
-    "text": "Measuring Uncertainty\nThe most important quantities we get from any regression model are those measuring uncertainty. For all sorts of reasons, we should doubt our estimates - the model is probably specified incorrectly in a number of ways; the variables are mismeasured; the assumptions we make in the model are unreasonable; and so on. The residuals which we now know how to compute are the key to measuring uncertainty about the estimates of \\(\\widehat{\\beta}\\).\n\nResiduals\nLet’s sum the residuals and verify they sum to zero:\n\ne &lt;- sum(predictions$res)\nprint(e)\n\n[1] -2.220446e-16\n\n\nIf the sum is zero, so is the mean. This is a property of the OLS estimator, and the reason we sum the squared residuals - this gives us the sum squared error:\n\nSSE &lt;- sum(predictions$res^2)\nprint(SSE)\n\n[1] 0.009442229\n\n\nIf we average the sum squared residuals over the degrees of freedom, we get the variance of the residuals. This is our estimate of the variance of the error term, \\(\\sigma^2\\). If we take the square root of this, we get the residual standard error or RSE (also called the root mean squared error). This is the average distance between the observed values and the predicted values.\n\n#variance of the residuals or sigma^2\nsigma2 &lt;- SSE / (6 - 2)\nprint(sigma2)\n\n[1] 0.002360557\n\n#residual standard error or root mean squared error\nrse &lt;- sqrt(sigma2)\nprint(rse)\n\n[1] 0.04858557\n\n#verify same as lm() output\nsummary(ols1) # Compare RSE\n\n\nCall:\nlm(formula = socins ~ gdp, data = df)\n\nResiduals:\n       1        2        3        4        5        6 \n 0.03438 -0.03481  0.02357 -0.04701 -0.03278  0.05665 \n\nCoefficients:\n            Estimate Std. Error t value Pr(&gt;|t|)  \n(Intercept) 0.045465   0.040220   1.130    0.322  \ngdp         0.003577   0.001510   2.368    0.077 .\n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 0.04859 on 4 degrees of freedom\nMultiple R-squared:  0.5837,    Adjusted R-squared:  0.4797 \nF-statistic: 5.609 on 1 and 4 DF,  p-value: 0.07696\n\n\nThe RSE is a measure of the typical size of a residual, and it’s in the units of the \\(y\\) variable, so useful in telling us how large or small our average error is.\nNow that we know where residuals come from, let’s move backwards and repeat what we’ve just done but in matrix notation - this will give us the same estimates as lm() but we’ll see how they’re generated, and it’ll give us some insight into where our standard errors come from."
+    "text": "Measuring Uncertainty\nThe most important quantities we get from any regression model are those measuring uncertainty. For all sorts of reasons, we should doubt our estimates - the model is probably specified incorrectly in a number of ways; the variables are mismeasured; the assumptions we make in the model are unreasonable; and so on. The residuals which we now know how to compute are the key to measuring uncertainty about the estimates of \\(\\widehat{\\beta}\\).\n\nResiduals\nLet’s sum the residuals and verify they sum to zero:\n\ne &lt;- sum(predictions$res)\nprint(e)\n\n[1] -2.220446e-16\n\n\nIf the sum is zero, so is the mean. This is a property of the OLS estimator, and the reason we sum the squared residuals - this gives us the sum squared error:\n\nSSE &lt;- sum(predictions$res^2)\nprint(SSE)\n\n[1] 0.009442229\n\n\nIf we average the sum squared residuals over the degrees of freedom, we get the variance of the residuals. This is our estimate of the variance of the error term, \\(\\sigma^2\\). If we take the square root of this, we get the residual standard error or RSE. This is the average distance between the observed values and the predicted values.\n\n#variance of the residuals or sigma^2\nsigma2 &lt;- SSE / (6 - 2)\nprint(sigma2)\n\n[1] 0.002360557\n\n#residual standard error\nrse &lt;- sqrt(sigma2)\nprint(rse)\n\n[1] 0.04858557\n\n#verify same as lm() output\nsummary(ols1) # Compare RSE\n\n\nCall:\nlm(formula = socins ~ gdp, data = df)\n\nResiduals:\n       1        2        3        4        5        6 \n 0.03438 -0.03481  0.02357 -0.04701 -0.03278  0.05665 \n\nCoefficients:\n            Estimate Std. Error t value Pr(&gt;|t|)  \n(Intercept) 0.045465   0.040220   1.130    0.322  \ngdp         0.003577   0.001510   2.368    0.077 .\n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 0.04859 on 4 degrees of freedom\nMultiple R-squared:  0.5837,    Adjusted R-squared:  0.4797 \nF-statistic: 5.609 on 1 and 4 DF,  p-value: 0.07696\n\n\nThe RSE is a measure of the typical size of a residual, and it’s in the units of the \\(y\\) variable, so useful in telling us how large or small our average error is.\nNow that we know where residuals come from, let’s move backwards and repeat what we’ve just done but in matrix notation - this will give us the same estimates as lm() but we’ll see how they’re generated, and it’ll give us some insight into where our standard errors come from."
   },
   {
     "objectID": "slides/linearmodelfirstlook.html#matrix-estimation",
@@ -1327,7 +1327,7 @@
     "href": "slides/olsmatrix25.html",
     "title": "Deriving the OLS Estimator",
     "section": "",
-    "text": "Start with: \\[y = X\\beta + \\epsilon\\]\nMinimize sum of squared errors: \\[\\min_{\\beta} \\epsilon'\\epsilon = \\min_{\\beta} (y - X\\beta)'(y - X\\beta)\\]\nExpand: \\[(y - X\\beta)'(y - X\\beta) = y'y - y'X\\beta - \\beta'X'y + \\beta'X'X\\beta\\]\nSimplify using symmetry (\\(y'X\\beta = \\beta'X'y\\) as they’re scalars): \\[= y'y - 2\\beta'X'y + \\beta'X'X\\beta\\]\nTake derivative with respect to \\(\\beta\\) and set to zero: \\[\\frac{\\partial}{\\partial\\beta}(y'y - 2\\beta'X'y + \\beta'X'X\\beta) = 0\\] \\[-2X'y + 2X'X\\beta = 0\\]\nSolve for \\(\\beta\\): \\[X'X\\beta = X'y\\] \\[\\hat{\\beta} = (X'X)^{-1}X'y\\]\n\n\n\nStart with \\(\\hat{\\beta} = (X'X)^{-1}X'y\\) and substitute \\(y = X\\beta + \\epsilon\\):\n\\[\\hat{\\beta} = (X'X)^{-1}X'(X\\beta + \\epsilon)\\] \\[= \\beta + (X'X)^{-1}X'\\epsilon\\]\nTherefore: \\[\\hat{\\beta} - \\beta = (X'X)^{-1}X'\\epsilon\\]\nThe variance-covariance matrix is: \\[Var(\\hat{\\beta}) = E[(\\hat{\\beta} - \\beta)(\\hat{\\beta} - \\beta)']\\] \\[= E[(X'X)^{-1}X'\\epsilon\\epsilon'X(X'X)^{-1}]\\]\nUnder homoskedasticity (\\(E[\\epsilon\\epsilon'] = \\sigma^2I\\)): \\[Var(\\hat{\\beta}) = \\sigma^2(X'X)^{-1}\\]\n\n\n\nThis approach yields identical results to the algebraic method\nMinimization ensures we find the global minimum as the objective function is strictly convex\nThe second derivative confirms this is a minimum"
+    "text": "Start with: \\[y = X\\beta + \\epsilon\\]\nMinimize sum of squared errors: \\[\\min_{\\beta} \\epsilon'\\epsilon = \\min_{\\beta} (y - X\\beta)'(y - X\\beta)\\]\nExpand: \\[(y - X\\beta)'(y - X\\beta) = y'y - y'X\\beta - \\beta'X'y + \\beta'X'X\\beta\\]\nSimplify using symmetry (\\(y'X\\beta = \\beta'X'y\\) as they’re scalars): \\[= y'y - 2\\beta'X'y + \\beta'X'X\\beta\\]\nTake derivative with respect to \\(\\beta\\) and set to zero: \\[\\frac{\\partial}{\\partial\\beta}(y'y - 2\\beta'X'y + \\beta'X'X\\beta) = 0\\] \\[-2X'y + 2X'X\\beta = 0\\]\nSolve for \\(\\beta\\): \\[X'X\\beta = X'y\\] \\[\\hat{\\beta} = (X'X)^{-1}X'y\\]\n\n\n\nStart with \\(\\hat{\\beta} = (X'X)^{-1}X'y\\) and substitute \\(y = X\\beta + \\epsilon\\):\n\\[\\hat{\\beta} = (X'X)^{-1}X'(X\\beta + \\epsilon)\\] \\[= \\beta + (X'X)^{-1}X'\\epsilon\\]\nTherefore: \\[\\hat{\\beta} - \\beta = (X'X)^{-1}X'\\epsilon\\]\nThe variance-covariance matrix is: \\[Var(\\hat{\\beta}) = E[(\\hat{\\beta} - \\beta)(\\hat{\\beta} - \\beta)']\\] \\[= E[(X'X)^{-1}X'\\epsilon\\epsilon'X(X'X)^{-1}]\\]\nUnder homoskedasticity (\\(E[\\epsilon\\epsilon'] = \\sigma^2I\\)): \\[Var(\\hat{\\beta}) = \\sigma^2(X'X)^{-1}\\]"
   },
   {
     "objectID": "slides/olsmatrix25.html#deriving-hatbeta",
@@ -1341,7 +1341,7 @@
     "href": "slides/olsmatrix25.html#variance-covariance-matrix",
     "title": "Deriving the OLS Estimator",
     "section": "",
-    "text": "Start with \\(\\hat{\\beta} = (X'X)^{-1}X'y\\) and substitute \\(y = X\\beta + \\epsilon\\):\n\\[\\hat{\\beta} = (X'X)^{-1}X'(X\\beta + \\epsilon)\\] \\[= \\beta + (X'X)^{-1}X'\\epsilon\\]\nTherefore: \\[\\hat{\\beta} - \\beta = (X'X)^{-1}X'\\epsilon\\]\nThe variance-covariance matrix is: \\[Var(\\hat{\\beta}) = E[(\\hat{\\beta} - \\beta)(\\hat{\\beta} - \\beta)']\\] \\[= E[(X'X)^{-1}X'\\epsilon\\epsilon'X(X'X)^{-1}]\\]\nUnder homoskedasticity (\\(E[\\epsilon\\epsilon'] = \\sigma^2I\\)): \\[Var(\\hat{\\beta}) = \\sigma^2(X'X)^{-1}\\]\n\n\n\nThis approach yields identical results to the algebraic method\nMinimization ensures we find the global minimum as the objective function is strictly convex\nThe second derivative confirms this is a minimum"
+    "text": "Start with \\(\\hat{\\beta} = (X'X)^{-1}X'y\\) and substitute \\(y = X\\beta + \\epsilon\\):\n\\[\\hat{\\beta} = (X'X)^{-1}X'(X\\beta + \\epsilon)\\] \\[= \\beta + (X'X)^{-1}X'\\epsilon\\]\nTherefore: \\[\\hat{\\beta} - \\beta = (X'X)^{-1}X'\\epsilon\\]\nThe variance-covariance matrix is: \\[Var(\\hat{\\beta}) = E[(\\hat{\\beta} - \\beta)(\\hat{\\beta} - \\beta)']\\] \\[= E[(X'X)^{-1}X'\\epsilon\\epsilon'X(X'X)^{-1}]\\]\nUnder homoskedasticity (\\(E[\\epsilon\\epsilon'] = \\sigma^2I\\)): \\[Var(\\hat{\\beta}) = \\sigma^2(X'X)^{-1}\\]"
   },
   {
     "objectID": "slides/bivariateexample25.html",
@@ -1517,5 +1517,68 @@
     "title": "The Bivariate Model",
     "section": "",
     "text": "Let \\(y\\) be a linear function of the \\(X\\)s and the unknowns, \\(\\beta\\), so the following produces a straight line:\n\\[y_{i}=\\beta_{0}+\\beta_{1}X_{1} + \\epsilon \\]\nand \\(\\epsilon\\) are the errors or disturbances."
+  },
+  {
+    "objectID": "slides/olsmatrix25.html#step-1-define-the-objective-function",
+    "href": "slides/olsmatrix25.html#step-1-define-the-objective-function",
+    "title": "Deriving the OLS Estimator",
+    "section": "Step 1: Define the Objective Function",
+    "text": "Step 1: Define the Objective Function\nThe OLS estimator minimizes the sum of squared residuals:\n\\[\\min_{\\beta} (y - X\\beta)'(y - X\\beta)\\]"
+  },
+  {
+    "objectID": "slides/olsmatrix25.html#step-2-first-order-conditions",
+    "href": "slides/olsmatrix25.html#step-2-first-order-conditions",
+    "title": "Deriving the OLS Estimator",
+    "section": "Step 2: First Order Conditions",
+    "text": "Step 2: First Order Conditions\nTake the derivative with respect to \\(\\beta\\) and set equal to zero:\n\\[\\frac{\\partial}{\\partial \\beta}(y - X\\beta)'(y - X\\beta) = 0\\]\nExpanding the expression:\n\\[\\frac{\\partial}{\\partial \\beta}(y'y - y'X\\beta - \\beta'X'y + \\beta'X'X\\beta) = 0\\]\nNote: \\(y'X\\beta\\) is a scalar, so \\(y'X\\beta = \\beta'X'y\\)"
+  },
+  {
+    "objectID": "slides/olsmatrix25.html#step-3-solve-first-order-conditions",
+    "href": "slides/olsmatrix25.html#step-3-solve-first-order-conditions",
+    "title": "Deriving the OLS Estimator",
+    "section": "Step 3: Solve First Order Conditions",
+    "text": "Step 3: Solve First Order Conditions\n\\[-2X'y + 2X'X\\beta = 0\\]\nSolving for \\(\\beta\\):\n\\[X'X\\beta = X'y\\]\n\\[\\hat{\\beta} = (X'X)^{-1}X'y\\]\nThis is the OLS estimator for \\(\\beta\\)."
+  },
+  {
+    "objectID": "slides/olsmatrix25.html#step-1-express-hatbeta-in-terms-of-true-beta",
+    "href": "slides/olsmatrix25.html#step-1-express-hatbeta-in-terms-of-true-beta",
+    "title": "Deriving the OLS Estimator",
+    "section": "Step 1: Express \\(\\hat{\\beta}\\) in Terms of True \\(\\beta\\)",
+    "text": "Step 1: Express \\(\\hat{\\beta}\\) in Terms of True \\(\\beta\\)\nSubstitute the true model into our estimator:\n\\[\\hat{\\beta} = (X'X)^{-1}X'(X\\beta + \\epsilon)\\] \\[\\hat{\\beta} = \\beta + (X'X)^{-1}X'\\epsilon\\]"
+  },
+  {
+    "objectID": "slides/olsmatrix25.html#step-2-calculate-variance",
+    "href": "slides/olsmatrix25.html#step-2-calculate-variance",
+    "title": "Deriving the OLS Estimator",
+    "section": "Step 2: Calculate Variance",
+    "text": "Step 2: Calculate Variance\nThe variance-covariance matrix is:\n\\[Var(\\hat{\\beta}) = E[(\\hat{\\beta} - \\beta)(\\hat{\\beta} - \\beta)']\\]\nSubstituting:\n\\[Var(\\hat{\\beta}) = E[(X'X)^{-1}X'\\epsilon\\epsilon'X(X'X)^{-1}]\\]"
+  },
+  {
+    "objectID": "slides/olsmatrix25.html#step-3-apply-classical-assumptions",
+    "href": "slides/olsmatrix25.html#step-3-apply-classical-assumptions",
+    "title": "Deriving the OLS Estimator",
+    "section": "Step 3: Apply Classical Assumptions",
+    "text": "Step 3: Apply Classical Assumptions\nUnder classical assumptions: - \\(E[\\epsilon] = 0\\) - \\(E[\\epsilon\\epsilon'] = \\sigma^2I\\)\nTherefore:\n\\[Var(\\hat{\\beta}) = (X'X)^{-1}X'E[\\epsilon\\epsilon']X(X'X)^{-1}\\] \\[Var(\\hat{\\beta}) = \\sigma^2(X'X)^{-1}X'X(X'X)^{-1}\\] \\[Var(\\hat{\\beta}) = \\sigma^2(X'X)^{-1}\\]\nThis is the variance-covariance matrix of the OLS estimator."
+  },
+  {
+    "objectID": "slides/olsmatrix25.html#key-properties",
+    "href": "slides/olsmatrix25.html#key-properties",
+    "title": "Deriving the OLS Estimator",
+    "section": "Key Properties",
+    "text": "Key Properties\n\nThe OLS estimator \\(\\hat{\\beta} = (X'X)^{-1}X'y\\) is:\n\nLinear in y\nUnbiased: \\(E[\\hat{\\beta}] = \\beta\\)\nBest (minimum variance) among linear unbiased estimators under classical assumptions\n\nThe variance-covariance matrix \\(Var(\\hat{\\beta}) = \\sigma^2(X'X)^{-1}\\):\n\nDepends on the error variance \\(\\sigma^2\\)\nIs inversely related to sample size through \\(X'X\\)\nCan be estimated using \\(\\hat{\\sigma}^2 = \\frac{e'e}{n-k}\\) where \\(e\\) is the vector of residuals"
+  },
+  {
+    "objectID": "slides/olsmatrix25.html#ols-derivation",
+    "href": "slides/olsmatrix25.html#ols-derivation",
+    "title": "OLS Derivation and Normal PDF Plot",
+    "section": "",
+    "text": "We start with the linear regression model in matrix form:\n\\(y = X\\beta + \\epsilon\\)\nwhere:\n\n\\(y\\) is an \\((n \\times 1)\\) vector of observed dependent variables.\n\\(X\\) is an \\((n \\times k)\\) matrix of observed independent variables (including a constant term if applicable).\n\\(\\beta\\) is a \\((k \\times 1)\\) vector of unknown coefficients to be estimated.\n\\(\\epsilon\\) is an \\((n \\times 1)\\) vector of unobserved error terms.\n\nThe Ordinary Least Squares (OLS) estimator aims to minimize the sum of squared residuals:\n\\(\\min_\\beta (y - X\\beta)^T(y - X\\beta)\\)\nTo find the minimum, we take the derivative with respect to \\(\\beta\\), set it to zero, and solve for \\(\\beta\\):\n\nDerivative:\n\n\\(\\frac{d}{d\\beta} [(y - X\\beta)^T(y - X\\beta)] = -2X^Ty + 2X^TX\\beta\\)\n\nSet to zero and solve:\n\n\\(-2X^Ty + 2X^TX\\beta = 0\\) \\(X^TX\\beta = X^Ty\\) \\(\\hat{\\beta} = (X^TX)^{-1}X^Ty\\) (assuming \\(X^TX\\) is invertible)\nThis is the OLS estimator for \\(\\beta\\)."
+  },
+  {
+    "objectID": "slides/olsmatrix25.html#variance-covariance-matrix-of-hatbeta",
+    "href": "slides/olsmatrix25.html#variance-covariance-matrix-of-hatbeta",
+    "title": "OLS Derivation and Normal PDF Plot",
+    "section": "",
+    "text": "The variance-covariance matrix of \\(\\hat{\\beta}\\) is given by:\n\\(Var(\\hat{\\beta}) = E[(\\hat{\\beta} - \\beta)(\\hat{\\beta} - \\beta)^T]\\)\nUnder the classical OLS assumptions (including homoscedasticity and no autocorrelation of errors), this simplifies to:\n\\(Var(\\hat{\\beta}) = \\sigma^2 (X^TX)^{-1}\\)\nwhere \\(\\sigma^2\\) is the variance of the error term, \\(\\epsilon\\). An unbiased estimator of \\(\\sigma^2\\) is given by:\n\\(s^2 = \\frac{(y - X\\hat{\\beta})^T(y - X\\hat{\\beta})}{(n - k)}\\)\nThus, an estimator of the variance-covariance matrix is:\n\\(\\widehat{Var}(\\hat{\\beta}) = s^2 (X^TX)^{-1}\\)"
   }
 ]
