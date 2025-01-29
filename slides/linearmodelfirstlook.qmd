@@ -564,12 +564,10 @@ Let's now turn to a real data set - the Boston housing data set. We'll estimate 
  
 Let's present the results two different ways: in a table and in a coefficient plot.
 
-```{r boston_data_and_model}
+```{r, results='asis'}
 #| echo: true
 #| code-fold: true
 #| code-summary: "code"
-
-
 
 library(MASS)
 boston <- data.frame(Boston)
@@ -578,18 +576,26 @@ inmodel <- subset(boston, select = c(medv, crim, age, tax, black, dis, ptratio))
 
 hvmodel1 <- lm(medv ~ crim + age + tax + black + dis + ptratio, data = boston)
 
-modelsummary(
-  models = hvmodel1,
-  stars = TRUE,
-  title = "Boston Housing Values, OLS estimates",
-  gof_map = c("n", "r.squared", "adj.r.squared", "fstatistic", "p.value")
-)
+stargazer(hvmodel1, type = "html", title = "Boston Housing Values, OLS estimates")
 
-modelplot(hvmodel1, stars = TRUE, title = "Boston Housing Values, OLS estimates", coef_omit = c("Intercept"))
 
+
+# sse <- sum(hvmodel1$residuals^2)
+# rse <- sqrt(sse / (nrow(boston) - 7))
+# rmse <- mean(hvmodel1$residuals^2)
 
 
 ```
+
+```{r boston_coefficients}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+modelplot(hvmodel1, stars = TRUE, title = "Boston Housing Values, OLS estimates", coef_omit = c("Intercept"))
+
+```
+
 
 Let's generate predicted housing values across the values of pupil-teacher ratio. We'll hold the other variables at means, medians, or modes, and compute the predictions and confidence intervals. 
 
