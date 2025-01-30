@@ -18,7 +18,9 @@ title: "Slides"
 
 <!-- [Multivariate model](multivariate24.qmd) -->
 
-<!-- [Prediction methods](predictionmethods24.qmd) -->
+[Prediction methods](predictionmethods25.qmd) 
+
+<!-- [Prediction methods video](predictionmethods.mov)  -->
 
 <!-- [Normality](normality24.qmd) -->
 
