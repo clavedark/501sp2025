@@ -20,7 +20,7 @@ title: "Slides"
 
 [Prediction methods](/slides/predictionmethods25.qmd) 
 
-<!-- [Prediction methods video](predictionmethods.mov)  -->
+[Prediction methods video](https://youtu.be/1KUWg6bATRk)
 
 <!-- [Normality](normality24.qmd) -->
 
