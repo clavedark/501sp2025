@@ -844,7 +844,7 @@
     "href": "code.html",
     "title": "Code",
     "section": "",
-    "text": "Back to top"
+    "text": "exercise #1 answers\n\n\n\n\n\n\n\n\n\n\n Back to top"
   },
   {
     "objectID": "slides/probability25.html#normal-pdfs-with-different-moments",
@@ -1629,5 +1629,26 @@
     "title": "Prediction Methods",
     "section": "",
     "text": "Here’s a model of attendance at MLB games, regressing home attendance on runs scored, runs allowed, season (year), and games behind, then generating “in-sample” predictions.\n\n\ncode\nm3 &lt;- lm(data=mlb, Home_attend ~  Runs_scored + Runs_allowed+ Season +Games_behind)\nmodelsummary(m3)\n\n\n\n\n    \n\n    \n    \n      \n        \n        \n              \n                 \n                (1)\n              \n        \n        \n        \n                \n                  (Intercept) \n                  -70849.854\n                \n                \n                              \n                  (4473.400)\n                \n                \n                  Runs_scored \n                  3.123     \n                \n                \n                              \n                  (0.338)   \n                \n                \n                  Runs_allowed\n                  -1.887    \n                \n                \n                              \n                  (0.357)   \n                \n                \n                  Season      \n                  36.215    \n                \n                \n                              \n                  (2.284)   \n                \n                \n                  Games_behind\n                  -8.273    \n                \n                \n                              \n                  (2.755)   \n                \n                \n                  Num.Obs.    \n                  838       \n                \n                \n                  R2          \n                  0.471     \n                \n                \n                  R2 Adj.     \n                  0.469     \n                \n                \n                  AIC         \n                  12963.1   \n                \n                \n                  BIC         \n                  12991.5   \n                \n                \n                  Log.Lik.    \n                  -6475.561 \n                \n                \n                  F           \n                  185.758   \n                \n                \n                  RMSE        \n                  549.20    \n                \n        \n      \n    \n\n\n\ncode\np3 &lt;- data.frame(predict(m3), mlb$Runs_scored)\nggplot(p3, aes(x=mlb.Runs_scored, y=predict.m3.)) + \n  geom_line() +\n  xlab(\"Runs Scored\") +\n  ylab(\"Predicted Attendance (in thousands)\")   \n\n\n\n\n\n\n\n\n\nAs you can see, the predictions are pretty ugly because all four \\(x\\) variables are varying by observation, so we’re getting predictions based on each individual observation’s characteristics - interesting if we care about the 1977 Red Sox, but not something we can draw generalities from. What’s missing here?\n\n\n\n\n\n\nControl\n\n\n\nHold all variables constant at means, medians, or modes, except the one of interest, so we can focus on how changes in the \\(x\\) of interest affect \\(\\widehat{y}\\)."
+  },
+  {
+    "objectID": "code/ex1answers2025.html",
+    "href": "code/ex1answers2025.html",
+    "title": "exercise #1 answers",
+    "section": "",
+    "text": "code\nxb &lt;- runif(1000, min=-4, max=4)\nlogitcdf &lt;- plogis(xb)\nnormalcdf &lt;- pnorm(xb)\nlogitpdf &lt;- dlogis(xb)\nnormalpdf &lt;- dnorm(xb)\n\ndf &lt;- data.frame(xb, logitcdf, normalcdf, logitpdf, normalpdf)\n\n#cdf  \ncdf &lt;- ggplot(data=df, aes(x=xb, y=logitcdf)) +\n  geom_line() +\n  geom_line(aes(y=normalcdf),  linetype=\"dotted\"  ) +\n  annotate(\"text\", x = 2, y = .3, label = \"Normal\") +\n  annotate(\"text\", x = -3, y = .15, label = \"Logistic\") +\n  labs(y=\"Pr(Y=1)\",  x=\"x\") +\n  ggtitle(\"Normal and Logistic CDFs\")\n\npdf &lt;- ggplot(data=df, aes(x=xb, y=logitpdf)) +\n  geom_line() +\n  geom_line(aes(y=normalpdf), linetype=\"dotted\" ) +\n  annotate(\"text\", x = 0, y = .3, label = \"Normal\") +\n  annotate(\"text\", x = -3, y = .1, label = \"Logistic\") +\n  labs(y=\"Pr(Y=1)\", x=\"x\") +\n  ggtitle(\"Normal and Logistic PDFs\")\n\n\ncdf-pdf"
+  },
+  {
+    "objectID": "code/ex1answers2025.html#q1",
+    "href": "code/ex1answers2025.html#q1",
+    "title": "exercise #1 answers",
+    "section": "",
+    "text": "code\nxb &lt;- runif(1000, min=-4, max=4)\nlogitcdf &lt;- plogis(xb)\nnormalcdf &lt;- pnorm(xb)\nlogitpdf &lt;- dlogis(xb)\nnormalpdf &lt;- dnorm(xb)\n\ndf &lt;- data.frame(xb, logitcdf, normalcdf, logitpdf, normalpdf)\n\n#cdf  \ncdf &lt;- ggplot(data=df, aes(x=xb, y=logitcdf)) +\n  geom_line() +\n  geom_line(aes(y=normalcdf),  linetype=\"dotted\"  ) +\n  annotate(\"text\", x = 2, y = .3, label = \"Normal\") +\n  annotate(\"text\", x = -3, y = .15, label = \"Logistic\") +\n  labs(y=\"Pr(Y=1)\",  x=\"x\") +\n  ggtitle(\"Normal and Logistic CDFs\")\n\npdf &lt;- ggplot(data=df, aes(x=xb, y=logitpdf)) +\n  geom_line() +\n  geom_line(aes(y=normalpdf), linetype=\"dotted\" ) +\n  annotate(\"text\", x = 0, y = .3, label = \"Normal\") +\n  annotate(\"text\", x = -3, y = .1, label = \"Logistic\") +\n  labs(y=\"Pr(Y=1)\", x=\"x\") +\n  ggtitle(\"Normal and Logistic PDFs\")\n\n\ncdf-pdf"
+  },
+  {
+    "objectID": "code/ex1answers2025.html#q2",
+    "href": "code/ex1answers2025.html#q2",
+    "title": "exercise #1 answers",
+    "section": "Q2",
+    "text": "Q2\n\n\ncode\nxb &lt;- runif(1000, min=-4, max=4)\npdf1 &lt;- dnorm(xb, mean=0, sd=1)\npdf2 &lt;- dnorm(xb, mean=0, sd=sqrt(.25))\npdf3 &lt;- dnorm(xb, mean=-1, sd=sqrt(1.25))\npdf4 &lt;- dnorm(xb)\n\ndf &lt;- data.frame(xb, pdf1, pdf2, pdf3, pdf4)\n\nggplot(data=df, aes(x=xb, y=pdf1)) +\n  geom_line() +\n  geom_line(aes(y=pdf2), linetype=\"dotted\") +\n  geom_line(aes(y=pdf3), linetype=\"longdash\" ) +\n  annotate(\"text\", x = 2.5, y = .1, label = \"Normal (0,1)\") +\n  annotate(\"text\", x = 1.5, y = .4, label = \"Normal (0, .25)\") +\n  annotate(\"text\", x = -3.3, y = .2, label = \"Normal (-1, 1.25)\") +\n  labs(y=\"Pr(Y=1)\", x=\"x\") +\n  ggtitle(\"Normal PDFs\")"
   }
 ]
