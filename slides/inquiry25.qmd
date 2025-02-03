@@ -1,0 +1,132 @@
+---
+title: "A note on inquiry"
+author: "Dave Clark"
+institute: "Binghamton University"
+date: today
+date-format: long
+title-block-banner: TRUE
+bibliography: ../refs501.bib
+format: 
+   html: default
+   # revealjs:
+   #   output-file: multivariate24s.html
+editor: source
+embed-resources: true
+cache: true
+---
+
+```{r setup, include=FALSE ,echo=FALSE, warning=FALSE, message=FALSE}
+options(htmltools.dir.version = FALSE)
+
+knitr::opts_chunk$set(fig.retina = 2, fig.align = "center", warning=FALSE, error=FALSE, message=FALSE) 
+  
+library(ggplot2)
+library(patchwork)
+library(tinytable)
+library(modelsummary)
+library(tidyverse)
+library(mvtnorm)
+
+```
+
+
+# Inquiry and Model Choice
+
+
+Perhaps the most useful and important, though  difficult skill to learn in science is how to choose a method of inquiry (say, a model). For one thing, there is a huge array of methods to choose from, and they’ll each have their proponents and their detractors. Within that noisy environment, there is always, always a complexity bias - the fancier, more difficult, more esoteric the model, the better it must be. For another, inquiry is also faddish. In the early 1990s, everthing was "colinear." In the early 2000s, everything suffered selection bias and needed a Heckman-style model. More recently, everything is "endogenous," a term throw around very loosely, with few suggestions as to remedies. Whatever the current fad is, expect Reviewer #2 to criticize your paper on those grounds, no matter how irrelevant. 
+
+
+![](peerreview.jpg)
+
+
+How does a scholar learn to navigate this methodological battlefield, to choose appropriate methods, to get persuasive and reasonable answers from their models, and persuade others they’re reasonable enough they warrant publication? I think a good starting point is to truly adopt and internalize George Box’s observation that “all models are wrong, some are useful.” The contest is not to be “right” but to make choices in a correct way that lead to a *useful model*. 
+
+Thinking about models as useful or not useful, say on a “usefulness” continuum, invites us to think about what makes them useful, and to reflect on what our analytic goals are. For instance, are we mainly interested in prediction? Are we primarily interested in discovery or description? Are we focused on testing hypotheses or establishing causal patterns? These are related but different sorts of inquiry - they usually imply different types of methods. A method that’s useful for one type of question may not be useful for another. 
+
+Consider a scholar interested in two principal questions. The first is “how widely influential is a variable, say age, in shaping support for political violence?” The second is “how important is this variable to explaining support for political violence compared to other variables?” These questions are not really about prediction or about causation - they’re more oriented to discovering and describing the landscape of correlations among a fairly wide set of variables across a relatively large number of studies using a relatively large number of different data sources. Pattern-seeking methods (say, ensemble models) might be really useful for these purposes.
+
+Another scholar might be interested in what determines levels of support for political violence, when and why. This implies a different type of inquiry focused on causal paths and prediction. The methods this scholar would likely choose would be quite different from those chosen by the first scholar, perhaps using regression-based methods of causal inference.
+
+Notice the question here is not about relative “rightness” - which scholar is “more right”. Instead, the question is absolute - is scholar #1’s inquiry or model useful? Is scholar #2’s inquiry or model useful? 
+
+What makes an inquiry “useful?” There are very involved debates on questions related to this in the philosophy of science, especially in debates about ontology, about the nature of assumptions, and about what comprises “theory.” I think about this in a very simple way. If an inquiry teaches us something and provokes further inquiry, it’s useful. The more an inquiry shows us and the more research or inquiry it provokes, the more useful it is. 
+
+Not coincidentally, the more provocative or useful a model or inquiry is, the “stupider” I feel, because I’m reminded how much I don’t know, how much more there is to know, that there are questions I didn’t know existed and new lines of inquiry to pursue far beyond what I had imagined. I love this feeling. 
+
+So what do we do? Seek out challenges - new methods, new literatures and arguments. Discuss and argue with each other. Tackle the hard problems that engage you, provoke you, challenge you, make you curious, make you feel stupid. Choose methods that are useful to your inquiry; they may be simple or complex, it doesn’t matter. What matters is that those methods or models are useful. Read a lot, especially things out of your particular (narrow) area. Your literature will become an echo chamber - avoid that by reading as broadly as you can. Be picky. Read things the challenge and engage you and interest you. Read outside the discipline - read historical and journalistic accounts of the phenomena you’re interested in.
+
+It's easy to be overwhelmed by methods of inquiry, but important to recognize those methods as tools in a very broad toolbox. Only some of those are useful for the questions you’re asking. 
+
+![](software.jpeg)
+
+
+
+
+<!-- Let's turn to some advice on building models and writing papers.  -->
+
+<!-- # Building models  -->
+
+
+<!-- From Hal Varian. How to build an economic model in your spare time. The American Economist. 2016 Mar;61(1):81-90. @varian2016build -->
+
+<!--   - Get an idea - not from journals. Newspapers, magazines, conversations... -->
+<!--   - Is the idea worthwhile? Talk it through with friends/colleagues.  -->
+<!--   - Don't look at the literature too soon. -->
+<!--   - Build the model - identify the pieces (actors, interests, constraints, interactions). Work an example, then another, then another. Keep it simple. -->
+<!--   - Generalize the (simple) model. -->
+<!--   - Make mistakes, or try different things - like sculpting though, most model involves stripping away rather than adding on. -->
+<!--   - Look at the literature. Develop context.  -->
+<!--   - Present the paper - it forces you to get to the point.  -->
+<!--   - Plan the paper, write the paper, revise the paper. Rinse, repeat. -->
+<!--   - Structure: "There's an old joke about academic papers. They are all supposed to have three parts. The first part, everyone can understand. The second, only a handful of readers can  -->
+<!-- understand. The last part no one can understand---that's how the readers know it's a  -->
+<!-- serious piece of work! The big mistake that authors make these days is to leave out the first part of the paper - that part that everyone can understand. But the introduction is the most important part of the paper." -->
+<!--   - Stop writing - make your point, and get out. -->
+<!--   - Proof and submit.  -->
+
+
+<!-- ## Some cautionary guidelines -->
+<!-- ``All models are wrong, but some are useful.'' (George Box) -->
+
+<!--   - Be suspicious of your results no matter what they tell you. -->
+<!--   - Assume the data are noisy. -->
+<!--   - Assume the estimator is wrong. -->
+<!--   - Assume the model is misspecified. -->
+<!--   - Assume your model assumptions are heroic. -->
+<!--   - Assume your theory assumptions are heroic.  -->
+
+<!-- ## And approaches -->
+
+<!--   - search for the limits of your results; evaluate their robustness. -->
+<!--   - tame the data by cleaning or transforming; use alternative measures. -->
+<!--   - examine different specifications and estimation models. -->
+<!--   - relax the statistical assumptions. -->
+<!--   - examine the empirical implications and actual effects of the theory assumptions.  -->
+
+
+<!-- ### Developing Papers -->
+
+<!-- From an interview with Harvard economist Susan Athey in @bowmaker2012art: -->
+
+<!-- Q: How do you achieve the right balance between communicating your research at an early stage versus the “close-to-finished” stage? -->
+
+
+<!-- A: I see young people making two kinds of mistakes: not presenting until something is done, and presenting something that’s half-baked. Generally, you have to realize that when you go out and give a seminar, you need to be prepared that people in the audience will have their main impression of you formed by that seminar. If there’s a group that you regularly present to, then it’s a little bit safer, but the world is full of Bayesians — people will update a lot based on one signal. Something that you present doesn’t have to be done, but you better be intelligent about it; you better be very clear on what you have done and what you haven’t done. And the part that you have done had better be good.  -->
+
+<!-- Senior people and good people will be very happy to give you feedback on things that aren’t done. They’ll respect the research process. But what you don’t want to do is have something where the whole idea doesn’t make sense, where you haven’t thought it through, and where people will feel like you’re wasting their time, or they’ll just decide that you’re stupid. -->
+
+<!-- It’s important for young people to practice. They practice for the job market, but probably underestimate the importance of doing it later. You see a lot of people mismanage their time. I find it very difficult to practice [laughs]. It’s a difficult thing to discipline yourself to do, but, until you become really comfortable and fluent, it’s crucial. And you also need to think from the perspective of the audience, particularly in terms of what questions people might have. -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
