@@ -128,7 +128,7 @@ mlb$used <- TRUE
 mlb$used[na.action(m3)] <- FALSE
 estdata <- mlb %>%  filter(used=="TRUE")
 
-datasummary(Home_attend+Runs_scored +Runs_allowed + Season + Games_behind ~ mean+ median+ sd+min+max,  data=mlb, style="grid", title = "MLB estimation data")
+datasummary(Home_attend+Runs_scored +Runs_allowed + Season + Games_behind ~ mean+ median+ sd+min+max,  data=estdata, style="grid", title = "MLB estimation data")
 
 ```
 

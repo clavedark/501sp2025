@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Dave Clark">
-<meta name="dcterms.date" content="2025-01-29">
+<meta name="dcterms.date" content="2025-02-05">
 
 <title>Prediction Methods – 501 - Spring 2025</title>
 <style>
@@ -4975,7 +4975,7 @@ window.Quarto = {
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">January 29, 2025</p>
+        <p class="date">February 5, 2025</p>
       </div>
     </div>
     
@@ -5637,7 +5637,7 @@ Prediction methods
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>mlb<span class="sc">$</span>used[<span class="fu">na.action</span>(m3)] <span class="ot">&lt;-</span> <span class="cn">FALSE</span></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>estdata <span class="ot">&lt;-</span> mlb <span class="sc">%&gt;%</span>  <span class="fu">filter</span>(used<span class="sc">==</span><span class="st">&quot;TRUE&quot;</span>)</span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">datasummary</span>(Home_attend<span class="sc">+</span>Runs_scored <span class="sc">+</span>Runs_allowed <span class="sc">+</span> Season <span class="sc">+</span> Games_behind <span class="sc">~</span> mean<span class="sc">+</span> median<span class="sc">+</span> sd<span class="sc">+</span>min<span class="sc">+</span>max,  <span class="at">data=</span>mlb, <span class="at">style=</span><span class="st">&quot;grid&quot;</span>, <span class="at">title =</span> <span class="st">&quot;MLB estimation data&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">datasummary</span>(Home_attend<span class="sc">+</span>Runs_scored <span class="sc">+</span>Runs_allowed <span class="sc">+</span> Season <span class="sc">+</span> Games_behind <span class="sc">~</span> mean<span class="sc">+</span> median<span class="sc">+</span> sd<span class="sc">+</span>min<span class="sc">+</span>max,  <span class="at">data=</span>estdata, <span class="at">style=</span><span class="st">&quot;grid&quot;</span>, <span class="at">title =</span> <span class="st">&quot;MLB estimation data&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <!-- preamble start -->
