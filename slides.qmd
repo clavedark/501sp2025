@@ -24,6 +24,8 @@ title: "Slides"
 
 [A note on inquiry and models](/slides/inquiry25.qmd)
 
+[The Multivariate Model](/slides/multivariate25.qmd)
+
 <!-- [Normality](normality24.qmd) -->
 
 <!-- [Inference](inference24.qmd) -->
