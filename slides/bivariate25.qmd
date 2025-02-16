@@ -235,7 +235,7 @@ $$= E[(X'X)^{-1}X'\epsilon\epsilon'X(X'X)^{-1}]$$
 Under homoskedasticity ($E[\epsilon\epsilon'] = \sigma^2I$):
 $$Var(\hat{\beta}) = \sigma^2(X'X)^{-1}$$
 
-Recall that $sigma^2 = \epsilon'\epsilon / (N - k)$, where $N$ is the number of observations and $k$ is the number of regressors including the constant.
+Recall that $\sigma^2 = \epsilon'\epsilon / (N - k)$, where $N$ is the number of observations and $k$ is the number of regressors including the constant.
 
 
 ## Variance-Covariance of $\widehat{\beta}$

@@ -1,0 +1,1097 @@
+---
+title: "Inference"
+author: "Dave Clark"
+institute: "Binghamton University"
+date: today
+date-format: long
+title-block-banner: TRUE
+bibliography: ../refs501.bib
+format: 
+   html: default
+   # revealjs:
+   #   output-file: multivariate24s.html
+editor: source
+embed-resources: true
+cache: true
+
+---
+
+<!-- render 2 types at same time; terminal "quarto render file.qmd" -->
+<!-- https://quarto.org/docs/output-formats/html-multi-format.html -->
+
+<!-- tables, smaller font and striping -->
+<style>
+table, th, td {
+    font-size: 18px;
+}
+tr:nth-child(odd) {
+  background-color: # f2f2f2;
+}
+</style>
+
+```{r setup, include=FALSE ,echo=FALSE, warning=FALSE}
+options(htmltools.dir.version = FALSE)
+
+knitr::opts_chunk$set(fig.retina = 2, fig.align = "center", warning=FALSE, error=FALSE, message=FALSE) 
+  
+library(knitr)
+library(datasets)
+library(tidyverse)
+library(ggplot2)
+library(haven) # read stata w/labels
+library(countrycode)
+library(patchwork)
+library(mvtnorm)
+library(modelsummary)
+library("GGally")
+library(stargazer)
+library(shiny)
+library(faux)
+library(RColorBrewer)
+library(plotly)
+library(htmlwidgets)
+library(DT)
+library(patchwork) 
+
+
+
+```
+
+
+
+
+#  Uncertainty about $\widehat{\beta}$
+ 
+We've dug pretty extensively into how we produce OLS estimates of $\widehat{\beta}$. Now we turn to the question of uncertainty about those estimates. After all, the data are a sample; the variables are imperfect measures; the variables may contain errors; we have ideas about the data generating process, but we don't know the true model, so the model is certainly misspecified. 
+
+We need ways to express our uncertainty about the estimates of $\beta$, and about our confidence in the claims we make from the model. 
+
+If we simply assume $\widehat{\beta} = \beta$, then we are assuming:
+ 
+  - all the regression assumptions are met;
+  - the sample is exactly equivalent to or representative of the population; 
+  - the model is specified correctly, and there are no sources of measurement error. 
+ 
+The probability these are all true is slim, but we are uncertain about the extent to which we do or do not meet these requirements. We need some statistical tools for quantifying our uncertainty about $\widehat{\beta}$.   
+ 
+
+# Measuring Uncertainty
+
+::: {.callout-note icon="false"}
+###  Normality of $\epsilon$
+
+To talk precisely about uncertainty, assume the following: 
+
+The disturbances, $\epsilon_i$ are independent of the $X$s and are normally distributed: $\epsilon \sim N(0,\sigma^{2})$.
+
+:::
+
+Two parts to this. 
+
+1. The residuals and $X$ variables are uncorrelated. Recall our [simulations](https://clavedark.github.io/501sp2025/slides/multivariate25.html#simulating-ols-assumptions) of what happens if we violate this assumption. The $\widehat{\beta}$s are biased, and the standard errors are inefficient. 
+
+2. The residuals are normally distributed. This is not a critical assumption, but it is a convenient one. It allows us to make inferences about the $\widehat{\beta}$s.
+
+
+::: {.callout-note icon="false"}
+
+### Normality of $\widehat{\beta}$
+
+Normality of $\epsilon$ implies that $\widehat{y}$ is normal, conditional on the $X$ variables.  The OLS assumptions collectively produce the following theorem:  ~ 
+
+
+Under the OLS assumptions, $\widehat{\beta} \sim N(\beta,var(\widehat{\beta}))$
+
+This helps form the foundation for inference. 
+
+:::
+
+
+# Normality of $\widehat{\beta}$
+
+Normality of $\beta$ is facilitated by the Central Limit Theorem. $\widehat{\beta}$ is our estimate of the mean of the distribution of $\beta$; it's one draw of theoretically infinite draws from that distribution. Assuming a large number of draws, the Central Limit Theorem tells us that the distribution of $\widehat{\beta}$ is normal.
+  
+```{r}
+#| echo: false
+#| code-fold: true
+#| code-summary: "code"
+
+knitr::include_app(url = "https://clavedark.shinyapps.io/normalitysim24/", height = "1000px")
+
+```
+
+## Framework for Inference
+ 
+  -  establish a null hypothesis, e.g. $\beta_1=0$.
+  -  estimate $\widehat{\beta_1}$
+  -  estimate the error variance $\widehat{\sigma^2}$.
+  -  determine the distribution of  $\widehat{\beta_k}$.
+  -  compute a test statistic for  $\widehat{\beta_1}$.
+  -  compare that test statistic to critical values on the distribution of  $\widehat{\beta_k}$.
+  -  determine the probability of observing the test statistic value, given the distribution of  $\widehat{\beta_k}$
+ 
+
+## Measuring Uncertainty
+
+  - Standard errors are basic measures of uncertainty. 
+  - The standard errors of the estimates of $\widehat{\beta_k}$ are the standard deviations of the sampling distribution of the estimator.
+  - Standard errors are analogous to standard deviations surrounding the estimates. 
+ 
+ 
+
+### Repetition: Variance-Covariance of $\epsilon$
+
+Because we assume constant variance and no serial correlation, we know
+
+$$ E(\mathbf{\epsilon\epsilon'})=
+\left[
+\begin{array}{cccc}
+\sigma^{2} & 0 &\cdots &0 \\
+0&\sigma^{2} &\cdots &0 \\
+\vdots&\vdots&\ddots& \vdots \\
+0 &0 &\cdots & \sigma^{2} \\
+\end{array} \right]
+= \sigma^{2}
+\left[
+\begin{array}{cccc}
+1 & 0 &\cdots &0 \\
+0&1 &\cdots &0 \\
+\vdots&\vdots&\ddots& \vdots \\
+0 &0 &\cdots & 1 \\
+\end{array} \right]
+= \sigma^{2} \mathbf{I} $$
+
+This is the variance-covariance matrix of the disturbances ($var-cov(e)$); it is symmetric, the main diagonal containing the variances of $\epsilon_i$. Assuming $Var(u|X)= \sigma^2$, the average of the main diagonal is $\widehat{\sigma^2}$; the average of a constant is the constant. 
+
+
+
+## Variance-Covariance Matrix
+
+Start with $\hat{\beta} = (X'X)^{-1}X'y$ and substitute $y = X\beta + \epsilon$:
+
+$$\hat{\beta} = (X'X)^{-1}X'(X\beta + \epsilon)$$
+$$= \beta + (X'X)^{-1}X'\epsilon$$
+
+Therefore:
+$$\hat{\beta} - \beta = (X'X)^{-1}X'\epsilon$$
+
+The variance-covariance matrix is:
+$$Var(\hat{\beta}) = E[(\hat{\beta} - \beta)(\hat{\beta} - \beta)']$$
+$$= E[(X'X)^{-1}X'\epsilon\epsilon'X(X'X)^{-1}]$$
+
+Under homoskedasticity ($E[\epsilon\epsilon'] = \sigma^2I$):
+$$Var(\hat{\beta}) = \sigma^2(X'X)^{-1}$$
+
+Recall that $\sigma^2 = \epsilon'\epsilon / (N - k)$, where $N$ is the number of observations and $k$ is the number of regressors including the constant.
+
+
+## Variance-Covariance of $\widehat{\beta}$
+
+ 
+$$ E[(\widehat{\beta}-\beta)(\widehat{\beta}-\beta)'] = $$ $~$
+
+
+
+$$\left[
+\begin{array}{cccc}
+var(\beta_1) & cov(\beta_1,\beta_2) &\cdots &cov(\beta_1,\beta_k)\\
+cov(\beta_2,\beta_1)& var(\beta_2) &\cdots &cov(\beta_2,\beta_k)\\
+\vdots&\vdots&\ddots& \vdots\\
+cov(\beta_k,\beta_1) &cov(\beta_2,\beta_k) &\cdots & var(\beta_k)\\
+\end{array} \right] $$
+
+
+## Standard Errors of $\beta_k$ 
+
+$$
+\left[
+\begin{array}{cccc}
+\sqrt{var(\beta_1)} & cov(\beta_1,\beta_2) &\cdots &cov(\beta_1,\beta_k)\\
+cov(\beta_2,\beta_1)& \sqrt{var(\beta_2)} &\cdots &cov(\beta_2,\beta_k)\\
+\vdots&\vdots&\ddots& \vdots\\
+cov(\beta_k,\beta_1) &cov(\beta_k,\beta_2) &\cdots & \sqrt{var(\beta_k)}\\
+\end{array} \right] 
+$$
+
+
+
+
+
+## Assume 
+
+$$ \widehat{u} \sim \mathcal{N}(0, \sigma^2 \mathbf{I}) $$
+
+If we meet the GM assumptions, then:
+
+$$ \widehat{\beta} \sim \mathcal{N}(\beta, \widehat{var(\beta)}) $$
+
+
+$$\widehat{var(\beta)} = \widehat{\sigma^{2}} \mathbf{(X'X)^{-1}} $$
+
+
+The estimated error variance will be smaller relative to large variation in the $X$ variables, so as variation in $X$ grows, the uncertainty surrounding $\mathbf{\widehat{\beta_k}}$ will get smaller. 
+
+Let's look at this in some detail.
+
+
+#Elements of the Variance-Covariance Matrix
+
+Start with a simple regression model:
+
+$$y_i = \beta_0 + \beta_1x_{1i} + \beta_2x_{2i} + \epsilon_i$$
+
+where:
+
+- $\beta_0 = 1$ (intercept)
+- $\beta_1 = 2$ (slope for $x_1$)
+- $\beta_2 = 3$ (slope for $x_2$)
+- $\epsilon_i \sim N(0, 1)$ (random errors)
+
+# Thinking about $\mathbf{X'X}$  
+
+The $\mathbf{X'X}$ matrix plays a central role in both coefficient estimates and their standard errors. Recall:
+  
+  1. **Coefficient Estimates**: $\hat{\beta} = \mathbf{(X'X)^{-1}}\mathbf{X'y}$
+  2. **Variance-Covariance Matrix**: $Var(\hat{\beta}) = \sigma^2\mathbf{(X'X)^{-1}}$
+  3. **Standard Errors**: $SE(\hat{\beta}_j) = \sqrt{\sigma^2[\mathbf{(X'X)^{-1}}]_{jj}}$
+  
+You an see $\mathbf{X'X}$ or its inverse directly affect:
+
+- How precisely we can estimate each coefficient
+- How much correlation between predictors affects our estimates
+- The magnitude of our standard errors
+
+We're going to simulate how changes in sample size and in the correlation between $x_1, x_2$ affect the structure of X'X and the precision of our estimates.
+
+
+
+```{r}
+#| echo: false
+#| code-fold: true
+#| code-summary: "code"
+
+# Main simulation function
+simulate_regression_variance <- function(n, correlation_level = 0, x_range = c(0, 10)) {
+  # Generate x1
+  x1 <- runif(n, x_range[1], x_range[2])
+  
+  # Generate x2 with controlled correlation
+  if(correlation_level == 0) {
+    x2 <- runif(n, x_range[1], x_range[2])
+  } else {
+    # Generate correlated x2 using correlation_level
+    x2 <- x1 * correlation_level + 
+          runif(n, x_range[1], x_range[2]) * sqrt(1 - correlation_level^2)
+  }
+  
+  # Create design matrix
+  X <- cbind(1, x1, x2)
+  
+  # True parameters
+  true_beta <- c(1, 2, 3)
+  sigma <- 1
+  
+  # Calculate matrices
+  XtX <- t(X) %*% X
+  XtXinv <- solve(XtX)
+  
+  # Generate y and compute estimates
+  y <- X %*% true_beta + rnorm(n, 0, sigma)
+  beta_hat <- solve(XtX) %*% t(X) %*% y
+  residuals <- y - X %*% beta_hat
+  sigma_hat <- sqrt(sum(residuals^2)/(n-3))
+  
+  # Compute var-cov matrix
+  varcov <- sigma_hat^2 * XtXinv
+  
+  return(list(
+    X = X,
+    XtX = XtX,
+    XtXinv = XtXinv,
+    varcov = varcov,
+    beta = beta_hat,
+    sigma = sigma_hat,
+    condition_number = kappa(XtX),
+    standard_errors = sqrt(diag(varcov)),
+    correlation = cor(x1, x2),
+    true_beta = true_beta,
+    y = y,
+    residuals = residuals
+  ))
+}
+
+
+# Function to run multiple simulations
+run_multiple_sims <- function(n, correlation_level, nsims = 100) {
+  results <- matrix(NA, nrow = nsims, ncol = 3)
+  colnames(results) <- c("beta0", "beta1", "beta2")
+  
+  for(i in 1:nsims) {
+    sim <- simulate_regression_variance(n, correlation_level)
+    results[i,] <- sim$beta
+  }
+  
+  return(results)
+}
+
+```
+
+---
+
+
+## Understanding the $\mathbf{(X'X)}$ Matrix
+
+The $\mathbf{(X'X)}$ matrix, often called the **information matrix**, contains crucial information about our ability to estimate regression coefficients. Each element tells us something specific about estimation precision:
+
+### What matrix elements mean
+
+1. **Diagonal Elements (i=j)**
+   - $\mathbf{X'X}_{11}$: Sum of squared ones (equals n)
+     * Controls intercept precision
+     * Larger n means better intercept estimation
+   - $\mathbf{X'X}_{22}$: Sum of squared x₁ values
+     * Determines β₁ estimation precision
+     * Affected by both sample size and x₁ variance
+   - $\mathbf{X'X}_{33}$: Sum of squared x₂ values
+     * Determines β₂ estimation precision
+     * Affected by both sample size and x₂ variance
+
+2. **Off-Diagonal Elements (i≠j)**
+   - $\mathbf{X'X}_{12}$ and $\mathbf{X'X}_{13}$: Sums of x₁ and x₂
+     * Related to predictor centering
+     * Smaller values improve estimation
+   - $\mathbf{X'X}_{23}$: Sum of x₁x₂ products
+     * Key indicator of multicollinearity
+     * Larger values relative to diagonals indicate problems
+     
+     
+Let's generate three cases to compare these matrix properties:
+
+1. **Good Case**: Large sample size (1200), no correlation between predictors
+2. **Medium Case**: Medium sample size (50), moderate correlation (~.5) between predictors
+3. **Bad Case**: Small sample size (10), high correlation (~.9) between predictors
+
+
+```{r}
+#| echo: false
+#| code-fold: true
+#| code-summary: "code"
+
+# Generate three cases
+good_case <- simulate_regression_variance(n = 1200, correlation_level = 0)
+medium_case <- simulate_regression_variance(n = 50, correlation_level = 0.5)
+bad_case <- simulate_regression_variance(n = 10, correlation_level = 0.9)
+
+# Function to create detailed matrix summary
+matrix_summary <- function(case) {
+  XtX <- case$XtX
+  eigenvals <- eigen(XtX)$values
+  
+  data.frame(
+    Sample_Size = nrow(case$X),
+    Correlation = round(case$correlation, 3),
+    Condition = round(case$condition_number, 1),
+    Det_XtX = round(det(XtX), 1)
+  )
+}
+
+# Create comparison table
+matrix_comparisons <- rbind(
+  matrix_summary(good_case),
+  matrix_summary(medium_case),
+  matrix_summary(bad_case)
+)
+rownames(matrix_comparisons) <- c("Good", "Medium", "Bad")
+
+# Display matrix properties
+datatable(matrix_comparisons,
+          caption = "Matrix Properties Across Cases",
+          options = list(
+            pageLength = 3,
+            dom = 't'
+          ),
+          rownames = TRUE) %>%
+  formatStyle(columns = names(matrix_comparisons),
+             backgroundColor = styleInterval(
+               c(0.5, 0.8),
+               c('white', '#f7f7f7', '#e7e7e7')
+             ))
+
+```
+
+
+You can see characteristics of the $\mathbf{(X'X)}$ matrix under each of the three sets of conditions. The condition number and determinant of the matrix are key indicators of multicollinearity and matrix stability. The condition number is effectively a measure of numerical accuracy - smaller values indicate better matrix properties. Condition increases as sample gets smaller and as correlation between predictors increases. The determinant of the matrix indicates columns of the matrix (variables) are distinct from one another. As the determinant approaches zero, that variability declines - at zero, the matrix is singular and cannot be inverted. 
+
+These heatmaps provide a visual representation of the information matrix structure under different conditions. The color gradient indicates the relative magnitude of each element, with darker colors representing larger values. Hover over each cell for detailed interpretations of the matrix elements.
+
+```{r}
+#| echo: false
+#| code-fold: true
+#| code-summary: "code"
+
+
+# Function to create enhanced interactive heatmap
+create_enhanced_heatmap <- function(mat, title, n, rho) {
+  # Ensure the matrix is in the correct orientation
+  n_rows <- nrow(mat)
+  
+  # Create data frame for plotly with correct diagonal orientation
+  plot_data <- expand.grid(row = 1:n_rows, col = 1:n_rows)  # Do not reverse rows
+  plot_data$value <- as.vector(mat)  # Use the matrix as-is
+  
+  # Create detailed interpretations
+  plot_data$interpretation <- case_when(
+    # Diagonal elements
+    plot_data$row == 1 & plot_data$col == 1 ~ 
+      sprintf("Sum of squared ones (n=%d)\nLarger values indicate better intercept estimation", n),
+    plot_data$row == 2 & plot_data$col == 2 ~ 
+      sprintf("Sum of squared x₁ values\nScaled by n and predictor variance\nLarger values relative to off-diagonals improve β₁ estimation"),
+    plot_data$row == 3 & plot_data$col == 3 ~ 
+      sprintf("Sum of squared x₂ values\nScaled by n and predictor variance\nLarger values relative to off-diagonals improve β₂ estimation"),
+    
+    # Off-diagonal elements
+    plot_data$row == 1 & plot_data$col == 2 ~ 
+      sprintf("Sum of x₁ values\nRelates to centering of x₁\nSmaller absolute values improve estimation"),
+    plot_data$row == 1 & plot_data$col == 3 ~ 
+      sprintf("Sum of x₂ values\nRelates to centering of x₂\nSmaller absolute values improve estimation"),
+    plot_data$row == 2 & plot_data$col == 3 ~ 
+      sprintf("Sum of x₁x₂ products\nIndicates collinearity (ρ≈%.2f)\nLarger values relative to diagonals decrease precision", rho),
+    
+    # Symmetry note
+    TRUE ~ paste("Mirror of opposite element\nMatrix is symmetric")
+  )
+  
+  # Add matrix element values to interpretation
+  plot_data$interpretation <- paste0(
+    "Value: ", round(plot_data$value, 2), "\n\n",
+    plot_data$interpretation
+  )
+  
+  # Create heatmap with enhanced color scale and annotations
+  p <- plot_ly(data = plot_data,
+               x = ~col,
+               y = ~row,
+               z = ~value,
+               type = "heatmap",
+               colorscale = list(c(0, 0.5, 1), c("#005A43", "#6CC24A", "#A7DA92")), # Blue gradient "lightblue", "#6baed6", "#08306b"
+               hoverongaps = FALSE,
+               hoverinfo = "text",
+               text = ~interpretation) %>%
+    layout(
+      title = list(
+        text = sprintf("%s\nn=%d, ρ≈%.2f", title, n, rho),
+        font = list(size = 14)
+      ),
+      xaxis = list(
+        title = "",
+        ticktext = c("β₀", "β₁", "β₂"),  # Correct axis labels
+        tickvals = 1:3
+      ),
+      yaxis = list(
+        title = "",
+        ticktext = c("β₀", "β₁", "β₂"),  # Correct axis labels
+        tickvals = 1:3,
+        autorange = "reversed"  # Reverse y-axis to match matrix orientation
+      ),
+      annotations = list(
+        list(
+          x = 1.3,
+          y = 3.9,
+          text = "Hover over cells for detailed interpretations",
+          showarrow = FALSE,
+          font = list(size = 12)
+        )
+      ),
+      margin = list(l = 50, r = 50, b = 50, t = 80)  # Adjust margins for better layout
+    )
+  
+  return(p)
+}
+
+# Create and display enhanced interactive heatmaps
+good_heatmap <- create_enhanced_heatmap(good_case$XtX, 
+                                       "Good Case: Strong Information Matrix",
+                                       n = 1200,
+                                       rho = good_case$correlation)
+medium_heatmap <- create_enhanced_heatmap(medium_case$XtX,
+                                         "Medium Case: Moderate Information Quality",
+                                         n = 50,
+                                         rho = medium_case$correlation)
+bad_heatmap <- create_enhanced_heatmap(bad_case$XtX,
+                                      "Bad Case: Poor Information Quality",
+                                      n = 10,
+                                      rho = bad_case$correlation)
+
+# Display heatmaps
+good_heatmap
+medium_heatmap
+bad_heatmap
+```
+
+The heatmaps above provide a visual representation of the **X'X matrix** under the three scenarios: described above. Here's how to interpret them:
+
+1. **Color Intensity**:
+   - Darker shades of green indicate larger values in the matrix.
+   - Diagonal elements (top-left to bottom-right) represent the **information content** for each coefficient.
+   - Off-diagonal elements represent **relationships between predictors**.
+
+2. **Diagonal Elements**:
+   - The top-left cell ($\beta_0, \beta_0$) shows the sum of squared ones (equal to n).
+   - The middle cell ($\beta_1, \beta_1$) shows the sum of squared x₁ values.
+   - The bottom-right cell ($\beta_2, \beta_2$) shows the sum of squared x₂ values.
+
+3. **Off-Diagonal Elements**:
+   - The top-middle cell ($\beta_0, \beta_1$) shows the sum of x₁ values.
+   - The top-right cell ($\beta_0, \beta_2$) shows the sum of x₂ values.
+   - The middle-right cell ($\beta_1, \beta_2$) shows the sum of x₁x₂ products, which indicates **collinearity**.
+ 
+In the **Good Case**, the main diagonal values are dominant, indicating high information content for all coefficients. Off-diagonal elements are small, suggesting efficient estimation of individual coefficients. In the **Medium Case**, off-diagonal elements grow larger, indicating some collinearity and reduced precision. In the **Bad Case**, off-diagonal elements are nearly as large as diagonal elements, indicating severe collinearity and poor estimation precision.
+
+
+## Inverse matrix 
+
+Here's a similar visual analysis of the inverse matrix, $\mathbf{(X'X)^{-1}}$:
+
+```{r}
+#| echo: false
+#| code-fold: true
+#| code-summary: "code"
+ 
+# Function to create enhanced interactive heatmap for (X'X)^-1
+create_inverse_heatmap <- function(mat, title, n, rho) {
+  # Ensure the matrix is in the correct orientation
+  n_rows <- nrow(mat)
+  
+  # Create data frame for plotly with correct diagonal orientation
+  plot_data <- expand.grid(row = 1:n_rows, col = 1:n_rows)  # Do not reverse rows
+  plot_data$value <- as.vector(mat)  # Use the matrix as-is
+  
+  # Create detailed interpretations for (X'X)^-1
+  plot_data$interpretation <- case_when(
+    # Diagonal elements
+    plot_data$row == 1 & plot_data$col == 1 ~ 
+      sprintf("Variance of β₀ estimate\nLarger values indicate higher uncertainty in intercept estimation"),
+    plot_data$row == 2 & plot_data$col == 2 ~ 
+      sprintf("Variance of β₁ estimate\nLarger values indicate higher uncertainty in x₁ slope estimation"),
+    plot_data$row == 3 & plot_data$col == 3 ~ 
+      sprintf("Variance of β₂ estimate\nLarger values indicate higher uncertainty in x₂ slope estimation"),
+    
+    # Off-diagonal elements
+    plot_data$row == 1 & plot_data$col == 2 ~ 
+      sprintf("Covariance between β₀ and β₁\nNon-zero values indicate dependence between intercept and x₁ slope estimates"),
+    plot_data$row == 1 & plot_data$col == 3 ~ 
+      sprintf("Covariance between β₀ and β₂\nNon-zero values indicate dependence between intercept and x₂ slope estimates"),
+    plot_data$row == 2 & plot_data$col == 3 ~ 
+      sprintf("Covariance between β₁ and β₂\nLarger values indicate collinearity (ρ≈%.2f) between x₁ and x₂", rho),
+    
+    # Symmetry note
+    TRUE ~ paste("Mirror of opposite element\nMatrix is symmetric")
+  )
+  
+  # Add matrix element values to interpretation
+  plot_data$interpretation <- paste0(
+    "Value: ", round(plot_data$value, 6), "\n\n",  # Use more precision for small values
+    plot_data$interpretation
+  )
+  
+  # Create heatmap with enhanced color scale and annotations
+  p <- plot_ly(data = plot_data,
+               x = ~col,
+               y = ~row,
+               z = ~value,
+               type = "heatmap",
+               colorscale = list(c(0, 0.5, 1), c("#005A43", "#6CC24A", "#A7DA92")),  # Blue gradient "lightblue", "#6baed6", "#08306b"
+               hoverongaps = FALSE,
+               hoverinfo = "text",
+               text = ~interpretation) %>%
+    layout(
+      title = list(
+        text = sprintf("%s\nn=%d, ρ≈%.2f", title, n, rho),
+        font = list(size = 14)
+      ),
+      xaxis = list(
+        title = "",
+        ticktext = c("β₀", "β₁", "β₂"),  # Correct axis labels
+        tickvals = 1:3
+      ),
+      yaxis = list(
+        title = "",
+        ticktext = c("β₀", "β₁", "β₂"),  # Correct axis labels
+        tickvals = 1:3,
+        autorange = "reversed"  # Reverse y-axis to match matrix orientation
+      ),
+      annotations = list(
+        list(
+          x = 1.3,
+          y = 3.9,
+          text = "Hover over cells for detailed interpretations",
+          showarrow = FALSE,
+          font = list(size = 12)
+        )
+      ),
+      margin = list(l = 50, r = 50, b = 50, t = 80)  # Adjust margins for better layout
+    )
+  
+  return(p)
+}
+
+```
+
+
+
+```{r}
+#| echo: false
+#| code-fold: true
+#| code-summary: "code"
+#| label: inverse-matrix-visualization
+
+
+# Generate three cases
+good_case <- simulate_regression_variance(n = 1200, correlation_level = 0)
+medium_case <- simulate_regression_variance(n = 50, correlation_level = 0.5)
+bad_case <- simulate_regression_variance(n = 10, correlation_level = 0.9)
+
+# Create and display enhanced interactive heatmaps for (X'X)^-1
+good_inverse_heatmap <- create_inverse_heatmap(good_case$XtXinv, 
+                                              "Good Case: Stable Inverse Matrix",
+                                              n = 1200,
+                                              rho = good_case$correlation)
+medium_inverse_heatmap <- create_inverse_heatmap(medium_case$XtXinv,
+                                                "Medium Case: Moderate Instability",
+                                                n = 50,
+                                                rho = medium_case$correlation)
+bad_inverse_heatmap <- create_inverse_heatmap(bad_case$XtXinv,
+                                             "Bad Case: Highly Unstable Inverse Matrix",
+                                             n = 10,
+                                             rho = bad_case$correlation)
+
+# Display heatmaps
+good_inverse_heatmap
+medium_inverse_heatmap
+bad_inverse_heatmap
+```
+
+---
+
+###  $\mathbf{(X'X)^{-1}}$ Elements
+
+The $\mathbf{(X'X)^{-1}}$ matrix is critical for understanding the **variance-covariance structure** of the regression coefficients. Here’s what each element means:
+
+1. **Diagonal Elements**:
+   - $\mathbf{(X'X)^{-1}_{11}}$: Variance of the intercept ($\beta_0$) estimate. Larger values indicate higher uncertainty in the intercept.
+   - $\mathbf{(X'X)^{-1}_{22}}$: Variance of the $\beta_1$ estimate. Larger values indicate higher uncertainty in the slope for $x_1$.
+   - $\mathbf{(X'X)^{-1}_{33}}$: Variance of the $\beta_2$ estimate. Larger values indicate higher uncertainty in the slope for $x_2$.
+
+2. **Off-Diagonal Elements**:
+   - $\mathbf{(X'X)^{-1}_{12}}$: Covariance between $\beta_0$ and $\beta_1$. Non-zero values indicate dependence between the intercept and $x_1$ slope estimates.
+   - $\mathbf{(X'X)^{-1}_{13}}$: Covariance between $\beta_0$ and $\beta_2$. Non-zero values indicate dependence between the intercept and \( x_2 \) slope estimates.
+   - $\mathbf{(X'X)^{-1}_{23}}$: Covariance between $\beta_1$ and $\beta_2$. Larger values indicate collinearity between $x_1$ and $x_2$, leading to inflated standard errors.
+
+
+For the **Good Case** (n=1200, ρ≈0):
+- The diagonal elements of $\mathbf{(X'X)^{-1}}$ will be small, indicating precise estimates.
+- The off-diagonal elements will be close to zero, indicating minimal dependence between coefficients.
+
+For the **Bad Case** (n=10, ρ≈0.9):
+- The diagonal elements of $\mathbf{(X'X)^{-1}}$ will be large, indicating high uncertainty in the estimates.
+- The off-diagonal elements will be large, indicating strong collinearity and dependence between coefficients.
+
+
+<!-- ### Takeaways -->
+
+<!-- 1. **Diagonal Elements**: -->
+<!--    - Larger values indicate higher uncertainty in the corresponding coefficient estimates. -->
+<!--    - These values are directly proportional to the **standard errors** of the coefficients. -->
+
+<!-- 2. **Off-Diagonal Elements**: -->
+<!--    - Non-zero values indicate dependence between coefficient estimates. -->
+<!--    - Large values suggest **collinearity**, which inflates standard errors and reduces interpretability. -->
+
+<!-- 3. **Matrix Stability**: -->
+<!--    - A well-conditioned $\mathbf{(X'X)}$ matrix results in a stable $\mathbf{(X'X)^{-1}}$ with small diagonal and off-diagonal elements. -->
+<!--    - Poor conditioning (e.g., small n or high ρ) leads to instability in $\mathbf{(X'X)^{-1}}$, reflected in large diagonal and off-diagonal elements. -->
+
+
+## Coefficient Recovery
+
+Let's look briefly at how well we recover the coefficients:
+
+```{r}
+#| echo: false
+#| code-fold: true
+#| code-summary: "code"
+#| fig-cap: "Coefficient Recovery Across Simulation Conditions"
+
+# Run simulations for each case
+good_sims <- run_multiple_sims(n = 1200, correlation_level = 0)
+medium_sims <- run_multiple_sims(n = 50, correlation_level = 0.5)
+bad_sims <- run_multiple_sims(n = 10, correlation_level = 0.9)
+
+# Combine results into a data frame
+results_df <- data.frame(
+  Case = rep(c("Good", "Medium", "Bad"), each = 100),
+  Beta0 = c(good_sims[,1], medium_sims[,1], bad_sims[,1]),
+  Beta1 = c(good_sims[,2], medium_sims[,2], bad_sims[,2]),
+  Beta2 = c(good_sims[,3], medium_sims[,3], bad_sims[,3])
+)
+
+# Plot coefficient recovery
+p1 <- ggplot(results_df, aes(x = Beta0, fill = Case)) +
+  geom_density(alpha = 0.5) +
+  geom_vline(xintercept = 1, linetype = "dashed", color = "red") +
+  labs(title = expression(beta[0]~"Recovery"),
+       x = expression("Estimated " ~ beta[0]),
+       y = "Density") +
+  theme_minimal()
+
+p2 <- ggplot(results_df, aes(x = Beta1, fill = Case)) +
+  geom_density(alpha = 0.5) +
+  geom_vline(xintercept = 2, linetype = "dashed", color = "red") +
+  labs(title = expression(beta[1]~"Recovery"),
+       x = expression("Estimated" ~ beta[1]),
+       y = "Density") +
+  theme_minimal()
+
+p3 <- ggplot(results_df, aes(x = Beta2, fill = Case)) +
+  geom_density(alpha = 0.5) +
+  geom_vline(xintercept = 3, linetype = "dashed", color = "red") +
+  labs(title = expression(beta[2]~"Recovery"),
+       x = expression("Estimated " ~ beta[2]),
+       y = "Density") +
+  theme_minimal()
+
+# Combine plots
+p1 / p2 / p3
+```
+
+Unsurprisingly, we recover the coefficients better under larger samples and lower correlation - however, you'll notice again that the estimates are unbiased. 
+
+
+
+
+
+
+
+
+## Characteristics of $\text{var}(\widehat{\beta_{j}})$
+
+
+::: {.callout-note icon="false"}
+### Standard Errors vary with $\sigma^{2}$
+
+The variance of $\widehat{\beta_{j}}$ varies directly with $\sigma^{2}$, so as the error variance increases, so does the variance surrounding $\widehat{\beta_{j}}$ - this makes sense if we think about what the variance of the error term suggests.  Large $\sigma^{2}$ suggests our model is not predicting $y$ very effectively - if the model itself is imprecise, then its component parts (the $\widehat{\beta_{j}}$s) will also be imprecise.  So as $\sigma^{2}$ increases, so does $\text{var}(\widehat{\beta_{j}})$.
+:::
+
+::: {.callout-note icon="false"}
+### Standard Errors vary with variation in $\mathbf{X}$
+
+The variance of $\widehat{\beta_{j}}$ varies indirectly with $\sum\limits_{i=1}^{n} (x_{i}-\bar{x})^{2}$, so as the sum of squares of $x$ increases, $\text{var}(\widehat{\beta_{j}})$ decreases.  This too makes sense because it means the more variability in $x$ or the more information our $x$ variables contain, the better our estimates of $\widehat{\beta_{j}}$ are.  Thus, more variability in the $x$s reduces $\text{var}(\widehat{\beta_{j}})$.
+:::
+
+::: {.callout-note icon="false"}
+### Standard Errors vary with sample size
+
+Sample size varies inversely with $\text{var}(\widehat{\beta_{j}})$ - larger samples (probably with greater variation in the $x$s and thus larger $\sum\limits_{i=1}^{n} (x_{i}-\bar{x})^{2}$) will produce more precise estimates of $\widehat{\beta_{j}}$ and smaller $\text{var}(\widehat{\beta_{j}})$.
+:::
+
+
+
+## Inferences about $\widehat{\beta}$
+
+The standard error of $\widehat{\beta_k}$ is the square root of the $k^{th}$ diagonal element of the variance-covariance matrix of $\widehat{\beta}$. 
+
+In scalar terms, 
+
+$$s.e.(\widehat{\beta_{1}}) =\sqrt{\frac{\widehat{\sigma^{2}}}{\sum\limits_{i=1}^{n} (x_{i}-\bar{x})^{2}}} \nonumber   \nonumber  
+= \frac{\widehat{\sigma}}{\sqrt{\sum\limits_{i=1}^{n} (x_{i}-\bar{x})^{2}}} $$
+
+ 
+and the critical value is given by 
+
+$$z=\frac{\widehat{\beta_{j}}-\beta_{j}}{\frac{\widehat{\sigma}}{\sqrt{\sum\limits_{i=1}^{n} (x_{i}-\bar{x})^{2}}}}$$ 
+
+$$t= \frac{\widehat{\beta_{j}}-\beta_{j}\sqrt{\sum\limits_{i=1}^{n} (x_{i}-\bar{x})^{2}}}{\widehat{\sigma}} $$
+
+This is not Normal, even though the numerator is - the denominator is composed of the squared residuals, each of which is a $\chi^{2}$ variable. A standard normal variable divided by a  $\chi^{2}$ distributed variable is distributed  $t$ with $n-k-1$ degrees of freedom.  
+
+
+# Confidence Intervals
+
+The estimates of $\widehat{\beta_{j}}$ are drawn from a normal distribution, and we know the distribution of the variance, and we know how those distributions are related.  For the $t$ distribution, we know that 95\% of the probability mass falls within 2 standard deviations of the mean, so if we construct a 95\% confidence interval, we can say that 95\% of the time the true value of $\beta$ will fall within the interval.  Put another way, the interval contains a range of probable values for the true value of $\beta$.  
+
+
+ 
+Because we know (from above) that 
+
+$$t= \frac{\widehat{\beta_{j}}-\beta_{j}}{s.e. \widehat{\beta_{j}}}$$
+
+we can easily compute a confidence interval surrounding $\widehat{\beta_{j}}$ by
+
+$$CI_{c} = \widehat{\beta_{j}} \pm c \cdot {s.e. \widehat{\beta_{j}}}$$
+
+where $c$ represents the size of the confidence interval, so if $c$ is the 97.5th percentile in the $t$ distribution with $6$ degrees of freedom, then the value of $c$ is 2.447 (see the t-table in the back of the text). Thus, we compute the confidence interval by:
+
+$$CI_{97.5} = \widehat{\beta_{j}} +  2.447 \cdot {s.e. \widehat{\beta_{j}}}, \widehat{\beta_{j}} -  2.447 \cdot {s.e. \widehat{\beta_{j}}}$$
+
+
+# Point Estimates
+
+Using confidence intervals, we state the probability the true coefficient lies between the upper and lower bounds of the interval.  Point estimate tests allow us to test specific hypotheses about the value of $\widehat{\beta_{j}}$.  Let's go back to the computation of a $t$ statistic:
+
+
+$$t= \frac{\widehat{\beta_{j}}-\beta_{j}}{s.e. \widehat{\beta_{j}}}$$
+
+You'll notice in the numerator we're subtracting the true coefficient from our estimate. Of course, we don't know the true values of $\beta$, so we choose a value to which we want to compare our estimate.  Then we're generating the probability of drawing a sample with $\widehat{\beta_{j}}$ given the value we choose.  
+
+
+# Hypotheses
+
+Normally, we set up our hypothesis tests such that the value of $\beta$ we select is zero. Thus, we state null and alternative hypotheses:
+
+$$H_0:\beta_j=0$$ 
+$$H_1:\beta_j\ne 0 $$
+
+
+Then, we choose significance levels, find the critical value associated with that significance level, and compare $t_{\widehat{\beta_j}}=\widehat{\beta_j}/se(\widehat{\beta_j})$ to the critical
+value.  Finally, we either reject or fail to reject $H_0$.  Note that we could choose other values to which we could compare the probability of $\widehat{\beta_{j}}$, though selecting those values can be tricky.
+
+
+
+## Hypotheses
+
+ 
+  - The relationship we expect between $x$ and $y$ is the alternative hypothesis. 
+  
+  - $H_a$ is the alternative to the null - the null includes everything that's not the alternative; mathematically, it always includes zero. 
+  
+  - Non-directional alternative hypotheses simply expect $\widehat{\beta}$ will not be zero. These are not very specific, less desirable. 
+  
+  - Directional hypotheses expect a direction, e.g., $\widehat{\beta}$ will be positive; the null in this case is $\widehat{\beta} \leq 0$. This is more specific, more desirable.
+
+ 
+::: {.callout-note icon="false"}
+### Directional Hypotheses
+ Statistical software doesn't know your data or argument.
+
+R/Stata does not know your hypotheses, whether directional or not; it does not know if your data are panel, time series, or cross sectional. 
+
+ 
+  - R/Stata report 2-tailed p-values.
+  
+  - If you have a directional hypothesis, you need the 1-tailed p-value.
+  
+  - Divide the 2-tailed value by 2 - in a 2-tailed test, it's divided between the two tails. You want just one tail, so dividing the 2-tailed probability by 2 gives you the 1-tailed probability.
+
+:::
+  
+  
+  
+::: {.callout-warning icon="true"}
+If you expect $\widehat{\beta} > 0$, and your estimated $\widehat{\beta} = -1.2$ with a p-value of .001, you cannot reject the null. While $\widehat{\beta}$ is statistically different from zero, it's not in the direction of your hypothesis, so the result is not meaningful, does not support the alternative hypothesis. 
+::: 
+
+
+
+## Don't Expect the Null Hypothesis
+
+![](nullinquisition.png)
+
+
+
+
+## Don't Expect the Null
+
+The classical hypothesis test is always constructed such that the null includes zero. It is not possible to expect as the alternative hypothesis, that $\widehat{\beta} = 0$. We should **never** see the alternative hypothesis::
+
+
+**X will have no relationship to y: $H_A: \beta_1=0$**
+
+
+In the classical test, the null includes a specific point (usually zero), though it can contain that point and a range of other values, e.g.: 
+
+$$H_0: \beta_1 \leq 0$$
+
+Here, the null that $\beta_1$ is less than or equal to zero includes zero, but also includes all negative values. The alternative is that $\beta_1$ is greater than zero, so the alternative is a *range of values*, not a specific point.
+
+If we flip this around to say "I expect $\beta_1$ to be zero", then we are expecting the null hypothesis. Note that the *alternative hypothesis* is now a specific point, and the null is a range of values without any specific point expectation. 
+
+It's important to note that the null may be around a point *other than zero*. We might expect the coefficient to be different from 5, so the null is $H_0: \beta_1=5$. Or, we might expect the coefficient to be less than or equal to 5, so the null is $H_0: \beta_1 \leq 5$. 
+
+The point is we cannot expect in the alternative that $\beta_1$ is zero where the null is that it is anything except zero unless we build a new type of test. See @gillprq99 for an excellent discussion of this.
+
+
+## Don't Expect the Null Hypothesis
+![](nulldrake.png)
+
+
+
+
+# Joint Hypothesis Tests
+
+Normally we test hypotheses about specific  parameters, but there are cases where we are interested in a hypothesis like this:
+
+$$H_0:\beta_1=\beta_2=0$$
+$$H_1:\beta_1\ne \beta_2\ne 0$$
+
+To test something like this (and really, tests like this are something we should be extremely interested in), we use the F-statistic.  
+
+The joint hypothesis above has two restrictions - we expect two parameters to be zero in the null.  We can have as many as $k-1$ exclusions or restrictions in the model, and we typically call the exclusions or restrictions $q$. 
+
+
+## Intuition
+
+Decompose the variation in the data and model this way:
+
+$$TSS= MSS+RSS$$
+
+Suppose a regression like this:
+
+$$y_i = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_3 x_3 + \beta_4 x_4 +\beta_5 x_5 + u_i $$
+
+Our usual, single coefficient hypothesis test, say on $\beta_3$ is 
+
+$$H_0: \beta_3=0$$
+
+which is equivalent to 
+
+$$y_i = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + {\mathbf{0}} x_3 + \beta_4 x_4 +\beta_5 x_5 + u_i $$
+call this the **unrestricted model**: 
+
+$$y_i = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_3 x_3 + \beta_4 x_4 +\beta_5 x_5 + u_i $$
+
+$$RSS_U = \sum_{i=1}^N \widehat{u_U}^2$$
+
+and refer to this as the **restricted model**:
+
+$$y_i = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + {\mathbf{0}} x_3 + \beta_4 x_4 +\beta_5 x_5 + u_i $$
+
+$$RSS_R = \sum_{i=1}^N \widehat{u_R}^2$$
+
+
+Are these quantities different from one another?
+
+$$RSS_U \neq RSS_R$$ 
+
+If 
+
+$$RSS_U = RSS_R = 0$$
+
+then the two models are indistinguishable, and $\beta_3$ is not different from zero. Alternatively, if 
+
+$$RSS_U \neq RSS_R \neq 0$$
+
+we can reject the null that the models are the same, and the specific null that $\beta_3=0$. By the way, this single coefficient F-test is inferentially equivalent to the t-test; in fact, $F_{\beta_{k}}= t^2_{\beta_{k}}$.
+
+
+## Extension
+
+Extend this to the following hypothesis test:
+
+$$y_i = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_3 x_3 + \beta_4 x_4 +\beta_5 x_5 + u_i $$
+
+$$H_0: \beta_3=\beta_4=\beta_5=0$$
+
+or that the effects of $x_3, x_4, x_5$ are individually and jointly zero.
+
+**Unrestricted:**
+
+$$y_i = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_3 x_3 + \beta_4 x_4 +\beta_5 x_5 + u_i $$
+
+**Restricted:**
+
+$$y_i = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + {\mathbf{0}} x_3 + {\mathbf{0}} x_4 +{\mathbf{0}} x_5 + u_i $$
+
+
+## F-test
+
+How do we test $RSS_U = RSS_R = 0$?  
+
+$$F=\frac{(RSS_R-RSS_{U})/q}{RSS_{U}/(n-k-1)} $$
+
+where $q$ is the number of restrictions.  
+
+The numerator is the difference in fit between the two models (weighted or "normed" by the different number of parameters, the restrictions), and the denominator is a baseline of how well the full model fits. So this is a ratio of improvement to the fit of the full model. Both are distributed $\chi^2$; their ratio is distributed $F$.
+
+
+## Alternatively
+
+We could equivalently state this as:
+
+$$F=\frac{(\sum\widehat{u}^{2}_{R}-\sum\widehat{u}^{2}_{U})/q}{\sum\widehat{u}^{2}_{U}/(n-k-1)} $$
+
+Notice that the denominator is also $\widehat{\sigma^2}$.  The resulting statistic is distributed $F\sim F_{q,n-k-1}$.   
+
+
+or we can write the same thing in terms of the $R^2$ estimates of the two models:
+
+$$F=\frac{(R^2_{U}-R^2_{R})/q}{(1-R^2_{U})/(n-k-1)} $$
+
+
+
+## In practice \ldots
+
+For a joint hypothesis test, we estimate two **nested** models which we label the **restricted** and **unrestricted** models.  
+
+
+::: {.callout-note icon="false"}
+
+Two models are nested iff they contain precisely the same observations, and the variables in one model are a strict subset of the variables in the other.
+
+:::
+
+
+The unrestricted model has all $k$ variables; the restricted model has $k-q$ variables, excluding the variables whose joint effect we want to test.
+
+Estimate the models, and examine how much the RSS increases when we exclude the $q$ variables from the model - of course, the RSS will always increase when we drop variables, but the question is how much will it increase. The F-test measures the increase in RSS in the restricted model relative to that of the unrestricted model. 
+
+
+
+## A common example
+
+Every OLS model reports a "model F-test" - this compares the model you estimated with all your $x$ variables (this is the unrestricted model) to the null model - no variables, just a constant.  The null hypothesis is 
+
+$$H_0: \beta_1=\beta_2 \ldots = \beta_k = 0$$
+
+It's a test of your model against the model with only a constant - it's comparing the value of your model against the model where our best guess at what explains $y$ is $\beta_0 = \bar{y}$. 
+
+
+
+
+ 
+## Tests like this are important and powerful
+ 
+Our enterprise is really about comparative model testing. Hypothesis tests on individual coefficients do not allow us to compare models. Our theories imply different explanations for phenomena, and thus different empirical models. To treat the theories comparatively, we must test our models comparatively as well. So tests such as the joint hypothesis test are critically important to that endeavor. 
+
+
+This test is a distributional test; that is, its product is a point or range on a known probability distribution. Thus, we can be quite exact about the probability with which we either do or do not reject the joint null hypothesis. 
+
+This is not the case of another popular measure of model fit, the $R^2$, which has no sampling distribution. The $R^2$ cannot tell us anything probabilistic about the model or more specifically, about the hypothesis that a variable or variables do or do not significantly affect the fit of the model. 
+ 
+
+
+
+# Inference on Predictions
+
+We worry a great deal about our uncertainty surrounding $\widehat{\beta}$. Until relatively recently, few concerned themselves with uncertainty surrounding $\widehat{y}$ even though $\widehat{y}= x\widehat{\beta}$ - you'll note of course $\widehat{y}$ is a function of the $\widehat{\beta}$s. 
+
+
+Just as we estimate the variance for each $\widehat{\beta}$, we can estimate the variance for each $\widehat{y}$. 
+
+
+The variance of $\widehat{\beta}$ is the $k^{th}$ diagonal element of the matrix $\sigma^2 \mathbf{(X'X)^{-1}}$. The error variance, $\sigma^2$ is the sum of squared residuals spread over the degrees of freedom. $\mathbf{(X'X)^{-1}}$ is the variance-covariance of $\mathbf{X}$ - the ratio spreads the error variance over the variation in the $\mathbf{X}$s. 
+
+
+The variance of $\widehat{y}$ is $\mathbf{X\widehat{V}X'}$, where $\mathbf{\widehat{V}}=\sigma^2 \mathbf{(X'X)^{-1}}$.  This is an NxN matrix measuring the variances and covariances of the $\widehat{y}$s. The square root of the $N^{th}$ diagonal is the standard error of the $N^{th}$ $\widehat{y}$. 
+
+We can use the  standard error of $\widehat{y}_i$ to generate a confidence interval around $\widehat{y}_i$ in the usual way:
+
+$$CI_{\widehat{y_i}} = \widehat{y}_i \pm c \cdot {s.e. \widehat{y_i}} $$
+
+usually \ldots
+
+$$CI_{\widehat{y_i}} = \widehat{y}_i \pm 1.96 \cdot {s.e. \widehat{y_i}} $$
+
+
+
+
+

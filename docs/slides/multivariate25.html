@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Dave Clark">
-<meta name="dcterms.date" content="2025-02-10">
+<meta name="dcterms.date" content="2025-02-16">
 
 <title>The Multivariate Model – 501 - Spring 2025</title>
 <style>
@@ -4975,7 +4975,7 @@ window.Quarto = {
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">February 10, 2025</p>
+        <p class="date">February 16, 2025</p>
       </div>
     </div>
     
@@ -5010,6 +5010,7 @@ window.Quarto = {
   <li><a href="#ols-1" id="toc-ols-1" class="nav-link" data-scroll-target="#ols-1">OLS</a></li>
   <li><a href="#if-assumptions-fail-ldots" id="toc-if-assumptions-fail-ldots" class="nav-link" data-scroll-target="#if-assumptions-fail-ldots">If assumptions fail <span class="math inline">\(\ldots\)</span></a></li>
   <li><a href="#simulating-ols-assumptions" id="toc-simulating-ols-assumptions" class="nav-link" data-scroll-target="#simulating-ols-assumptions">Simulating OLS assumptions</a></li>
+  <li><a href="#key-simulation-results" id="toc-key-simulation-results" class="nav-link" data-scroll-target="#key-simulation-results">Key simulation results</a></li>
   </ul>
 </nav>
     </div>
@@ -5049,6 +5050,7 @@ background-color: # f2f2f2;
 <p><span class="math display">\[y_i = \hat{\beta_0} + \hat{\beta_1}x_1 + \hat{\beta_2} x_2 + \epsilon_i\]</span></p>
 <p>is equivalent to this one ::</p>
 <p><span class="math display">\[y_i = \widehat{\beta_0} + \widehat{\beta_1}x_1 + \widehat{\beta_2^*}( x_2-\bar{x_2}) + \epsilon_i\]</span></p>
+<div class="cell" data-layout-align="center">
 <details class="code-fold">
 <summary>code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#simulate 2 regressions to show equivalence, report results in 2 columns of table using stargazer</span></span>
@@ -5293,7 +5295,9 @@ F Statistic (df = 2; 97)
 </td>
 </tr>
 </tbody></table>
+</div>
 <p>Only the constant shifts (in linear transformations; <span class="math inline">\(\widehat{\beta_0}\)</span> shifts by a factor of <span class="math inline">\(-k\widehat{\beta}\)</span>). In this case, that shift in the intercept is given by <span class="math inline">\(\hat{\beta_2} \bar{x_2}\)</span>:</p>
+<div class="cell" data-layout-align="center">
 <details class="code-fold">
 <summary>code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">#compute difference in intercepts in reg1 and reg2</span></span>
@@ -5314,6 +5318,7 @@ F Statistic (df = 2; 97)
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;x2 mean * beta2: &quot;</span>, x2_mean_beta2, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <p>x2 mean * beta2: -0.3252012</p>
+</div>
 <div class="callout callout-style-default callout-note no-icon callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -5518,10 +5523,19 @@ Theorem: Gauss Markov
 </section>
 <section id="simulating-ols-assumptions" class="level1">
 <h1>Simulating OLS assumptions</h1>
-<div class="cell">
+<div class="cell" data-layout-align="center">
 <iframe src="https://clavedark.shinyapps.io/olssimulations/?showcase=0" width="672" height="1000px" data-external="1">
 </iframe>
 </div>
+</section>
+<section id="key-simulation-results" class="level1">
+<h1>Key simulation results</h1>
+<ul>
+<li><p>The OLS estimator is unbiased under most circumstances, even at small samples. The OLS estimator has good small sample properties.</p></li>
+<li><p>An important exception is the OLS estimator is biased when the error term is correlated with the <span class="math inline">\(X\)</span> variables. This is the general case of endogeneity which arises for multiple reasons including excluded variable bias and simultaneity. Generally, the bias is in the direction of the correlation.</p></li>
+<li><p>When <span class="math inline">\(cov(x,\epsilon) \neq 0\)</span>, not only is the OLS estimator biased but the standard errors are too small. This increases the threat of Type I errors.</p></li>
+<li><p>The primary consequence of correlated <span class="math inline">\(x\)</span> variables is the standard errors are inflated. This increases the threat of Type II errors. The OLS estimator is unbiased.</p></li>
+</ul>
 
 
 </section>

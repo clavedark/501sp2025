@@ -1,0 +1,264 @@
+---
+title: "Data Quality and the Variance-Covariancee Matrix"
+author: "Dave Clark"
+institute: "Binghamton University"
+date: today
+date-format: long
+title-block-banner: TRUE
+bibliography: ../refs501.bib
+format: 
+   html: default
+   # revealjs:
+   #   output-file: multivariate24s.html
+editor: source
+embed-resources: true
+cache: true
+---
+
+<!-- render 2 types at same time; terminal "quarto render file.qmd" -->
+<!-- https://quarto.org/docs/output-formats/html-multi-format.html -->
+
+<!-- tables, smaller font and striping -->
+<style>
+table, th, td {
+    font-size: 18px;
+}
+tr:nth-child(odd) {
+  background-color: # f2f2f2;
+}
+</style>
+
+
+```{r setup, include=FALSE ,echo=FALSE, warning=FALSE}
+options(htmltools.dir.version = FALSE)
+
+knitr::opts_chunk$set(fig.retina = 2, fig.align = "center", warning=FALSE, error=FALSE, message=FALSE) 
+  
+library(knitr)
+library(datasets)
+library(tidyverse)
+library(ggplot2)
+library(haven) # read stata w/labels
+library(countrycode)
+library(patchwork)
+library(mvtnorm)
+library(modelsummary)
+library("GGally")
+library(stargazer)
+library(shiny)
+library(faux)
+library(kableExtra)
+```
+
+# On computing the $var-cov(\beta)$ matrix
+
+These slides demonstrate the effects of sample size and predictor correlation on regression coefficient estimation, particularly focusing on the variance-covariance structure of the estimates. 
+
+# Simulation Setup
+
+First, we'll define our simulation function:
+
+```{r}
+#| label: simulation-function
+simulate_regression_variance <- function(n1 = 100, n2 = 20, sigma = 1) {
+  # Case 1: Well-behaved data
+  x1_good <- runif(n1, 0, 10)
+  x2_good <- runif(n1, 0, 10)
+  X1 <- cbind(1, x1_good, x2_good)
+  
+  # Calculate X'X and its inverse
+  XtX1 <- t(X1) %*% X1
+  XtXinv1 <- solve(XtX1)
+  
+  # Generate y and compute residuals for sigma estimate
+  true_beta <- c(1, 2, 3)
+  y1 <- X1 %*% true_beta + rnorm(n1, 0, sigma)
+  beta_hat1 <- solve(XtX1) %*% t(X1) %*% y1
+  residuals1 <- y1 - X1 %*% beta_hat1
+  sigma_hat1 <- sqrt(sum(residuals1^2)/(n1-3))
+  
+  # Compute var-cov matrix for beta_hat
+  varcov1 <- sigma_hat1^2 * XtXinv1
+  
+  # Case 2: Poorly-behaved data
+  x1_poor <- runif(n2, 0, 2)
+  x2_poor <- x1_poor + runif(n2, 0, 0.1)  # highly correlated
+  X2 <- cbind(1, x1_poor, x2_poor)
+  
+  XtX2 <- t(X2) %*% X2
+  XtXinv2 <- solve(XtX2)
+  
+  y2 <- X2 %*% true_beta + rnorm(n2, 0, sigma)
+  beta_hat2 <- solve(XtX2) %*% t(X2) %*% y2
+  residuals2 <- y2 - X2 %*% beta_hat2
+  sigma_hat2 <- sqrt(sum(residuals2^2)/(n2-3))
+  
+  varcov2 <- sigma_hat2^2 * XtXinv2
+  
+  # Return results as a list
+  return(list(
+    case1 = list(X = X1, XtX = XtX1, XtXinv = XtXinv1, 
+                 varcov = varcov1, beta = beta_hat1, sigma = sigma_hat1),
+    case2 = list(X = X2, XtX = XtX2, XtXinv = XtXinv2, 
+                 varcov = varcov2, beta = beta_hat2, sigma = sigma_hat2),
+    condition_numbers = c(case1 = kappa(XtX1), case2 = kappa(XtX2)),
+    true_beta = true_beta,
+    true_sigma = sigma
+  ))
+}
+```
+
+# Running the Simulation
+
+Let's run the simulation and examine the results:
+
+```{r}
+#| label: run-simulation
+set.seed(123)  # for reproducibility
+results <- simulate_regression_variance()
+```
+
+# Results Analysis
+
+## Case 1: Well-behaved Data (n=100)
+
+### Design Matrix Structure
+```{r}
+#| label: case1-design
+head(results$case1$X) |>
+  kable(format = "html", digits = 3, 
+        col.names = c("Intercept", "X1", "X2")) |>
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+### $X'X$ Matrix
+```{r}
+#| label: case1-xtx
+results$case1$XtX |>
+  round(3) |>
+  kable(format = "html") |>
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+### $(X'X)^-1$ Matrix
+```{r}
+#| label: case1-xtxinv
+results$case1$XtXinv |>
+  round(4) |>
+  kable(format = "html") |>
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+### Variance-Covariance Matrix
+```{r}
+#| label: case1-varcov
+results$case1$varcov |>
+  round(4) |>
+  kable(format = "html") |>
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+## Case 2: Poorly-behaved Data (n=20)
+
+### Design Matrix Structure
+```{r}
+#| label: case2-design
+head(results$case2$X) |>
+  kable(format = "html", digits = 3,
+        col.names = c("Intercept", "X1", "X2")) |>
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+### $X'X$ Matrix
+```{r}
+#| label: case2-xtx
+results$case2$XtX |>
+  round(3) |>
+  kable(format = "html") |>
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+### $(X'X)^-1$ Matrix
+```{r}
+#| label: case2-xtxinv
+results$case2$XtXinv |>
+  round(4) |>
+  kable(format = "html") |>
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+### Variance-Covariance Matrix
+```{r}
+#| label: case2-varcov
+results$case2$varcov |>
+  round(4) |>
+  kable(format = "html") |>
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+# Comparison of Key Metrics
+
+## Condition Numbers
+```{r}
+#| label: condition-numbers
+data.frame(
+  Case = c("Well-behaved", "Poorly-behaved"),
+  Condition_Number = round(results$condition_numbers, 2)
+) |>
+  kable(format = "html") |>
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+## Coefficient Estimates vs True Values
+```{r}
+#| label: coefficient-comparison
+data.frame(
+  Parameter = c("β₀", "β₁", "β₂"),
+  True_Value = results$true_beta,
+  Case1_Estimate = round(results$case1$beta, 4),
+  Case2_Estimate = round(results$case2$beta, 4)
+) |>
+  kable(format = "html") |>
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+## Standard Errors
+```{r}
+#| label: standard-errors
+data.frame(
+  Parameter = c("β₀", "β₁", "β₂"),
+  Case1_SE = round(sqrt(diag(results$case1$varcov)), 4),
+  Case2_SE = round(sqrt(diag(results$case2$varcov)), 4)
+) |>
+  kable(format = "html") |>
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+# Visual Analysis
+
+## Correlation Between Predictors
+```{r}
+#| label: predictor-correlation
+#| fig-width: 10
+#| fig-height: 5
+par(mfrow = c(1, 2))
+plot(results$case1$X[,2], results$case1$X[,3], 
+     main = "Case 1: Well-behaved",
+     xlab = "X1", ylab = "X2")
+plot(results$case2$X[,2], results$case2$X[,3], 
+     main = "Case 2: Poorly-behaved",
+     xlab = "X1", ylab = "X2")
+```
+
+# Conclusions
+
+1. **Condition Numbers**: The poorly-behaved case shows a much higher condition number, indicating numerical instability in the estimation.
+
+2. **Standard Errors**: Case 2 has much larger standard errors, reflecting the combined impact of:
+   - Smaller sample size
+   - High correlation between predictors
+   - Less variability in predictor values
+
+3. **Coefficient Estimates**: Case 1 provides more accurate estimates of the true coefficients, while Case 2 shows more deviation from the true values.
+
+4. **Variance-Covariance Structure**: The poorly-behaved case shows much larger variances and covariances, indicating less precise estimation and stronger dependencies between coefficient estimates.

@@ -48,8 +48,6 @@ library(stargazer)
 library(shiny)
 library(faux)
 
-
-
 ```
 
 
@@ -413,3 +411,17 @@ knitr::include_app(url = "https://clavedark.shinyapps.io/olssimulations/", heigh
 
 
 ```
+
+# Key simulation results
+
+-  The OLS estimator is unbiased under most circumstances, even at small samples. The OLS estimator has good small sample properties.
+
+-  An important exception is the OLS estimator is biased when the error term is correlated with the $X$ variables. This is the general case of endogeneity which arises for multiple reasons including excluded variable bias and simultaneity. Generally, the bias is in the direction of the correlation. 
+
+- When $cov(x,\epsilon) \neq 0$, not only is the OLS estimator biased but the standard errors are too small. This increases the threat of Type I errors.
+
+-  The primary consequence of correlated $x$ variables is the standard errors are inflated. This increases the threat of Type II errors. The OLS estimator is unbiased.
+
+
+
+
