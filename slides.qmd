@@ -28,7 +28,7 @@ title: "Slides"
 
 <!-- [Normality](normality24.qmd) -->
 
-[Inference](/slides/inference24.qmd)
+[Inference](/slides/inference25.qmd)
 
 <!-- [Model specification](specification24.qmd) -->
 
