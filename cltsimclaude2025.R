@@ -105,8 +105,8 @@ server <- function(input, output) {
       if (is_started()) {  # Only run when simulation is active
         invalidateLater(200, session = getDefaultReactiveDomain())
         
-        # Check runtime limit (100 seconds)
-        if (Sys.time() > now + 100) {
+        # Check runtime limit (200 seconds)
+        if (Sys.time() > now + 200) {
           is_started(FALSE)
         } else {
           # Generate new sample

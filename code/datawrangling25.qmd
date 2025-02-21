@@ -1,0 +1,172 @@
+---
+title: "Data Aggregation and Joining"
+subtitle: "Illustrating Aggregation and Joining with ITT and Polity Data"
+format: html
+---
+  
+```{r}
+#| label: setup
+#| include: false
+
+# Load required packages
+library(dplyr)
+library(ggplot2)
+library(countrycode)
+```
+
+
+## Introduction
+
+This document demonstrates data aggregation and joining using ITT disaggregated event data and Polity data.  We will aggregate event data to the country-year level and then join it with Polity data to explore the relationship between political regime characteristics and events.
+
+## Data Loading and Initial Processing
+
+```{r}
+#| label: load-data
+
+# Read in event data on allegations
+allegations <- read.csv("/Users/dave/Documents/teaching/501/2025/topics/data-wrangling/allegation.csv", stringsAsFactors = FALSE)
+
+# Convert relevant columns to numeric (0/1)
+allegations <- allegations %>%
+  mutate(across(c(illtreatment, scarring, stealth), ~ifelse(. == "Yes", 1, 0))) 
+```
+
+## Data Aggregation
+
+We aggregate the allegations data to the country-year level, summing the counts of illtreatment, scarring, stealth events, and calculating the total number of allegations.
+
+```{r}
+#| label: aggregate-data
+
+aggregated_df <- allegations %>%
+  group_by(iso3alpha, yearbegin) %>%
+  summarize(sum_illtreatment = sum(illtreatment, na.rm = TRUE),
+            sum_scarring = sum(scarring, na.rm = TRUE),
+            sum_stealth = sum(stealth, na.rm = TRUE),
+            n_allegations = n()) %>%  # Add count of allegations per country-year
+  ungroup()
+```
+
+## Checking for Duplicates and Exploring Aggregated Data
+
+```{r}
+#| label: check-duplicates-explore
+
+# Check for duplicate country-year observations
+dupes <- aggregated_df %>% 
+  group_by(iso3alpha, yearbegin) %>% 
+  filter(n() > 1) %>% 
+  dplyr::select(iso3alpha, yearbegin) %>% 
+  distinct()
+
+table(dupes)
+
+```
+
+No duplicates found; let's take a look at the aggregated data.
+
+
+
+```{r}
+# Explore aggregated data
+table(aggregated_df$iso3alpha)
+table(aggregated_df$yearbegin)
+
+
+# Count distinct countries (using dplyr)
+n_distinct_countries_dplyr <- n_distinct(aggregated_df$iso3alpha)
+n_distinct_countries_dplyr
+
+# List unique values
+unique(aggregated_df$iso3alpha)
+unique(aggregated_df$yearbegin)
+
+```
+This gives us a sense of the span of the aggregated data (countries and years covered). Let's visualize that coverage with some simple histograms.
+
+## Data Visualization
+
+```{r}
+#| label: visualize-data
+#| fig-cap: "Distribution of Allegations by Country and Year"
+
+# Histogram of country frequencies; labels at 45 degree angle
+
+ggplot(aggregated_df, aes(x = iso3alpha)) + 
+  geom_bar() + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+
+# Histogram of year frequencies
+ggplot(aggregated_df, aes(x = yearbegin)) + geom_bar()
+
+```
+Some unevenness in country coverage; lots covering 10 or 11 years, but a good number covering 3 or so. Time coverage is good until 2005; some countries not measured in 2005.
+
+
+Let's join polity data to the aggregated data to explore the relationship between political regime characteristics and allegations.
+
+## Polity Data Processing
+
+```{r}
+#| label: process-polity
+
+polity <- read.csv("/Users/dave/Documents/teaching/501/2025/topics/data-wrangling/polity5.csv", stringsAsFactors = FALSE)
+
+# Filter to relevant years (1995-2005) and select relevant columns
+polity <- polity %>% 
+  filter(year >= 1995 & year <= 2005) %>%
+  dplyr::select(ccode, scode, country, year, democ, autoc, polity2) 
+```
+
+## Making a mistake
+
+ITT has a variable called `iso3alpha` which is ISO 3166-1 alpha-3 country codes. Polity has a variable called `scode` which looks like an ISO3 code, so let's join on that and year.
+
+
+```{r}
+# Join polity with aggregated_df (iso3alpha -> ccode) (yearbegin -> year) ----
+
+merged_df <- aggregated_df %>%
+  left_join(polity, by = c("iso3alpha" = "scode", "yearbegin" = "year"))
+
+# Check for missing on polity2
+
+table(is.na(merged_df$polity2)) #lots of mistakes
+
+# list iso3alpha with missing polity2
+
+print(n = 20, merged_df %>% filter(is.na(polity2)) %>% dplyr::select(iso3alpha, yearbegin) %>% distinct())
+
+```
+
+Lots of mistakes here - fewer than half our ITT cases matched with Polity. We know Polity's coverage is very good, so there should be few misses. It was a mistake to assume `scode` was an ISO3 code. Let's fix that by using `countrycode` to add cow codes to the ITT data and then joining on cow code and year.
+
+
+## Joining Data and Handling Missing Values
+
+```{r}
+#| label: join-data
+
+# Add ccode to aggregated_df (using countrycode package)
+aggregated_df$ccode <- countrycode(aggregated_df$iso3alpha, "iso3c", "cown", warn = FALSE)
+
+
+# Join aggregated_df with polity on ccode and year
+merged_df <- aggregated_df %>%
+  left_join(polity, by = c("ccode" = "ccode", "yearbegin" = "year"))
+
+# Check for missing polity2 values after improved join
+table(is.na(merged_df$polity2))
+
+
+# Filter and print rows with missing polity2
+missing_df <- merged_df %>% filter(is.na(polity2))
+
+print(missing_df %>% dplyr::select(iso3alpha, yearbegin) %>% distinct(), n = Inf)
+
+
+```
+
+Many fewer misses, many of which are because of mismatches in cow codes. We can fix these by hand and have a nearly complete data set.
