@@ -4,7 +4,7 @@ title: "Code"
 
 -   [exercise #1 answers](/code/ex1answers2025.qmd)
 
--   [aggregating and joining in R](/code/datawrangling2025.qmd)
+-   [aggregating and joining in R](/code/datawrangling25.qmd)
 
 <!-- -   [exercise #2 answers](ex2answers2024.qmd) -->
 
