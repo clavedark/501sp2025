@@ -467,7 +467,7 @@ The estimated error variance will be smaller relative to large variation in the 
 Let's look at this in some detail.
 
 
-#Elements of the Variance-Covariance Matrix
+# Elements of the Variance-Covariance Matrix
 
 Start with a simple regression model:
 
