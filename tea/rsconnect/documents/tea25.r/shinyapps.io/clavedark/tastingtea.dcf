@@ -1,0 +1,12 @@
+name: tastingtea
+title: tastingtea
+username: clavedark
+account: clavedark
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 14096354
+bundleId: 9854972
+url: https://clavedark.shinyapps.io/tastingtea/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE

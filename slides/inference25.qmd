@@ -57,7 +57,237 @@ library(patchwork)
 
 ```
 
+# Hypothesis testing
 
+The frequentist framework for hypothesis testing is rooted in Ronald Fisher's work in the early 20th century. Fisher's approach is based on the idea of null hypothesis significance testing. The basic idea is to test the null hypothesis that there is no effect against the alternative hypothesis that there is an effect.
+
+Fisher had a lady friend in London who said she could taste a cup of tea and tell whether the milk was poured before or after the tea. Fisher was skeptical of the lady's claim that she could taste the difference, so he devised a test to determine if she could indeed taste the difference. 
+
+He designed an experiment preparing eight cups of tea, four with milk first and four with milk second. The lady was to taste the tea and determine which 4 cups were prepared with milk first.
+
+Fisher's null hypothesis was that the lady could not taste the difference; any of the cups on which she guessed correctly were random correct guesses. 
+
+The alternative hypothesis was that she could taste the difference - that correct guesses were systematic. 
+
+Take a look at this simulation and description of Fisher's tea experiment.
+
+```{r}
+#| echo: false
+#| code-fold: true
+#| code-summary: "code"
+
+knitr::include_app(url = "https://clavedark.shinyapps.io/tastingtea/", height = "1000px")
+
+```
+
+### Terms
+
+  - The **null hypothesis**, usually denoted $H_0$, is the hypothesis that there is no effect. This is what we're hoping to show to be wrong. 
+
+
+  - The **alternative hypothesis**, usually denoted $H_1$ or $H_a$, is the hypothesis that there is an effect, usually what we suspect to be true.
+
+  - **p-value** - is the probability of observing a test statistic as extreme as the one observed, given that the null hypothesis is true. The smaller the p-value, the less plausible the null hypothesis. 
+
+::: {.callout-warning icon="true"}
+The p-value is the probability of observing the data if the null hypothesis is true. It tells us how likely it is these data exist in the world where the null is correct. It is not the probability the null is false or the alternative is true.
+
+:::
+
+### Hypothesis testing process 
+
+  - Generate the **null hypothesis and alternative hypothesis**. The two must be mutually exclusive and exhaustive. For Fisher, the null hypothesis was that the lady could not taste the difference; the alternative hypothesis was that she could taste the difference.
+  
+  - Determine the **critical value**. This is the value that the test statistic must exceed to reject the null hypothesis. We calculate this based on a significance level (e.g. 0.05). For Fisher, the distribution of guesses is binomial with 8 guess (n=8) and p=.5 (random guessing). The critical value is the number of correct guesses that would be unlikely to occur by chance (e.g. 0.05 probability of occurring by chance), computed as `critical_value <- qbinom(1 - 0.05, size = 8, prob = 0.5)` which equals 7. So if we generate a test statistic of 7 or more correct guesses, we would reject the null hypothesis. 
+
+  - Using an appropriate sample of data, calculate the **test statistic**. For Fisher, this would be the number of correct guesses out of 8 cups of tea in the actual experiment.
+  
+  - Determine the probability of observing the test statistic value, given the null hypothesis is true. This is the **p-value**.  For Fisher, the p-value is the probability of observing 7 or more correct guesses out of 8 cups of tea, given that the lady was guessing randomly: `p_value <- 1 - pbinom(7 - 1, size = 8, prob = 0.5)` which equals 0.03516.
+  
+  - Compare the p-value to a **test level, $\alpha$**. It's common to set $\alpha=.05$. If the p-value is less than the test level ($\alpha$), reject the null hypothesis. If the p-value is greater than the critical value, fail to reject the null hypothesis. For Fisher, the p-value of this test statistic is 0.03516 which is less than 0.05 so we can reject the null hypothesis. 
+
+
+::: {.callout-warning icon="true"}
+We reject the null, or we fail to reject the null. We never accept the null, we never accept the alternative. We only show that the null is unlikely because our observing our data is so unlikely if the null is true.
+
+:::
+
+
+
+### Non-directional hypothesis: Two-tailed test
+
+A two-tailed test is appropriate to a null hypothesis that $\beta = 0$. The alternative hypothesis is that $\beta \neq 0$. We have no expectation about direction, just that $\beta$ is not zero. This is called a **non-directional** hypothesis.
+
+You can see the critical region of the t-distribution is two-sided so that it is either greater than or less than the t-values associated with .025 in the tails (2*.025=.05).
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+library(ggplot2)
+library(ggtext)
+
+# Degrees of freedom (adjust as needed)
+df <- 20
+
+# Calculate t-values for the .025 tails
+t_val <- qt(c(0.025, 0.975), df)
+
+# Create a sequence of x values for the t-distribution
+x <- seq(-4, 4, length.out = 1000)
+
+# Calculate the density for the t-distribution
+density <- dt(x, df)
+
+# Create the plot
+ggplot(data.frame(x = x, density = density), aes(x = x, y = density)) +
+  geom_line() +  # Plot the t-distribution line
+  geom_area(data = subset(data.frame(x = x, density = density), x <= t_val[1]),
+            aes(fill = "Lower Tail"), alpha = 0.5) +  # Shade lower tail
+  geom_area(data = subset(data.frame(x = x, density = density), x >= t_val[2]),
+            aes(fill = "Upper Tail"), alpha = 0.5) + # Shade upper tail
+  geom_richtext(aes(x = t_val[1], y = 0.02,
+                   label = paste0("t = ", round(t_val[1], 3))),
+                fill = NA, label.color = NA, hjust = 1.1) +  # Lower t-value label
+   geom_richtext(aes(x = t_val[2], y = 0.02,
+                   label = paste0("t = ", round(t_val[2], 3))),
+                fill = NA, label.color = NA, hjust = -0.1) + # Upper t-value label
+
+
+  scale_fill_manual(values = c("Lower Tail" = "blue", "Upper Tail" = "blue"), 
+                    name = "Tail Areas") +  # Customize fill colors and legend
+  labs(title = paste0("t-distribution (df = ", df, ") with .025 Shaded Tails"),
+       x = "t-score",
+       y = "Density") +  # Add title and labels
+  theme_bw() + # Use a black and white theme
+  theme(legend.position = "bottom")  # Move legend to the bottom
+```
+
+### Directional hypothesis: One-tailed test
+
+A one-tailed test is appropriate to a null hypothesis that $\beta \leq 0$ or $\beta \geq 0$. The alternative hypothesis is that $\beta > 0$ or $\beta < 0$. We have an expectation about the direction of the effect. This is called a **directional** hypothesis. 
+
+Fisher's hypothesis is directional. The null is that the lady's sensitivity to the tea is 50-50 or random, so the expected number of correct guesses would be less than or equal to $.5*n=4$. The alternative is that she can taste the difference, so the alternative hypothesis is that the expected number of correct guesses would be greater than 4.
+
+
+Here, you can see the critical region of the distribution is one-sided so that it is strictly greater than the t-value associated with .05 in the right tail.
+
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+
+library(ggplot2)
+library(ggtext)
+
+# Degrees of freedom (adjust as needed)
+df <- 20
+
+# Calculate t-value for the .05 right tail
+t_val <- qt(0.95, df)  # Only the upper quantile is needed
+
+# Create a sequence of x values for the t-distribution
+x <- seq(-4, 4, length.out = 1000)
+
+# Calculate the density for the t-distribution
+density <- dt(x, df)
+
+# Create the plot
+ggplot(data.frame(x = x, density = density), aes(x = x, y = density)) +
+  geom_line() +  # Plot the t-distribution line
+  geom_area(data = subset(data.frame(x = x, density = density), x >= t_val),
+            aes(fill = "Upper Tail"), alpha = 0.5) + # Shade upper tail only
+  geom_richtext(aes(x = t_val, y = 0.02, label = paste0("t = ", round(t_val, 3))),
+                fill = NA, label.color = NA, hjust = -0.1) +  # t-value label
+
+  scale_fill_manual(values = c("Upper Tail" = "blue"), 
+                    name = "Tail Area") +  # Customize fill color and legend
+  labs(title = paste0("t-distribution (df = ", df, ") with .05 Right Tail Shaded"),
+       x = "t-score",
+       y = "Density") +  # Add title and labels
+  theme_bw() +
+  theme(legend.position = "bottom") # Use a black and white theme and put legend at bottom
+  
+```
+
+Fisher's hypothesis is directional; if the lady correctly guesses 7 or more cups of tea, we reject the null hypothesis. We do not accept the alternative; we have only shown that the null is unlikely. The p-value (.03) tells us the chances of her guessing 7 or more cups correctly if the null were true (that she can't tell the difference and is guessing randomly).
+
+::: {.callout-warning icon="true"}
+
+A coefficient is never significant but in the wrong direction. The one-tailed figure above makes it clear that $\beta_k$ is significant iff it is in the right tail of the distribution, not in the left. So a t-statistic of -5 would be way down in the left tail, but **would not allow us to reject the null hypothesis.**
+:::
+
+![](neversayingcertain.png)
+
+
+##  Statistical Errors
+
+```{r}
+#| label: set
+#| include: false
+library(kableExtra)
+library(dplyr)
+```
+
+Two types of inferential errors are possible in this hypothesis testing structure. A Type I error is the rejection of a true null hypothesis. It is a false positive, so a fire alarm when there's no fire.
+
+The probability of a Type I error is $\alpha$, the significance level. A Type II error is the failure to reject a false null hypothesis. It is a false negative, so a silent fire alarm when there is a fire. The probability of a Type II error is denoted $\beta$. The power of the test is $1 - \beta$; this is the probability of correctly rejecting a false null hypothesis. The power of a fire alarm is it probability of going off when there is a fire, so rejected the false null that there is no fire.
+
+It's worth noting @kennedy2002sinning discusses the Type III error: 
+
+> A type III error, introduced in Kimball (1957), occurs when a
+researcher produces the right answer to the wrong question. A
+corollary of this rule, as noted by Chatfield (1995, p. 9), is
+that an approximate answer to the right question is worth a
+great deal more than a precise answer to the wrong question.
+
+This is from Peter Kennedy's very good paper "Sinning in the Basement." 
+
+
+
+```{r}
+#| label: error-table
+#| echo: false
+
+# Create the data frame for the error table
+error_table <- data.frame(
+  Decision = c("Fail to Reject H₀", "Reject H₀"),
+  H0_True = c("Correct Decision (1 - α)", "Type I Error (α)"),
+  H0_False = c("Type II Error (β)", "Correct Decision (1 - β, Power)")
+)
+
+# Format the table
+error_table %>%
+  kbl(col.names = c("", "H₀ is True", "H₀ is False"),
+      caption = "Type I and Type II Errors in Hypothesis Testing",
+      format = "html") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+                full_width = FALSE, position = "center") %>%
+  column_spec(1, bold = TRUE) %>%
+  add_header_above(c(" " = 1, "Reality" = 2)) %>%
+  pack_rows("Statistical Decision", 1, 2)
+```
+
+### Error Types
+
+- **Type I Error (α)**: Rejecting a true null hypothesis (false positive)
+  * Example: Concluding a treatment has an effect when it actually doesn't
+  * Probability = α (significance level, typically 0.05)
+
+- **Type II Error (β)**: Failing to reject a false null hypothesis (false negative)
+  * Example: Concluding a treatment has no effect when it actually does
+  * Probability = β
+  * Power of the test = 1 - β (ability to detect an effect when it exists)
+
+
+## Hypothesis testing in the regression context
+
+How does this map onto testing hypotheses in regressions? 
+
+  - The null hypothesis is that the coefficient is zero, $H_0: \beta_k = 0$.
+  - The alternative hypothesis is that the coefficient is not zero, $H_1: \beta_k \neq 0$.
+  - The test statistic is the t-statistic, $t = \frac{\widehat{\beta_k}}{SE(\widehat{\beta_k})}$.
+  - The p-value is the probability of observing the test statistic, given the null hypothesis is true.
+  - The critical value is the value of the test statistic that would lead us to reject the null hypothesis.
+  - The significance level is the probability of a Type I error, $\alpha$.
+  - The power of the test is the probability of correctly rejecting a false null hypothesis, $1 - \beta$.
+
+You should note the star of the show, the test statistic, comes from our calculation of $\widehat{\beta_k}$ and $SE(\widehat{\beta_k})$. 
 
 
 #  Uncertainty about $\widehat{\beta}$
@@ -73,6 +303,9 @@ If we simply assume $\widehat{\beta} = \beta$, then we are assuming:
   - the model is specified correctly, and there are no sources of measurement error. 
  
 The probability these are all true is slim, but we are uncertain about the extent to which we do or do not meet these requirements. We need some statistical tools for quantifying our uncertainty about $\widehat{\beta}$.   
+ 
+ 
+ 
  
 
 # Measuring Uncertainty

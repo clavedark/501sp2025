@@ -22,3 +22,5 @@ RColorBrewer
 plotly
 htmlwidgets
 DT
+ggtext
+kableExtra
