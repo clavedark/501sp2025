@@ -125,7 +125,7 @@ library(ggplot2)
 library(ggtext)
 
 # Degrees of freedom (adjust as needed)
-df <- 20
+df <- 2000
 
 # Calculate t-values for the .025 tails
 t_val <- qt(c(0.025, 0.975), df)
@@ -151,7 +151,7 @@ ggplot(data.frame(x = x, density = density), aes(x = x, y = density)) +
                 fill = NA, label.color = NA, hjust = -0.1) + # Upper t-value label
 
 
-  scale_fill_manual(values = c("Lower Tail" = "blue", "Upper Tail" = "blue"), 
+  scale_fill_manual(values = c("Lower Tail" = "#005A43", "Upper Tail" = "#005A43"), 
                     name = "Tail Areas") +  # Customize fill colors and legend
   labs(title = paste0("t-distribution (df = ", df, ") with .025 Shaded Tails"),
        x = "t-score",
@@ -176,7 +176,7 @@ library(ggplot2)
 library(ggtext)
 
 # Degrees of freedom (adjust as needed)
-df <- 20
+df <- 2000
 
 # Calculate t-value for the .05 right tail
 t_val <- qt(0.95, df)  # Only the upper quantile is needed
@@ -195,7 +195,7 @@ ggplot(data.frame(x = x, density = density), aes(x = x, y = density)) +
   geom_richtext(aes(x = t_val, y = 0.02, label = paste0("t = ", round(t_val, 3))),
                 fill = NA, label.color = NA, hjust = -0.1) +  # t-value label
 
-  scale_fill_manual(values = c("Upper Tail" = "blue"), 
+  scale_fill_manual(values = c("Upper Tail" = "#005A43"), 
                     name = "Tail Area") +  # Customize fill color and legend
   labs(title = paste0("t-distribution (df = ", df, ") with .05 Right Tail Shaded"),
        x = "t-score",
