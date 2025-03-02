@@ -30,7 +30,7 @@ title: "Slides"
 
 [Inference](/slides/inference25.qmd)
 
-[Model specification](specification25.qmd)
+[Model specification](/slides/specification25.qmd)
 
 <!-- [Dummy variables and interactions](interactions24.qmd) -->
 
