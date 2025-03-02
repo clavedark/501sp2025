@@ -1,0 +1,689 @@
+---
+title: "Model Specification and Fit"
+author: "Dave Clark"
+institute: "Binghamton University"
+date: today
+date-format: long
+title-block-banner: TRUE
+bibliography: ../refs501.bib
+format: 
+   html: default
+   # revealjs:
+   #   output-file: specification24s.html
+editor: source
+embed-resources: true
+cache: true
+---
+
+<!-- render 2 types at same time; terminal "quarto render file.qmd" -->
+
+<!-- https://quarto.org/docs/output-formats/html-multi-format.html -->
+
+<!-- leverage https://www.statology.org/leverage-in-r/ -->
+
+<!-- influence https://rpubs.com/DragonflyStats/Cooks-Distance -->
+
+<!-- discrepancy https://www.statology.org/studentized-residuals-in-r/ -->
+
+<!-- tables, smaller font and striping -->
+
+```{=html}
+<style>
+table, th, td {
+    font-size: 18px;
+}
+tr:nth-child(odd) {
+  background-color: # f2f2f2;
+}
+</style>
+```
+<!-- <script src="https://cdn.jsdelivr.net/gh/ncase/nutshell/nutshell.js"></script> -->
+
+```{r setup, include=FALSE ,echo=FALSE, warning=FALSE}
+options(htmltools.dir.version = FALSE)
+
+knitr::opts_chunk$set(fig.retina = 2, fig.align = "center", warning=FALSE, error=FALSE, message=FALSE) 
+  
+library(knitr)
+library(datasets)
+library(tidyverse)
+library(ggplot2)
+library(haven) # read stata w/labels
+library(countrycode)
+library(patchwork)
+library(mvtnorm)
+library(modelsummary)
+library("GGally")
+library(stargazer)
+library(shiny)
+library(faux)
+library(MASS)
+library(ggrepel)
+library(ggpmisc)
+
+
+```
+
+# Model Specification
+
+## Model Fit
+
+We're trying to explain variation. What does this look like?
+
+-   best guess at variation in $y$ would be its mean (constant-only model). With variables, variation is composed of two parts: $y = \mu + \epsilon$. The first is $x\beta$, our systematic component; the second is the random component. $x$ shapes the systematic part of $y$.
+
+-   total variation in $y$ is the sum of the variance of these components: $\text{var}(y) = \text{var}(x)\beta + \text{var}(e)$
+
+-   the squared variation in $y$ due to $x$ is the Model Sum of Squares (MSS) or Explained Sum of Squares (ESS).
+
+-   the squared variation in $e$ is the Residual Sum of Squares (RSS), a quantity we know well from deriving the variance-covariance matrix of $\widehat{\beta}$.
+
+-   their sum is the Total Sum of Squares (TSS).
+
+------------------------------------------------------------------------
+
+<!-- ## Model fit -->
+
+We compute these by:
+
+$TSS = \sum\limits_{i=1}^{N} (y-\bar{y})^2$ :: Total Sum of Squares - the variation in $y$.
+
+$MSS = \sum\limits_{i=1}^{N} (\widehat{y} -\bar{y})^2$ :: Model or Explained Sum of Squares - variation in $\widehat{y}$.
+
+$SSE = \sum\limits_{i=1}^{N} (y-\widehat{y} )^2$ :: Residual Sum of Squares - $e'e$ - variation in $e$.
+
+It's also true $TSS = y'y$, $MSS = \widehat{y}'\widehat{y}$, and $RSS = e'e$. We also can write $TSS = MSS + RSS$, etc.
+
+## Model Fit -- $R^2$
+
+$$TSS= MSS+RSS$$
+
+The $R^2$ is the proportion of the total variation in $y$ explained by the systematic component:
+
+$$R^2 = \frac{MSS}{TSS}$$ 
+
+it's equivalent to the correlation between $y$ and $\widehat{y}$ squared. This might be more obvious if we say $R^2 = \text{cor}(y, x\widehat{\beta})^2$.
+
+We can also write this in terms of the ratio of the RSS to the total variation in $y$:
+
+$$R^2 = 1- \frac{RSS}{TSS}$$
+
+## Fit -- $R^2_{adj}$
+
+$R^2$ increases as $k$ increases. The adjusted $R^2$ penalizes for additional regressors (though still increases with $k$):
+
+$$R^2_{adj} = 1 - \frac{(1-R^2)(N-1)}{(N-k-1)} $$
+
+in the numerator, adjusting for $N$ minus one for the constant, and in the denominator for $N-k-1$.
+
+<!-- ## Fit -- $R^2_{adj}$  -->
+
+$R^2$ describes the density of the cloud of points around the regression line. Data where $y$ has greater variability or where $e$ has greater variability will produce regressions with lower $R^2$ values.
+
+```{r, warning=FALSE, message=FALSE}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+
+
+
+library(ggplot2)
+library(ggtext) # For better text rendering
+
+# Function to create the plot and return a ggplot object
+simulate_and_plot <- function(r_squared_target) {
+
+  # Simulate data to achieve approximate R-squared 
+  set.seed(123)
+  n <- 100 # Sample size
+  x <- rnorm(n)
+  
+  if(r_squared_target < 0.5){
+    error_sd <- 6.75 # Larger error for lower R^2
+  } else {
+    error_sd <- 0.75  # Smaller error for higher R^2
+  }
+  
+  y <- 2 + 8*x + rnorm(n, sd = error_sd)
+  
+
+  # Fit the linear model
+  model <- lm(y ~ x)
+  r_squared <- summary(model)$r.squared
+
+  # Create the plot
+  ggplot(data.frame(x, y), aes(x = x, y = y)) +
+    geom_point() +
+    geom_smooth(method = "lm", se = FALSE, color = "blue") +
+    geom_richtext(aes(x = min(x), y = max(y), 
+                     label = paste0("R<sup>2</sup> = ", round(r_squared, 2))),
+                  hjust = 0, vjust = 1, fill = NA, label.color = NA, size = 4) + # Nicer R^2 label
+    # labs(title = paste0("Target R^2 ≈ ", r_squared_target)) +  # Use target R^2 in title
+    theme_minimal_grid(12) 
+}
+
+
+# Create plots for low and high R^2
+p1 <- simulate_and_plot(0.3)  # Aiming for approximately 0.3, but will vary due to randomness
+p2 <- simulate_and_plot(0.9) # Aiming for approximately 0.9, but will vary
+
+
+# Arrange plots side by side using cowplot or patchwork (choose one)
+# library(cowplot)
+# plot_grid(p1, p2, ncol = 2)
+# 
+
+# Or using patchwork:
+# library(patchwork)
+ p1 + p2
+
+```
+
+
+<!-- ```{r, warning=FALSE, message=FALSE} -->
+<!-- #| echo: true -->
+<!-- #| code-fold: true -->
+<!-- #| code-summary: "code" -->
+
+
+<!-- x <- rnorm(100) -->
+<!-- e <- rnorm(100, 0, (2)) -->
+<!-- y <- -1+ 12*x+ e -->
+<!-- e2 <- rnorm(100, 0, sqrt(140)) -->
+<!-- y2 = -1+ 12*x+ e2 -->
+<!-- m1 <- lm(y~x) -->
+<!-- m2 <- lm(y2~x) -->
+<!-- # summary(m1)$r.squared -->
+<!-- # summary(m2)$r.squared -->
+
+<!-- tight <- ggplot(data.frame(x=x, y=y), aes(x=x, y=y)) + geom_point() +  stat_poly_line(se=FALSE) + -->
+<!--   stat_poly_eq(use_label(c("R2"))) + -->
+<!--   geom_point()+ -->
+<!--   labs(title="Tight fit", x="x", y="y") -->
+
+<!-- loose <- ggplot(data.frame(x=x, y=y2), aes(x=x, y=y2)) + geom_point() +  stat_poly_line(se=FALSE) + -->
+<!--   stat_poly_eq(use_label(c("R2"))) + -->
+<!--   geom_point()+ scale_y_continuous(limits=c(-25,25)) +  -->
+<!--   labs(title="Loose fit", x="x", y="y") -->
+
+<!-- loose + tight -->
+
+
+<!-- ``` -->
+
+
+
+Because $R^2$ describes the density of the cloud of points around the regression line, in an odd way, it rewards less variant $y$ variables. $R^2$ does the following:
+
+-   it tells us how much of the variation in $y$ is explained by the systematic component, but only for the sample.
+
+-   it permits **nested** model comparison.
+
+-   because $R^2$ does not have a sampling distribution, we cannot generally say an $R^2$ value is large or small - relative to what? If, say, it were distributed normally, we could make claims about the probability of observing a given $R^2$ value.
+
+-   it is possible to construct such a sampling distribution, but it seems no one ever does, so the value of the $R^2$ is not that great.
+
+## Fit -- RMSE
+
+Root Mean Squared Error (standard error of the estimate):
+
+$$RMSE = \sqrt{\frac{RSS}{(N-k)}}$$
+
+Is the average (squared) error. It's useful because it's in the same units as $y$, so interpretable as the average (squared) distance of an observation from the regression line.
+
+## Fit -- F-test
+
+In the linear model, the F-test is probably the most useful tool for comparing (nested) models. Reviewing, models are nested iff:
+
+  - their samples are identical. 
+  
+  - the variables in one are a strict subset of those in the other.
+
+The nested models are the Restricted and Unrestricted. The number of restrictions is the number of variables excluded in the restricted model, included in the unrestricted model. For each restriction, we are restricting the effect of $x_j$ to be zero in the restricted model.
+
+
+
+How do we test generate $F$ to test the null hypothesis that there's no difference between the two models, or $RSS_U = RSS_R = 0$?
+
+$$F=\frac{(RSS_R-RSS_{U})/q}{RSS_{U}/(n-k-1)}$$
+
+where $q$ is the number of restrictions.
+
+The numerator is the difference in fit between the two models (weighted or "normed" by the different number of parameters, the restrictions), and the denominator is a baseline of how well the full model fits. So this is a ratio of improvement to the fit of the full model. Both are distributed $\chi^2$; their ratio is distributed $F$.
+
+### Example
+
+```{r, warning=FALSE, message=FALSE, results='asis'}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+itt <- read.csv("/Users/dave/Documents/teaching/501/2023/exercises/ex4/ITT/data/ITT.csv")
+
+itt$p1 <- itt$polity2+11
+itt$p2 <- itt$p1^2
+itt$p3 <- itt$p1^3
+
+
+itt <- 
+  itt%>% 
+  group_by(ccode) %>%
+  mutate( lagprotest= lag(protest), lagRA=lag(RstrctAccess), n=1)
+
+
+m1 <- lm(scarring ~ lagRA + civilwar + lagprotest + p1+p2+p3 +wdi_gdpc, data=itt)
+#summary(m1)
+# estimation sample to ensure restricted model2 is nested in unrestricted model 1
+itt$used <- TRUE
+itt$used[na.action(m1)] <- FALSE
+ittm1sample <- itt %>%  filter(used=="TRUE")
+m2 <- lm(scarring ~ lagRA + civilwar + lagprotest + p1+wdi_gdpc, data=itt)
+#summary(m2)
+
+
+stargazer(m1,m2, type="html",  single.row=TRUE, header=FALSE, digits=3,  omit.stat=c("LL","ser"),  star.cutoffs=c(0.05,0.01,0.001),  column.labels=c("Model 1", "Model 2"),  dep.var.caption="Dependent Variable: Scarring Torture", dep.var.labels.include=FALSE,  covariate.labels=c("Restricted Access, t-1", "Civil War", "Protests, t-1", "Polity", "<p>Polity<sup>2</sup></p>", "<p>Polity<sup>3</sup></p>", "GDP per capita", "Population"),  notes=c("Standard errors in parentheses", "Significance levels:  *** p<0.001, ** p<0.01, * p<0.05"), notes.append = FALSE,  align=TRUE,  font.size="small")
+
+```
+
+
+```{r, warning=FALSE, message=FALSE, results='asis'}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+ftest <- anova(m1,m2)
+
+kable(ftest, digits=3)
+
+
+```
+
+In this case, p-value of the test statistic (F=1.529) is 0.217, so we fail to reject the null hypothesis that the restricted model is as good as the unrestricted model. In other words, we do not find support for the claim that the additional variables in the model improve the fit of the model.
+
+The F-test is useful to the extent we are interested in comparative model testing (we are). The F-test reported with most OLS output (in R, Stata, and elsewhere) tests the null hypothesis that your unrestricted model (the model you estimated) is no different from or better than the null model ($y = \beta_0$) - in other words, the mean of $y$ is just a good a prediction of $y$ as predictions from your model. Not a terribly useful application of a very useful test, but one to report in your table of results anyhow.  
+
+
+## Outliers
+
+Outliers are best thought of as cases our model is not explaining well. 
+
+We can motivate a conversation about outliers by asking "How much do individual observations shape the regression estimates?" This discussion draws an excellent monograph by @foxregression1991. We can think of three concepts with respect to our observations:
+
+-   leverage - how much an observation affects the slope of the regression line - it might have great leverage, but be on the line, so not discrepant.
+
+-   discrepancy - how unusual an observation is.
+
+-   influence - how much an unusual observation affects the slope of the regression line. How much a discrepant observation exerts leverage.
+
+Studying these features after we estimate our models can help us understand which (if any) of our observations are especially affecting our estimates. The presence of outliers gives us clues about the data generating process and helps us specify the model more effectively. 
+
+------------------------------------------------------------------------
+
+### Leverage - $h$
+
+Leverage is usually computed from the diagonal of the $hat$ matrix, $H$.  
+
+$h$ is an element of the $hat$ matrix:
+
+$$ y = X \beta $$ $$= X(X'X)^{-1} X'y $$ $$=Hy $$ where $$H = X(X'X)^{-1} X' $$
+
+The matrix $H$ is a square $n,n$ matrix; the main diagonal indicates the extent to which any observation has leverage on the regression line by virtue of being large relative to the other $X$s.
+
+Observations where $h> 2(k/N)$ are often thought of as having leverage with the potential to shape the regression estimates.
+
+------------------------------------------------------------------------
+
+### Discrepancy - Residuals
+
+A common indicator of discrepancy is to standardize residuals to see which fall outside of standard confidence bounds. This is problematic (for reasons set aside), so the replacement is *Studentized* residuals. About 95% of these residuals should fall between -2/+2, and those that do not may be discrepant or unusual observations, and worth scrutiny.
+
+------------------------------------------------------------------------
+
+### Influence
+
+There are a number of measures of influence including DFBETA, DFFITS, and Cook's Distance. In general, measures of influence evaluate the estimates progressively excluding each observation; observations that substantially change the estimates are more influential.
+
+------------------------------------------------------------------------
+
+### Cook's D
+
+Cook's D combines measures of discrepancy and leverage to indicate how **influential** an observation is:
+
+$$ \frac{s(e^2)}{k} \cdot \frac{h_i}{1-h_i}$$
+
+where the first term is standardized residuals indicating discrepancy, and the second is $h$, measuring leverage. If both are high, then influence is high; otherwise, influence is low.
+
+------------------------------------------------------------------------
+
+### Visualizing Outliers
+
+Fox suggests plotting $h$ against Studentized Residuals - those high on both may be influential outliers. Let's look at potential outliers from a model using the ITT data.
+
+------------------------------------------------------------------------
+
+### Outliers - Ill-treatment and Torture Data
+
+```{r, warning=FALSE, message=FALSE}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+itt <- read.csv("/Users/dave/Documents/teaching/501/2023/exercises/ex4/ITT/data/ITT.csv")
+itt$p1 <- itt$polity2+11
+itt$p2 <- itt$p1^2
+itt$p3 <- itt$p1^3
+
+
+itt <- 
+  itt%>% 
+  group_by(ccode) %>%
+  mutate( lagprotest= lag(protest), lagRA=lag(RstrctAccess), n=1)
+
+
+m1 <- lm(scarring ~ lagRA + civilwar + lagprotest + p1+p2+p3 +wdi_gdpc, data=itt)
+#plot(m1, which=5, labels.id=itt$ctryname)
+
+
+itt$used <- TRUE
+itt$used[na.action(m1)] <- FALSE
+ittesample <- itt %>%  filter(used=="TRUE")
+
+sr <- studres(m1) # studentized residuals
+h <- hatvalues(m1) # leverage
+influence <- cooks.distance(m1) # influence
+
+outliers <- data.frame(ctryname=ittesample$ctryname, year=ittesample$year, sr=sr, h=h, influence=influence)
+
+ggplot(data=outliers, aes(x=h, y=sr), label=ctryname) +
+  geom_point(aes(size=influence), alpha=.2, show.legend = F) +
+  geom_text_repel(aes(label=ifelse(influence>0.007742674|h>.04, paste(outliers$ctryname,outliers$year), ""), force=2, size=.1, alpha=.4), show.legend = F) +
+  labs(x="Leverage (h)", y="Discrepency (Studentized Residuals)", size="Influence (Cook's D)") +
+theme_minimal() 
+
+```
+
+Looking at the upper-middle of the plot, Turkey, Sudan, Russia, and Indonesia seem especially influential. On the x-axis, the UK, France, and Qatar have high leverage, so inordinately affect the regression line. On the y-axis, Turkey (several years), Italy, Mexico, and Indonesia are discrepant or unusual.
+
+Here's the same information but plotted so the differences in size are more apparent - fly over the data points for information.
+
+```{r, warning=FALSE, message=FALSE}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+library(plotly)
+library(ggrepel)
+library(car)  # For studentized residuals and hatvalues
+library(dplyr)
+
+
+itt <- read.csv("/Users/dave/Documents/teaching/501/2023/exercises/ex4/ITT/data/ITT.csv")
+itt$p1 <- itt$polity2+11
+itt$p2 <- itt$p1^2
+itt$p3 <- itt$p1^3
+
+
+itt <- 
+  itt%>% 
+  group_by(ccode) %>%
+  mutate( lagprotest= lag(protest), lagRA=lag(RstrctAccess), n=1)
+
+
+m1 <- lm(scarring ~ lagRA + civilwar + lagprotest + p1+p2+p3 +wdi_gdpc, data=itt)
+#plot(m1, which=5, labels.id=itt$ctryname)
+
+itt$used <- TRUE
+itt$used[na.action(m1)] <- FALSE
+ittesample <- itt %>%  filter(used=="TRUE")
+
+# Calculate outlier metrics
+sr <- studres(m1)
+h <- hatvalues(m1)
+influence <- cooks.distance(m1)
+
+# Scale influence for better visualization
+scaled_influence <- influence / max(influence) * 100 # Scale to 0-100
+
+outliers <- data.frame(ctryname=ittesample$ctryname, year=ittesample$year, sr=sr, h=h, influence=scaled_influence)
+
+# bucolors<-list("#005A43","#6CC24A", "#A7DA92", "#BDBEBD", "#000000" )
+# n_colors <- length(bucolors)
+
+# Create Plotly plot
+plot_ly(data = outliers, x = ~h, y = ~sr,
+        text = ~paste("Country:", ctryname, "<br>Year:", year,
+                      "<br>Influence:", round(influence, 4),
+                      "<br>Leverage:", round(h, 4),
+                      "<br>Studentized Residual:", round(sr, 4)),
+        hoverinfo = "text",
+        type = 'scatter', mode = 'markers',
+        marker = list(size = ~scaled_influence * 2,  # Adjust multiplier for desired size variation
+                      opacity = 0.7,
+                      sizemode = "diameter",  # Size based on diameter, not area
+                      color = ~scaled_influence,  # Color points by influence
+                      colorscale = 'Viridis')) %>%  # Use a visually appealing color scale
+  layout(title = "Outliers - Ill-treatment and Torture Data",
+         xaxis = list(title = "Leverage (h)"),
+         yaxis = list(title = "Discrepancy (Studentized Residuals)"))
+
+
+
+```
+------------------------------------------------------------------------
+
+### Thinking about outliers
+
+Why are observations outliers? Because the model explains those cases poorly. What should we do with them? Don't exclude them - they're part of the data produced by the data generating process. Excluding them likely damages the randomness of the sample.
+
+Think about outliers as a modeling challenge - what variables are not in the model that would explain these outlying cases? We might ask:
+
+-   what do the outliers have in common?
+
+-   what would predict them? Is there a missing variable that would "soak up" the unexplained variance of those observations?
+
+-   the model does not explain outliers well - what can we learn from the model's "success" in explaining other cases?
+
+-   are the outliers data errors? It's worth examining cases to see if there are obvious coding errors. 
+
+
+## Functional Form
+
+The two most common nonlinear functions applied to variables in political science are:
+
+-   natural log
+
+-   polynomial
+
+### Natural Logs
+
+Permit nonlinear but monotonic[^1] changes in $y$ over changes in $x$. Model interpretations using natural logs of variables (from @wooldridge2013 p. 44)
+
+[^1]: A function is monotonic if it is either entirely increasing or decreasing. A horizontal line only passes through a monotonic function once. A function is non-monotonic if a horizontal line passes through it more than once.
+
+![](wooldridge_ln.jpg)
+
+This table from Wooldridge's text shows the effect of a one-unit change in $x$ on $y$ in different specifications using the natural log. The most common application of the natural log in our discipline is to a right-hand side variable, so the interpretation is the "level-log". Most commonly, political scientists take the natural log of variables that have skewed distributions (e.g. population, GDP) in order to limit the skewness and therefore limit the effects of outlying observations.
+
+
+
+
+### Polynomials
+
+The other commonly used functional form is the polynomial - here, for instance, is a third-order polynomial:
+
+$$y= \beta_0 + \beta_1 x_1 + \beta_2 x_1^2 + \beta_3 x_1^3$$
+
+-   Permits nonmonotonic changes in $y$ given changes in $x$
+
+-   Raises the question of whether $x$ exerts these higher order effects (requires joint hypothesis tests, say the F-test as in the example above).
+
+-   The marginal effect of a change in $x$ now involves two estimates; $\beta_1+2\beta_2x$
+
+-   The inflection point (minimum or maximum) is $\frac{\beta_1}{|2\beta_2|}$
+
+
+### Example
+
+Using data we've seen before, let's look at the effect of GDP per capita on infant mortality rate. We'll look at the effect of GDP per capita on infant mortality rate using a linear model, a log-linear model, and a polynomial model, compared below.
+
+```{r, warning=FALSE, message=FALSE}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+
+censor <- read.csv("/Users/dave/Documents/teaching/501/2023/data/censorcy.csv", header=TRUE)
+censor <- subset(censor, select=-c(lngdp))
+
+ggplot(data=censor, aes(x=gdppc, y=IMR)) +
+   geom_point(data=censor, aes(x=gdppc, y=IMR) ,color="green") + 
+   geom_text_repel(label=censor$ctry, size=3) +
+  stat_poly_line(data=censor, formula = y ~ x, se=FALSE, color="black") +
+  stat_poly_line(data=censor, formula = y ~ log(x), se=FALSE, linetype="dashed", color="red" )   +
+  stat_poly_line(data=censor, formula = y ~ poly(x,2), se=FALSE, linetype="dashed" )   +
+  labs(x="Polity", y="Predicted Infant Mortality Rate")+
+  theme_minimal()
+
+
+```
+
+You can see the linear model is a poor fit. The other two are better fits to the observed data (blue line is polynomial, red line is logarithmic.)
+
+
+
+## Scaling Variables
+
+Rescaling variables can make presentational and interpretational sense. $X$ variables on a very large scale will have very small coefficients, and vice versa. Rescaling can make the coefficients more interpretable. 
+
+Here are some ways to rescale and their effects: 
+
+-   adding a constant, $k$ to either $X$ or $y$ will shift the location of the regression line, but will not change its shape/slope. In other words, the intercept will change, the slope will not.
+
+-   adding a constant to $y$ shifts the intercept by $k$; $\widehat{\beta_0}+k$ - the standard error is unchanged.
+
+-   adding a constant to $x_1$ shifts the intercept by $\widehat{\beta_0}-k\widehat{\beta_1}$ - the standard error will change too.
+
+-   multiplying either $X$ or $y$ by some constant will distort the axis and affect the coefficient estimate accordingly.
+
+-   multiplying $X$ by $k$ changes the slope to $\widehat{\beta_1}/k$; intercept is unchanged.
+
+-   multiplying $y$ by $k$ shifts the intercept to $\widehat{\beta_0}k$, and the slope to $\widehat{\beta_1}k$
+
+@gelman2008scaling suggests rescaling continuous variables by dividing each by two times their standard deviation. This effective puts those variables on the same scale and they're now comparable in scale to binary variables. Now, a change in $X$ of two standard deviations is the same as a change in $X$ of one unit of a binary variable - we're measuring changes of 2 standard deviations in $X$, and $\widehat{\beta}$ now represents the change in $E(Y)$ associated with a change in $X$ of two standard deviations. 
+
+
+
+## Collinearity
+
+We know perfect collinearity is not much of a problem since we can't estimate $\widehat{\beta}$ at all in its presence - the matrix $(X'X)^{-1}$ is singular and thus can't be inverted.
+
+What about correlation among $X$ variables short of perfect collinearity? What about correlation among $X$ variables short of perfect collinearity? The problem lies in the amount of independent variance in each of the correlated variables, and whether that information is sufficient to estimate $\widehat{\beta}$ with precision. The Venn diagrams below illustrate two variables correlated at 0.2 and at 0.8. You should see the independent variation in the two variables is less in the second case, and the model will measure greater uncertainty around the $\widehat{\beta}$ estimates for each compared to the first case. 
+
+
+### Correlation among $X$s
+
+```{r, warning=FALSE, message=FALSE}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+library(VennDiagram)
+library(gridExtra) # For arranging plots
+library(grid)
+
+# Function to create a Venn diagram with specified correlation
+create_venn <- function(correlation) {
+  
+  # Areas of the circles (can be adjusted)
+  area1 <- 1
+  area2 <- 1
+  
+  # Calculate the intersection area based on correlation
+  intersection_area <- correlation * sqrt(area1 * area2)
+  
+  # Create the Venn diagram
+  venn.plot <- draw.pairwise.venn(
+    area1 = area1,
+    area2 = area2,
+    cross.area = intersection_area,
+    category = c("x1", "x2"),
+    fill = c("lightblue", "lightgreen"),
+    lty = "blank",  # Remove circle borders
+    cex = 2,        # Text size
+    cat.cex = 2,    # Category label size
+    cat.pos = c(0, 0), # Category label positions (centered)
+    cat.dist = 0.05, # Category label distance from circles
+    # print.mode = c("percent"),
+    scaled = TRUE, # Important for proper circle sizing in grobTree
+    ext.text = FALSE, # prevents scaled venn from printing category names outside circles.
+    main = paste0("Correlation = ", correlation)
+  )
+
+  return(venn.plot) # Return grob object
+}
+
+
+# Create Venn diagrams for different correlations
+grid.arrange(venn1 <- grobTree(create_venn(0.2)) ) # Convert to grob
+grid.arrange(venn2 <- grobTree(create_venn(0.8)))  # Convert to grob
+
+
+
+
+```
+Recall what the OLS simulations show:
+
+-   the estimates are unbiased.
+-   the standard errors are inflated because of our uncertainty.
+-   we're asking the model to estimate 2 unknowns from very little independent information about each.
+-   the estimates are less precise than they otherwise would be.
+-   the model is still BLUE.
+
+### Collinearity is a data problem
+
+-   if the model is correctly specified, don't remove one of the correlated variables - if you do, you've created omitted variable bias, and now the model is no longer BLUE. Theory is the key here - it's the only way to arbitrate what should or shouldn't be in the model.
+
+-   collect more data or better data.
+
+-   transform the collinear variables:
+
+    -   difference variables (but with consequences)
+    -   combine variables as an index or using a measurement model like factor analysis or IRT (but with consequences)
+
+## Missing Data
+
+**Data is never missing randomly.**
+
+The process generating missing data is systematic.
+
+### Missing data signifies sample problems
+
+If data are missing systematically, we can write a missing data function:
+
+$$Pr(Missing_i) = F(Z_i \widehat{\gamma} + \varepsilon_i)$$
+
+Some variables $Z$ have $\widehat{\gamma}$ effects on the probability any particular case has missing data - those effects map onto the probability space via some cumulative distribution function $F$.
+
+### Dealing with Missingness
+
+This is not generally a model we'd run, but it's a useful thought exercise. When data are missing, social scientists often turn to imputation methods.
+
+-   single imputation - replace missing value with the (panel) mean/median/mode of the variable; replace with a randomly chosen value of $x$; replace it with an estimate of $x$ from a model predicting $x$.
+
+-   multiple imputation - a form of simulation. Draw from a distribution of the missing data, to generate multiple data sets. Estimate the model in each data set, and use the distribution of estimates and uncertainty to generate estimates.
+
+### Missingness
+
+All this said, it's *always* important to rely on theory to understand both why observations might be missing, and how those missing observations might influence estimates. The best solution is often to collect better data.
+
+## A comment on dissertations
+
+![](dissertationfish.png)
+
+------------------------------------------------------------------------
+
+## References
+
+::: {#refs}
+:::
