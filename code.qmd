@@ -6,6 +6,8 @@ title: "Code"
 
 -   [aggregating and joining in R](/code/datawrangling25.qmd)
 
+-   [basic event data management in R](/code/acled-wrangle25.R)
+
 <!-- -   [exercise #2 answers](ex2answers2024.qmd) -->
 
 <!-- -   [exercise #3 answers](ex3answers2024.qmd) -->
