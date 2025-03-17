@@ -32,7 +32,7 @@ title: "Slides"
 
 [Model specification](/slides/specification25.qmd)
 
-<!-- [Dummy variables and interactions](interactions24.qmd) -->
+[Dummy variables and interactions](interactions25.qmd)
 
 <!-- [Limited dependent variables](limiteddv24.qmd) -->
 
