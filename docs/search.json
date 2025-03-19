@@ -2315,5 +2315,40 @@
     "title": "Differential Intercepts and Interactions",
     "section": "References",
     "text": "References\n\n\nBrambor, T., W. R. Clark, and M. Golder. 2006. “Understanding Interaction Models: Improving Empirical Analyses.” Political Analysis 14 (1): 63–82."
+  },
+  {
+    "objectID": "replication25web.html",
+    "href": "replication25web.html",
+    "title": "Replication and Extension",
+    "section": "",
+    "text": "For the seminar, you need to replicate and extend a published paper. You should choose a paper based on two criteria - that the paper interests you; and that the data are available. Please do not choose based on familiarity or on the type of model - most of the papers you read will use nonlinear models, and that’s completely fine. I’ll help you with estimation/interpretation to the extent you need it.\nWhat should be in the paper, and what should the paper look like? Below, I list things you should consider and cover.\n\n\n\nWhat is the paper about? Explain what the paper attempts to do, where it sits in the literature, and what it finds.\nWhy is the paper important (relatedly, why did it get published)? What does it contribute to knowledge in the field? What do we know from this paper we didn’t know before?\nAre there any data or model innovations? If so, describe?\nWhat’s the biggest problem or shortcoming of the paper? Why do you think this is problematic? Alternatively, what interesting questions do you think remain unanswered (that you’d like to try to answer)? Part of this is likely to be the motive for your extension.\nWhat are you going to do to extend the paper? Why? What’s your argument regarding why we need to change, augment, extend this paper?\nHow are you going to extend the paper (ie, what do you need to do in terms of data, model, etc.)?\n\n\n\n\n\nAre you able to replicate the findings in the paper? Describe any issues you have doing this, issues in code, data etc.\nExamining the data, do you see any potential issues the author(s) faced (or neglected)? Do you see problems in the data? Do you see problems in how the author(s) treated the data or estimated the model?\n\n\n\n\nThis is the most important part of the project - take ownership of your argument; lay out the causal mechanism you imagine at work here, and argue for why this is a step forward that advances what we know in this field. How does your argument improve the state of knowledge in this field?\n\nMake an argument, state a hypothesis.\nExplain how you’re going to test that hypothesis; what data do you need, what do you need to do.\nEstimate and interpret that model, and report quantities of interest.\nExplain your findings, and why this is important.\n\n\n\n\nCreate a poster presenting the original paper’s argument, your extension and its rationale, your hypothesis, model, and findings. We’ll present these in a poster session at the end of the semester. Treats will be provided!"
+  },
+  {
+    "objectID": "replication25web.html#evaluating-the-paper",
+    "href": "replication25web.html#evaluating-the-paper",
+    "title": "Replication and Extension",
+    "section": "",
+    "text": "What is the paper about? Explain what the paper attempts to do, where it sits in the literature, and what it finds.\nWhy is the paper important (relatedly, why did it get published)? What does it contribute to knowledge in the field? What do we know from this paper we didn’t know before?\nAre there any data or model innovations? If so, describe?\nWhat’s the biggest problem or shortcoming of the paper? Why do you think this is problematic? Alternatively, what interesting questions do you think remain unanswered (that you’d like to try to answer)? Part of this is likely to be the motive for your extension.\nWhat are you going to do to extend the paper? Why? What’s your argument regarding why we need to change, augment, extend this paper?\nHow are you going to extend the paper (ie, what do you need to do in terms of data, model, etc.)?"
+  },
+  {
+    "objectID": "replication25web.html#replication",
+    "href": "replication25web.html#replication",
+    "title": "Replication and Extension",
+    "section": "",
+    "text": "Are you able to replicate the findings in the paper? Describe any issues you have doing this, issues in code, data etc.\nExamining the data, do you see any potential issues the author(s) faced (or neglected)? Do you see problems in the data? Do you see problems in how the author(s) treated the data or estimated the model?"
+  },
+  {
+    "objectID": "replication25web.html#extension",
+    "href": "replication25web.html#extension",
+    "title": "Replication and Extension",
+    "section": "",
+    "text": "This is the most important part of the project - take ownership of your argument; lay out the causal mechanism you imagine at work here, and argue for why this is a step forward that advances what we know in this field. How does your argument improve the state of knowledge in this field?\n\nMake an argument, state a hypothesis.\nExplain how you’re going to test that hypothesis; what data do you need, what do you need to do.\nEstimate and interpret that model, and report quantities of interest.\nExplain your findings, and why this is important."
+  },
+  {
+    "objectID": "replication25web.html#poster",
+    "href": "replication25web.html#poster",
+    "title": "Replication and Extension",
+    "section": "",
+    "text": "Create a poster presenting the original paper’s argument, your extension and its rationale, your hypothesis, model, and findings. We’ll present these in a poster session at the end of the semester. Treats will be provided!"
   }
 ]

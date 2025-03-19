@@ -88,7 +88,9 @@ A word about completeness - attempt everything. To receive a passing grade in th
 
 For technical and statistics training and help, Oguzhan will lead a **required workshop session every week, Thursday 1:15-2:15pm.**
 
-The paper assignment asks you to replicate some published piece of research (details on selecting this we'll discuss in seminar), to comment critically on the theory and design as you replicate, and then to build on the paper in a substantive way, extending the research. That extension is the main part of the assignment - this is one of your first major opportunities to develop a novel contribution to the empirical literature. The replication/extension paper is due the Monday of exam week. You'll keep a research log as you work on the paper during the semester - this is due along with the paper, and is part of your total grade. In addition, we'll have a poster session to present your extensions at the end of the semester. Details to follow.
+The paper assignment asks you to replicate some published piece of research (details on selecting this we'll discuss in seminar), to comment critically on the theory and design as you replicate, and then to build on the paper in a substantive way, extending the research. That extension is the main part of the assignment - this is one of your first major opportunities to develop a novel contribution to the empirical literature. The replication/extension paper is due the Monday of exam week. You'll keep a research log as you work on the paper during the semester - this is due along with the paper, and is part of your total grade. In addition, we'll have a poster session to present your extensions at the end of the semester. 
+
+A detailed description of the replication/extension assignment is available [here](replication25web.html). The replication paper and ancillary materials are due on **Friday May 16, 2025**. The poster session will be **Friday May 9, 2025 from 11:00am-1:00pm**.
 
 Grades will be assigned on the following scale:
 
