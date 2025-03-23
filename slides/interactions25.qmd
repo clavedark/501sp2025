@@ -682,7 +682,7 @@ or the coefficient on restricted access plus the coefficient on the interaction 
 
 df <- df %>% mutate(protest=seq(1,40,1),
   MEra=m4$coefficients[3]+m4$coefficients[4]*protest, 
-  se = sqrt(vcov(m4)[3,3]+vcov(m4)[4,4]*protest^2+2*vcov(m4)[2,3]*protest),   
+  se = sqrt(vcov(m4)[3,3]+vcov(m4)[4,4]*protest^2+2*vcov(m4)[3,4]*protest),   
   ub=MEra+1.96*se, lb=MEra-1.96*se)
 
 ggplot() +
