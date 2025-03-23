@@ -512,7 +512,7 @@ Here, the expected value of $y$ depends on the intercept given by $\beta_0$ and 
 
 An important insight: the interaction coefficient, $\beta_3$, measures the difference in slopes between the groups represented by $d=0$ and $d=1$. 
 
-This means the marginal effect of $x_2$ is not just $\beta_2$, but $\beta_2+\beta_3$.
+This means the marginal effect of a change in $x_2$ is now $\beta_1+\beta_3*x_2$.
 
 :::
 
@@ -557,7 +557,8 @@ stargazer(m4, type="html",  single.row=TRUE, header=FALSE, digits=3,  omit.stat=
 
 Let's look at the estimates and think about what we can and cannot say. Recall the estimates on *protests* and *restricted access* are now conditional on the other, so we cannot make unconditional statements. We can say the effect of *protests* on scarring torture is 0.13 when access is restricted, and *restricted access* on scarring torture is about 8.5 cases when there are zero protests. 
 
-There is no effect of *protests* on scarring torture when *restricted access* is zero. When access is restricted, the effect of *protests* on scarring torture is $\beta_1+\beta_3$ (.14+.78 = .92), so the sum of the uncondtional slope for *protests* and the interaction slope which represents the **difference in slope effect for protests between restricted and unrestricted access**. 
+There is no effect of *protests* on scarring torture when *restricted access* is zero. When access is restricted, the effect of *protests* on scarring torture is $\beta_1+\beta_3*x_2$ ($.14+.78*1 = .92$), so the sum of the uncondtional slope for *protests* and the interaction slope which represents the **difference in slope effect for protests between restricted and unrestricted access**. This is the marginal effect of a change in *protests* on *scarring torture* given a change in *access*.
+
 
 
 ### Inference 
@@ -579,23 +580,23 @@ This how we'd compute the standard error for the sum of the two coefficients. Go
   - We might also consider the *marginal effects* of changes in one variable on the expected value of $y$. The marginal effect is simply the change in $y$ given a change in $x$.
 
 
-In the non-interactive model, the marginal effect of $x_1$ is: 
+In the non-interactive model, the marginal effect of $x_2$ is: 
 
 $$\frac{\partial{y}}{\partial{x_{1}}}= \beta_{1}$$
 
-In the interactive model, the marginal effect of $d_1$ is:
+In the interactive model, referring to the torture model above, the marginal effect of a change in $d_1$ (access) is:
 
-$$\frac{\partial{y}}{\partial{d_1}}= \beta_1+\beta_3*x_2 $$
+$$\frac{\partial{y}}{\partial{d_1}}= \beta_2+\beta_3*x_1 $$
 
-Note this depends on the values of $x_2$, allowing for the possibility the effect of $x_2$ accelerates or slows. 
+Note this depends on the values of $x_1$, protests, allowing for the possibility the effect of protests accelerates or slows. We would say this is the marginal effect of a change in *access* on *scarring torture* given a change in *protests*.
 
 Interactions in regression models are symmetric in the sense that we can be interested in the effect of $d_1$ on $y$ given $x_2$ or the effect of $x_2$ on $y$ given $d_1$. Which you're interested in is up to you and is a matter of theory.
 
-The (symmetric) marginal effect of $x_1$ on $y$ given $d_1$ is: 
+The (symmetric) marginal effect of $x_1$, protests, on $y$ given $d_1$ (access) is: 
 
-$$\frac{\partial{y}}{\partial{x_2}}= \beta_2+\beta_3*d_1 $$
+$$\frac{\partial{y}}{\partial{x_1}}= \beta_1+\beta_3*d_1 $$
 
-It should make sense that if $d_1=0$, the effect is just $\beta_2$. If $d_1=1$, we adjust the slope by $\beta_3$, thereby allowing the slopes to be different for the two groups in $d_1$,  relaxing structural stability. This is also a reminder that we can only interpret these coefficients conditional on one another.
+It should make sense that if $d_1=0$, the effect is just $\beta_1$. If $d_1=1$, we adjust the slope by $\beta_3$, thereby allowing the slopes to be different for the two groups in $d_1$,  relaxing structural stability. This is also a reminder that we can only interpret these coefficients conditional on one another.
 
 
 ## Linear Predictions (Average Effects)
@@ -666,10 +667,11 @@ As protests increase, we can see little change in scarring torture where IGO acc
 
 We can also compute the marginal effects (as above). Let's look at the marginal effect of restricting access to IGOs on scarring torture as protests increase.^[Since restricted access is binary, this is really a first difference rather than a marginal effect.]
 
-In terms of the regression above, we're computing:
+In terms of the regression above where R stores the model coefficients as a vector where the constant is first, the coefficient on protests is second, the coefficient on restricted access is third, and the coefficient on the interaction term is fourth, the marginal effect of restricting access on scarring torture across protests would be:
 
-$$ \frac{\partial{y}}{\partial{d_1}}= \beta_2+\beta_4*x_2 $$
+$$ \frac{\partial{y}}{\partial{d_1}}= \beta_3+\beta_4*x_2 $$
 
+or the coefficient on restricted access plus the coefficient on the interaction term times the value of protests.
 
 
 ```{r}
@@ -679,14 +681,13 @@ $$ \frac{\partial{y}}{\partial{d_1}}= \beta_2+\beta_4*x_2 $$
 
 
 df <- df %>% mutate(protest=seq(1,40,1),
-  MEprotest=m4$coefficients[2]+m4$coefficients[4]*protest, 
-  se = sqrt(vcov(m4)[2,2]+vcov(m4)[4,4]*protest^2+2*vcov(m4)[2,4]*protest),   
-  ub=MEprotest+1.96*se, lb=MEprotest-1.96*se)
+  MEra=m4$coefficients[3]+m4$coefficients[4]*protest, 
+  se = sqrt(vcov(m4)[3,3]+vcov(m4)[4,4]*protest^2+2*vcov(m4)[2,3]*protest),   
+  ub=MEra+1.96*se, lb=MEra-1.96*se)
 
 ggplot() +
-  geom_line(data=df, aes(x=protest, y=MEprotest) ) +
-  geom_ribbon(data=df, aes(x=protest, ymin=lb, ymax=ub),fill = "grey70", alpha = .4, ) +
-  labs( x = "Protests", y =  "Marginal Effect of Access Restriction on Scarring Torture")
+  geom_line(data=df, aes(x=protest, y=MEra) ) +
+  geom_ribbon(data=df, aes(x=protest, ymin=lb, ymax=ub),fill = "grey70", alpha = .4, ) + labs( x = "Protests", y =  "Marginal Effect of Access Restriction on Scarring Torture")
 
 ```
 
