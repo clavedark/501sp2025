@@ -428,9 +428,59 @@ literally multiplying $d_1$ and $x_2$ together, and including that new variable 
 
 
 
+
 # Multiplicative Interactions
 
-@brambor2006understanding provide a great discussion of interactions. Some of these same authors have a new book on the topic. 
+Let's work with the ITT data for the sake of continuity. The basic model we're working with is predicting reports of scarring torture. In general, my argument is that scarring torture is potentially a tool regimes use to signal to dissidents they should watch themselves. Insofar as violent repression is costly, regimes will use scarring torture reduce dissent, thereby making violent repression less necessary. So when protest frequency is higher, we should see more scarring torture as regimes attempt to quell dissent.^[It should be evident my argument implies both that protests influence scarring torture and that torture shapes protests; this simultaneity, if it exists, means the estimates are both biased an inefficient, and we should find a way to model this interesting source endogeneity. We'll do so in week 15.] 
+
+Regime transparency will modify this relationship. Regimes that restrict access to IGOs will have lower costs for using violence (scarring torture), so should employ it at a higher rate than will regimes that do not restrict IGO access. This implies the following hypothesis: 
+
+$H_1$: *Protests will be positively related to scarring torture; their effect will be stronger in states that restrict IGO access than in states that do not.*
+
+Alternatively, we can state it this way: 
+
+$H_1$: *Increases in protests will produce faster increases in scarring torture in states that restrict IGO access than in states that do not.*
+
+
+You should note this implies two slopes - one for states that restrict IGO access, and one for states that do not. The slope effect for protests should be larger in states that restrict access.
+
+Since we're positing different slopes, we're explicitly relaxing the **structural stability assumption.**
+
+
+::: {.callout-note title="Structural Stability"}
+
+In this regression:
+
+$$y = \beta_0 + \beta_1 d_1 + \beta_2 x_2 $$
+
+The slope on $x_2$ is the same for both groups represented by $d_1$. The model assumes structural stability by restricting both groups in $d_1$ to have the same slope on $x_2$.
+
+Note that the marginal effect of $x_2$ is $\beta_2$ for both groups represented by $d_1$.
+
+:::
+
+We relax structural stability by adding a multiplicative interaction between $d_1$ and $x_2$. This allows the slope on $x_2$ to differ between the two groups represented by $d_1$. Note that whether or not the two groups have different slopes is now the matter of a hypothesis test.
+
+
+::: {.callout-note title="Multiplicative Interactions"}
+
+In this regression:
+
+$$y = \beta_0 + \beta_1 d_1 + \beta_2 x_2 + \beta_3 (d_1x_2)$$
+
+The slope for $x_2$ is $\beta_2$ when $d_1=0$ and $\beta_2+\beta_3$ when $d_1=1$. The interaction term, $\beta_3$, measures the difference in slopes between the two groups represented by $d_1$.
+
+Note that interpretation of $x_2$ is now conditional on $d_1$ - we cannot interpret the effect of $x_2$ without reference to $d_1$.
+
+:::
+
+
+## Estimating the model
+
+@brambor2006understanding provide a great discussion of multiplicative interactions in regression models. @berry2012improving provide further developments and particularly focus on hypotheses to test from interaction models. Recently, @clark2023interaction present a comprehensive treatment of interactions in regression models (along with complete replication code). Resources for the book and articles are available on [Matt Golder's website](https://mattgolder.com/interactions).
+
+
+### Basics of interactions 
 
 A regression with the multiplicative interaction of two variables, $x_1$ and $x_2$:
 
@@ -443,10 +493,7 @@ A regression with the multiplicative interaction of two variables, $x_1$ and $x_
   - interpretation is always conditional, so we cannot interpret the effects of the constituents or interaction term without reference to the other.
 
 
-
-## Multiplicative Interactions 
-
-Supposing the following model: 
+Suppose the following model: 
 
 $$y = \beta_0 + \beta_1 d_1 + \beta_2 x_2 + \beta_3 (d_1x_2)$$
 
@@ -465,43 +512,21 @@ Here, the expected value of $y$ depends on the intercept given by $\beta_0$ and 
 
 An important insight: the interaction coefficient, $\beta_3$, measures the difference in slopes between the groups represented by $d=0$ and $d=1$. 
 
+This means the marginal effect of $x_2$ is not just $\beta_2$, but $\beta_2+\beta_3$.
+
 :::
 
 
-## What does a hypothesis look like?
+## Example
 
-Hypothesis: An increase in $x_2$ will produce a larger or faster increase in $y$ if $d_1$ is present than when it is absent. 
+Let's look at the scarring torture model interacting protests and restricted access. The model looks like this:
 
- 
-$$Y = \beta_0+\beta_1 d_1+ \beta_2 x_2  +\beta_3 x_2d_1 +\varepsilon $$
-
-
-
-### Hypothesis on Scarring Torture 
-
-Giving this some substance, again thinking of the ITT data, we might hypothesize that:
+$$scarring = \beta_0 + \beta_1 protests + \beta_2 restricted + \beta_3 (protests*restricted) + X\beta$$
+where $X$ is a matrix of control variables.
 
 
-Increases in protests will produce larger or faster increases in scarring torture in states that restrict IGO access than in states that do not.
 
-
-# Quantities of Interest
-
-  - We've just seen the linear predictions - just as usual, this is a principle quantity of interest.
- 
-  - We might also consider the *marginal effects* of changes in one variable on the expected value of $y$.
-  
-  - The marginal effect is simply the change in $y$ given a change in $x$.
-
-
-In the non-interactive model, the marginal effect of $x_1$ is: 
-
-$$\frac{\partial{y}}{\partial{x_{1}}}= \beta_{1}$$
-
-
-## Expected values
-
-```{r}
+```{r, warning=FALSE, message=FALSE, results='asis'}
 #| echo: true
 #| code-fold: true
 #| code-summary: "code"
@@ -518,11 +543,70 @@ itt <-
   itt%>% 
   group_by(ccode) %>%
   mutate( lagprotest= lag(protest), lagRA=lag(RstrctAccess), n=1) %>%
-  mutate(interact= civilwar*lagRA)
-m4 <- lm(scarring ~  lagprotest + as.factor(lagRA) + lagprotest:lagRA +civilwar  + p1+p2+p3 +wdi_gdpc+wdi_pop, data=itt)
-#summary(m4)
+  mutate(gdp=wdi_gdpc /1000) %>%
+  mutate(pop=wdi_pop/100000) %>%
+  mutate(interaction=lagprotest*RstrctAccess) %>%
+  ungroup()
 
-# average predictions, end point boundaries
+m4 <- lm(scarring ~  lagprotest + as.factor(RstrctAccess) +interaction +civilwar  + p1 +gdp+pop  , data=itt)
+
+stargazer(m4, type="html",  single.row=TRUE, header=FALSE, digits=3,  omit.stat=c("LL","ser"),  star.cutoffs=c(0.05,0.01,0.001),  column.labels=c("OLS Estimates"),  dep.var.caption="Scarring Torture", dep.var.labels.include=FALSE,  covariate.labels=c("Protests, t-1", "Restricted Access","Protests (t-1)*Restricted Acc.",  "Civil War",  "Polity", "GDP per capita", "Population"),  notes=c("Standard errors in parentheses", "Significance levels:  *** p<0.001, ** p<0.01, * p<0.05"), notes.append = FALSE,  align=TRUE,  font.size="small")
+
+
+```
+
+Let's look at the estimates and think about what we can and cannot say. Recall the estimates on *protests* and *restricted access* are now conditional on the other, so we cannot make unconditional statements. We can say the effect of *protests* on scarring torture is 0.13 when access is restricted, and *restricted access* on scarring torture is about 8.5 cases when there are zero protests. 
+
+There is no effect of *protests* on scarring torture when *restricted access* is zero. When access is restricted, the effect of *protests* on scarring torture is $\beta_1+\beta_3$ (.14+.78 = .92), so the sum of the uncondtional slope for *protests* and the interaction slope which represents the **difference in slope effect for protests between restricted and unrestricted access**. 
+
+
+### Inference 
+
+To say whether this is different from zero, we need to compute a standard error for the sum of these two coefficients. We can't just add the two standard errors together, but constructing one from the variance-covariance matrix of $\beta$ is easy:
+
+$$ se(\beta_{1}+ \beta_{3})= \sqrt{var(\beta_{1})+ X_{2}^{2}var(\beta_{3})+2X_{2}cov(\beta_{1},\beta_{3})} $$
+This how we'd compute the standard error for the sum of the two coefficients. Golder and his colleagues provide guidance for computing standard errors for a variety of models including two-way interactions (as above), three way interactions, and for models with quadratic terms - see the two figures below, both from [Golder's website](https://mattgolder.com/interactions)
+
+
+
+![Interaction standard errors](standarderrors1.png){.lightbox}
+![Quadratic interaction standard errors](standarderrors2.png){.lightbox}
+
+# Quantities of Interest
+
+  - linear predictions - computed as usual (using any of the methods we've learned, e.g, at-mean effects, average effects, simulated effects), this is a principle quantity of interest.
+ 
+  - We might also consider the *marginal effects* of changes in one variable on the expected value of $y$. The marginal effect is simply the change in $y$ given a change in $x$.
+
+
+In the non-interactive model, the marginal effect of $x_1$ is: 
+
+$$\frac{\partial{y}}{\partial{x_{1}}}= \beta_{1}$$
+
+In the interactive model, the marginal effect of $d_1$ is:
+
+$$\frac{\partial{y}}{\partial{d_1}}= \beta_1+\beta_3*x_2 $$
+
+Note this depends on the values of $x_2$, allowing for the possibility the effect of $x_2$ accelerates or slows. 
+
+Interactions in regression models are symmetric in the sense that we can be interested in the effect of $d_1$ on $y$ given $x_2$ or the effect of $x_2$ on $y$ given $d_1$. Which you're interested in is up to you and is a matter of theory.
+
+The (symmetric) marginal effect of $x_1$ on $y$ given $d_1$ is: 
+
+$$\frac{\partial{y}}{\partial{x_2}}= \beta_2+\beta_3*d_1 $$
+
+It should make sense that if $d_1=0$, the effect is just $\beta_2$. If $d_1=1$, we adjust the slope by $\beta_3$, thereby allowing the slopes to be different for the two groups in $d_1$,  relaxing structural stability. This is also a reminder that we can only interpret these coefficients conditional on one another.
+
+
+## Linear Predictions (Average Effects)
+
+Here are predictions computed as average effects for the scarring torture model. Note we have predictions for two groups (restricted and unrestricted access), and their slopes are different. 
+
+
+```{r, warning=FALSE, message=FALSE}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code" # average predictions, end point boundaries
 
 # estimation sample
 itt$used <- TRUE
@@ -539,18 +623,20 @@ lbxbr0 <-0
 medxbr1 <-0
 ubxbr1 <-0
 lbxbr1 <-0
-pred_data$lagRA <- 0
+pred_data$RstrctAccess <- 0
 for(p in seq(1,40,1)) {
   pred_data$lagprotest <- p 
+  pred_data$interaction <- 0
   protests[p] <- p 
   allpreds <- data.frame(predict(m4, interval="confidence", se.fit=TRUE, newdata = pred_data))  
   medxbr0[p] <- median(allpreds$fit.fit, na.rm=TRUE)
   ubxbr0[p] <- median(allpreds$fit.fit, na.rm=TRUE)+1.96*(median(allpreds$se.fit, na.rm=TRUE))
   lbxbr0[p] <- median(allpreds$fit.fit, na.rm=TRUE)-1.96*(median(allpreds$se.fit, na.rm=TRUE))
 }
-pred_data$lagRA <- 1
+pred_data$RstrctAccess <- 1
 for(p in seq(1,40,1))  {
   pred_data$lagprotest <- p
+  pred_data$interaction <- p
   allpreds <- data.frame(predict(m4, interval="confidence", se.fit=TRUE, newdata = pred_data))  
   medxbr1[p] <- median(allpreds$fit.fit, na.rm=TRUE)
   ubxbr1[p] <- median(allpreds$fit.fit, na.rm=TRUE)+1.96*(median(allpreds$se.fit, na.rm=TRUE))
@@ -573,52 +659,18 @@ ggplot() +
 
 ```
 
-## Marginal Effects 
-
-In the interactive model, the marginal effect of $d_1$ is:
-
-$$\frac{\partial{y}}{\partial{d_1}}= \beta_1+\beta_3*x_2 $$
-
-Note this depends on the values of $x_2$, allowing for the possibility the effect of $x_2$ accelerates or slows. 
+As protests increase, we can see little change in scarring torture where IGO access is unrestricted. Transparency makes repressive acts harder to execute. On the other hand, where IGO access is restricted, scarring torture increases at considerably faster rate as protests increase. The confidence bands do not overlap, suggesting the slopes are different for the two groups. 
 
 
-
-The marginal effect of $x_1$ is: 
-
-$$\frac{\partial{y}}{\partial{x_2}}= \beta_2+\beta_3*d_1 $$
-
-It should make sense that if $d_1=0$, the effect is just $\beta_2$. If $d_1=1$, we adjust the slope by $\beta_3$, thereby allowing the slopes to be different for the two groups in $d_1$, thereby relaxing structural stability. 
-
-
-
-
-```{r}
-#| echo: true
-#| code-fold: true
-#| code-summary: "code"
-
-avg <- data %>% mutate(x2=0, interaction=0)
-int0 <- data.frame(x1=avg$x1, predict(m2, interval="confidence", se.fit=TRUE, newdata = avg))
-avg <- data %>% mutate(x2=1, interaction=x1) 
-int1 <- data.frame(x1=avg$x1, predict(m2, interval="confidence", se.fit=TRUE, newdata = avg))
-
-allpred <- data.frame(x1=int0$x1, fit0=int0$fit.fit, fit1=int1$fit.fit, me=int1$fit.fit-int0$fit.fit)
-
-ggplot() +
-  geom_line(data=allpred, aes(x=x1, y=fit0), linetype="dashed") +
-  geom_line(data=allpred, aes(x=x1, y=fit1), linetype="dashed") +
-  geom_line(data=allpred, aes(x=x1, y=me), color="blue") +
-  labs ( colour = NULL, x = "x1", y =  "Predicted xb" ) +
-  annotate("text", x = 0, y = -2, label = "x2=0", size=2.5, colour="gray30")+
-  annotate("text", x = 0, y = 5, label = "x2=1", size=2.5, colour="gray30")+
-  annotate("text", x = 2.5, y = 6, label = "marginal \n\n effect", size=2.5, colour="gray30")+
-  theme_minimal()
-```
-
-In this case, the marginal effect of $x_2$ is the difference between the two lines. The dashed lines are the predicted values of $y$ for $x_1$ given $x_2=0$ and $x_2=1$. The solid line is the difference between the two, the marginal effect of $x_2$ across the values of $x_1$
- 
- 
 ## Marginal Effects
+
+We can also compute the marginal effects (as above). Let's look at the marginal effect of restricting access to IGOs on scarring torture as protests increase.^[Since restricted access is binary, this is really a first difference rather than a marginal effect.]
+
+In terms of the regression above, we're computing:
+
+$$ \frac{\partial{y}}{\partial{d_1}}= \beta_2+\beta_4*x_2 $$
+
+
 
 ```{r}
 #| echo: true
@@ -627,7 +679,9 @@ In this case, the marginal effect of $x_2$ is the difference between the two lin
 
 
 df <- df %>% mutate(protest=seq(1,40,1),
-  MEprotest=m4$coefficients[2]+m4$coefficients[10]*protest, se = sqrt(vcov(m4)[2,2]+vcov(m4)[10,10]*protest^2+2*vcov(m4)[10,2]*protest), ub=MEprotest+1.96*se, lb=MEprotest-1.96*se)
+  MEprotest=m4$coefficients[2]+m4$coefficients[4]*protest, 
+  se = sqrt(vcov(m4)[2,2]+vcov(m4)[4,4]*protest^2+2*vcov(m4)[2,4]*protest),   
+  ub=MEprotest+1.96*se, lb=MEprotest-1.96*se)
 
 ggplot() +
   geom_line(data=df, aes(x=protest, y=MEprotest) ) +
@@ -636,31 +690,10 @@ ggplot() +
 
 ```
 
-## Conditionality
 
-All effects in this model are now conditional - we can no longer talk about independent or direct effects of either $D_1$ or $x_1$ in this model. The marginal effects should also give us some hints about hypothesis testing:
+In this plot, the marginal effect of restricting IGO access over the range of protests is positive, and increasing - it is above zero, and it has a positive slope. These are not redundant statements. The marginal effect could be negative, but increasing, or positive but decreasing. It's important to idenitfy the location (above or below zero, or not different from zero), and its slope (positive, negative, zero). 
 
-$$ \frac{\partial{y}}{\partial{d_1}}= \beta_1+\beta_3*x_2 $$
-
-Note the question is not whether $\beta_1$ or $\beta_3$ is different from zero. Instead, the question is whether $\beta_{1}+\beta_{3}$ is different from zero. This is a lot like asking whether $\beta_{1}+\beta_{3} = \beta_1$. If so, structural stability holds; if not, it fails. 
-
-## Inference
-
-Think about the hypothesis that the slope for $D_1=0$ is different from the slope for $D_1=1$ - in the marginal effect, the slope for $D_1=0$ is $\beta_1$; for $D_1=1$ is $\beta_{1}+\beta_{3}$. 
-
-Whether the interaction coefficient, $\beta_{3}$ is different from zero does not matter. What matters is whether the combination of $\beta_{1}+\beta_{3}$ is different from zero.
-
-To evaluate the hypothesis $\beta_{1}+\beta_{3} \neq 0$, we need a standard error for this quantity.
-
-
-
-## Inference on Marginal Effects
-
-We can't just add the two standard errors together, but constructing one from the variance-covariance matrix of $\beta$ is easy:
-
-$$ se(\beta_{1}+ \beta_{3})= \sqrt{var(\beta_{1})+ X_{2}^{2}var(\beta_{3})+2X_{2}cov(\beta_{1},\beta_{3})} $$
-
-Note these vary across $x$ because, just as the marginal effect is not constant across $x$, neither is the standard error of the marginal effect.
+One last observation (shown in in the simulated data earlier) is that the marginal effect is the difference between the two lines in the linear prediction plot above. The marginal effect is the difference between the two groups (restricted, unrestricted) over the values of protests. 
 
 
 
