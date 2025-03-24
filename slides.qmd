@@ -36,7 +36,13 @@ title: "Slides"
 
 [Interactions video](https://youtu.be/8D0Y1SpVIGQ)
 
-<!-- [Limited dependent variables](limiteddv24.qmd) -->
+[Limited dependent variables](/slides/limiteddv25.qmd)
+
+If you're interested in how maximum likelihood estimation works, check out this page:
+
+[Maximization](https://clavedark.github.io/MLEfall24/llfmax24.html)
+
+
 
 <!-- [Panel data](panel24.qmd) -->
 

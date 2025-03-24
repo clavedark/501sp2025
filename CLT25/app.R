@@ -1,3 +1,4 @@
+#central limit theorem simulation
 library(shiny)
 library(ggplot2)
 

@@ -340,7 +340,7 @@
     "href": "slides.html",
     "title": "Slides",
     "section": "",
-    "text": "Course overview\nMatrix algebra basics\nProbability basics\nA First Look at OLS\nThinking about data\nBivariate model\nBivariate example\n\nPrediction methods\nPrediction methods video\nA note on inquiry and models\nThe Multivariate Model\n\nInference\nModel specification\nDummy variables and interactions\nInteractions video\n\n\n\n\n\n\n\n\n Back to top"
+    "text": "Course overview\nMatrix algebra basics\nProbability basics\nA First Look at OLS\nThinking about data\nBivariate model\nBivariate example\n\nPrediction methods\nPrediction methods video\nA note on inquiry and models\nThe Multivariate Model\n\nInference\nModel specification\nDummy variables and interactions\nInteractions video\nLimited dependent variables\nIf you’re interested in how maximum likelihood estimation works, check out this page:\nMaximization\n\n\n\n\n\n\n\n Back to top"
   },
   {
     "objectID": "slides/overview25.html",
@@ -2532,5 +2532,222 @@
     "title": "Differential Intercepts and Interactions",
     "section": "Footnotes",
     "text": "Footnotes\n\n\nIt should be evident my argument implies both that protests influence scarring torture and that torture shapes protests; this simultaneity, if it exists, means the estimates are both biased an inefficient, and we should find a way to model this interesting source endogeneity. We’ll do so in week 15.↩︎\nSince restricted access is binary, this is really a first difference rather than a marginal effect.↩︎"
+  },
+  {
+    "objectID": "slides/limiteddv25.html",
+    "href": "slides/limiteddv25.html",
+    "title": "Binary \\(y\\) variables",
+    "section": "",
+    "text": "What happens if \\(y\\) is binary?\nDoes OLS work? This model is known as the linear probability model.\nWhat are the problems?\nLogit, Probit as solutions.\n\n\n\n\nThe LPM is the OLS model estimated with a binary dependent variable.\nThis is generally frowned upon.\n\n\n\nThe model we’ve worked with so far is\n\\[y_i=F(\\beta_0 +  \\beta_1 X_1 + \\beta_2 X_2 \\ldots + \\beta_k X_k + \\epsilon_i) \\]\nwhere \\(F\\) is a linear function, so\n\\[\\hat{y_i}=\\hat{\\beta_0} +  \\hat{\\beta_1} X_1 + \\hat{\\beta_2} X_2 \\ldots + \\hat{\\beta_k} X_k \\nonumber\\\\ \\nonumber\\\\\n=x\\hat{\\beta} \\]\n\\(F\\) is linear, so the model is linear in parameters. \\(x\\hat{\\beta}\\) is the linear prediction and is the , the conditional expected value of \\(y\\).\nNow, consider a situation where \\(y\\) is binary, such that,\n\\[  y = \\left\\{ \\begin{array}{ll}\n         1 \\\\\n         0  \n         \\end{array}\n     \\right. \\]\nand\n\\[ y^* = \\left\\{ \\begin{array}{ll}\n          \\pi_{i}\\\\\n          1-\\pi_{i}\n         \\end{array}\n     \\right. \\]\nwhere \\(y_i^*\\) is what we wish we could measure (say, the probability \\(y_i=1\\)), though we can only measure \\(y_i\\). Now, \\(y^*\\) is going to be our principle quantity of interest.\nSuppose the regression model\n\\[y_i =F(\\beta_0 +  \\beta_1 X_1 + \\beta_2 X_2 \\ldots + \\beta_k X_k + \\epsilon_i) \\]\nwhere \\(F\\) is a nonlinear function relating the linear prediction, \\(x\\beta\\) to \\(y_i^*\\).\n\\[\\widehat{y^*} = F(x\\widehat{\\beta})=F(\\hat{\\beta_0} +  \\hat{\\beta_1} X_1 + \\hat{\\beta_2} X_2 \\ldots + \\hat{\\beta_k} X_k ) \\]\n\\(F\\) is a nonlinear function, so the model is nonlinear in parameters. \\(x\\hat{\\beta}\\) is the linear prediction, but it is not the quantity of interest. Instead, the quantity of interest is \\(F(x\\hat{\\beta})\\) which is equal to \\(y_i^*\\).\n\n\n\n\n\n\nImportant Concept\n\n\n\nThe difference between this model and the OLS linear model is simply that we must transform the linear prediction, \\(x\\hat{\\beta}\\), by \\(F\\) in order to produce predictions. Put differently, we want to map our linear prediction, \\(x\\beta\\) onto \\(y^*\\)."
+  },
+  {
+    "objectID": "slides/limiteddv25.html#goals",
+    "href": "slides/limiteddv25.html#goals",
+    "title": "Binary \\(y\\) variables",
+    "section": "",
+    "text": "What happens if \\(y\\) is binary?\nDoes OLS work? This model is known as the linear probability model.\nWhat are the problems?\nLogit, Probit as solutions."
+  },
+  {
+    "objectID": "slides/limiteddv25.html#linear-probability-model",
+    "href": "slides/limiteddv25.html#linear-probability-model",
+    "title": "Binary \\(y\\) variables",
+    "section": "",
+    "text": "The LPM is the OLS model estimated with a binary dependent variable.\nThis is generally frowned upon."
+  },
+  {
+    "objectID": "slides/limiteddv25.html#linear-model",
+    "href": "slides/limiteddv25.html#linear-model",
+    "title": "Binary \\(y\\) variables",
+    "section": "",
+    "text": "The model we’ve worked with so far is\n\\[y_i=F(\\beta_0 +  \\beta_1 X_1 + \\beta_2 X_2 \\ldots + \\beta_k X_k + \\epsilon_i) \\]\nwhere \\(F\\) is a linear function, so\n\\[\\hat{y_i}=\\hat{\\beta_0} +  \\hat{\\beta_1} X_1 + \\hat{\\beta_2} X_2 \\ldots + \\hat{\\beta_k} X_k \\nonumber\\\\ \\nonumber\\\\\n=x\\hat{\\beta} \\]\n\\(F\\) is linear, so the model is linear in parameters. \\(x\\hat{\\beta}\\) is the linear prediction and is the , the conditional expected value of \\(y\\).\nNow, consider a situation where \\(y\\) is binary, such that,\n\\[  y = \\left\\{ \\begin{array}{ll}\n         1 \\\\\n         0  \n         \\end{array}\n     \\right. \\]\nand\n\\[ y^* = \\left\\{ \\begin{array}{ll}\n          \\pi_{i}\\\\\n          1-\\pi_{i}\n         \\end{array}\n     \\right. \\]\nwhere \\(y_i^*\\) is what we wish we could measure (say, the probability \\(y_i=1\\)), though we can only measure \\(y_i\\). Now, \\(y^*\\) is going to be our principle quantity of interest.\nSuppose the regression model\n\\[y_i =F(\\beta_0 +  \\beta_1 X_1 + \\beta_2 X_2 \\ldots + \\beta_k X_k + \\epsilon_i) \\]\nwhere \\(F\\) is a nonlinear function relating the linear prediction, \\(x\\beta\\) to \\(y_i^*\\).\n\\[\\widehat{y^*} = F(x\\widehat{\\beta})=F(\\hat{\\beta_0} +  \\hat{\\beta_1} X_1 + \\hat{\\beta_2} X_2 \\ldots + \\hat{\\beta_k} X_k ) \\]\n\\(F\\) is a nonlinear function, so the model is nonlinear in parameters. \\(x\\hat{\\beta}\\) is the linear prediction, but it is not the quantity of interest. Instead, the quantity of interest is \\(F(x\\hat{\\beta})\\) which is equal to \\(y_i^*\\).\n\n\n\n\n\n\nImportant Concept\n\n\n\nThe difference between this model and the OLS linear model is simply that we must transform the linear prediction, \\(x\\hat{\\beta}\\), by \\(F\\) in order to produce predictions. Put differently, we want to map our linear prediction, \\(x\\beta\\) onto \\(y^*\\)."
+  },
+  {
+    "objectID": "slides/limiteddv25.html#limited-dependent-variables",
+    "href": "slides/limiteddv25.html#limited-dependent-variables",
+    "title": "Binary \\(y\\) variables",
+    "section": "Limited Dependent Variables",
+    "text": "Limited Dependent Variables\nWhy would we measure \\(y_i\\) rather than \\(y_i^*\\)?\nLimited dependent variables are usually limited in the sense that we cannot observe the range of the variable or the characteristic of the variable we want to observe. We are limited to observing \\(y_i\\), and so must estimate \\(y_i^*\\)."
+  },
+  {
+    "objectID": "slides/limiteddv25.html#examples-of-limited-dvs",
+    "href": "slides/limiteddv25.html#examples-of-limited-dvs",
+    "title": "Binary \\(y\\) variables",
+    "section": "Examples of Limited DVs",
+    "text": "Examples of Limited DVs\n\nbinary variables: 0=peace, 1=war; 0=vote, 1=don’t vote.\nunordered or nominal categorical variables: type of car you prefer: Honda, Toyota, Ford, Buick; policy choices; consumer choices.\nordered variables that take on few values: some survey responses.\n\n-discrete count variables; number of episodes of scarring torture in a country-year, 0, 1, 2, 3, , \\(\\infty\\)\n\ntime to failure; how long a civil war lasts; how long a patient survives disease; how long a leader survives in office."
+  },
+  {
+    "objectID": "slides/limiteddv25.html#binary-dependent-variables",
+    "href": "slides/limiteddv25.html#binary-dependent-variables",
+    "title": "Binary \\(y\\) variables",
+    "section": "Binary dependent variables",
+    "text": "Binary dependent variables\nGenerally, we conceive of a binary variable as being the observable manifestation of some underlying, latent, unobserved continuous variable.\nIf we could adequately observe (and measure) the underlying continuous variable, we’d use some form of OLS regression to analyze that variable."
+  },
+  {
+    "objectID": "slides/limiteddv25.html#linear-probability-model-1",
+    "href": "slides/limiteddv25.html#linear-probability-model-1",
+    "title": "Binary \\(y\\) variables",
+    "section": "Linear Probability Model",
+    "text": "Linear Probability Model\nThe linear probability model (LPM) is the OLS linear regression with a binary dependent variable.\nThe main justification for the LPM is OLS is unbiased (by Gauss Markov). But \\(\\ldots\\)\n\npredictions are nonsensical (linear, unbounded, measures of \\(\\hat{y}\\) rather than \\(y^*\\)).\ndisturbances are non-normal, and heteroskedastic.\nrelation or mapping of \\(x\\beta\\) and \\(y\\) are the wrong functional form (linear)."
+  },
+  {
+    "objectID": "slides/limiteddv25.html#running-example---democratic-peace-data",
+    "href": "slides/limiteddv25.html#running-example---democratic-peace-data",
+    "title": "Binary \\(y\\) variables",
+    "section": "Running example - Democratic Peace data",
+    "text": "Running example - Democratic Peace data\nAs a running example, I’ll use the Democratic Peace data to estimate logit and probit models. These come from Oneal and Russett (1997)’s well-known study in ISQ. The units are dyad-years; the \\(y\\) variable is the presence or absence of a mililtarized dispute, and the \\(x\\) variables include a measure of democracy (the lowest of the two Polity scores in the dyad), and a set of controls.\n\nPredictions out of bounds\n\n\ncode\ndp &lt;- read_dta(\"/Users/dave/Documents/teaching/501/2023/slides/L7_limiteddv/code/dp.dta\")\n\nm1 &lt;-glm(dispute ~ border+deml+caprat+ally, family=binomial(link=\"logit\"), data=dp )\nlogitpreds &lt;- predict(m1, type=\"response\")\n\nmols &lt;-lm(dispute ~ border+deml+caprat+ally, data=dp )\nolspreds &lt;- predict(mols)\n\ndf &lt;- data.frame(logitpreds, olspreds, dispute=as.factor(dp$dispute))\n\nggplot(df, aes(x=logitpreds, y=olspreds, color=dispute)) + \n  geom_point()+\n  labs(title=\"Predictions from Logit and OLS\", x=\"Logit Predictions\", y=\"OLS Predictions\")+\n  geom_hline(yintercept=0)+\n  theme_minimal() +\n  annotate(\"text\", x=.05, y=-.05, label=\"2,147 Predictions out of bounds\", color=\"red\")\n\n\n\n\n\n\n\n\n\n\n\ncode\nggplot(df, aes(x=olspreds)) + \n  geom_density(alpha=.5)+\n  labs(title=\"Density of OLS Predictions\", x=\"Predictions\", y=\"Density\")+\n  theme_minimal()+\ngeom_vline(xintercept=0, linetype=\"dashed\")\n\n\n\n\n\n\n\n\n\n\n\nHeteroskedastic Residuals\n\n\ncode\ndf &lt;- data.frame(df, mols$residuals)\n \nggplot(df, aes(x=mols.residuals, color=dispute)) + \n  geom_density()+\n  labs(title=\"Density of OLS Residuals\", x=\"Residuals\", y=\"Density\")+\n  theme_minimal()+\n  geom_vline(xintercept=0, linetype=\"dashed\")"
+  },
+  {
+    "objectID": "slides/limiteddv25.html#when-is-the-lpm-reasonable",
+    "href": "slides/limiteddv25.html#when-is-the-lpm-reasonable",
+    "title": "Binary \\(y\\) variables",
+    "section": "When is the LPM Reasonable?",
+    "text": "When is the LPM Reasonable?"
+  },
+  {
+    "objectID": "slides/limiteddv25.html#on-linearity",
+    "href": "slides/limiteddv25.html#on-linearity",
+    "title": "Binary \\(y\\) variables",
+    "section": "On Linearity",
+    "text": "On Linearity\nIn the linear model, \\(\\hat{y_i}=x_i\\beta\\). This makes sense because \\(y = y^*\\). Put differently, \\(y\\) is continuous, unbounded, (assumed) normal, and is an “unlimited” measure of the concept we intend to measure.\nIn binary models, \\(y \\neq y^*\\), because our observation of \\(y\\) is limited such that we can only observe its presence or absence. We have two different realizations of the same variable: \\(y\\) is the limited but observed variable; \\(y^*\\) is the unlimited variable we want to measure, but cannot because it is unobservable.\nThe goal of these models is to use \\(y\\) in the regression in order to get estimates of \\(y^*\\). Those estimates of \\(y^*\\) are our principle quantity of interest in the binary variable model."
+  },
+  {
+    "objectID": "slides/limiteddv25.html#linking-xwidehatbeta-and-y",
+    "href": "slides/limiteddv25.html#linking-xwidehatbeta-and-y",
+    "title": "Binary \\(y\\) variables",
+    "section": "Linking \\(x\\widehat{\\beta}\\) and \\(y^*\\)",
+    "text": "Linking \\(x\\widehat{\\beta}\\) and \\(y^*\\)\nWe can produce the linear prediction, \\(x\\widehat{\\beta}\\), but we need to transform it to produce estimates of \\(y^*\\). To do so, we use a link function to map \\(x_i\\beta\\) onto the probability space, \\(y^*\\). This means \\(\\widehat{y_i} \\neq x\\widehat{\\beta}\\). Instead,\n\\[y^* = F(x_i\\beta)\\]\nWhere \\(F\\) is a continuous, sigmoid probability CDF. This is how we get estimates of our quantity of interest, \\(y^*\\)."
+  },
+  {
+    "objectID": "slides/limiteddv25.html#non-linear-change-in-pry1-across-values-of-x",
+    "href": "slides/limiteddv25.html#non-linear-change-in-pry1-across-values-of-x",
+    "title": "Binary \\(y\\) variables",
+    "section": "Non linear change in Pr(y=1) across values of \\(x\\)",
+    "text": "Non linear change in Pr(y=1) across values of \\(x\\)\nIn the LPM, the relationship between \\(Pr(y=1)\\) and \\(X\\) is linear, so the rate of change toward \\(Pr(y=1)\\) is constant across all values of \\(X\\).\nThis means that the rate of change approaching one (or approaching zero) is exactly the same as the rate of change anywhere else in the distribution.\nFor example, this means that the change from .99 to 1.00 is just as likely as the change from .50 to .51; is this sensible for a bounded latent variable (probability)?"
+  },
+  {
+    "objectID": "slides/limiteddv25.html#linear-and-sigmoid-functions-at-limits",
+    "href": "slides/limiteddv25.html#linear-and-sigmoid-functions-at-limits",
+    "title": "Binary \\(y\\) variables",
+    "section": "Linear and Sigmoid Functions at Limits",
+    "text": "Linear and Sigmoid Functions at Limits\n\n\ncode\nz &lt;- seq(-5,5,.1)\nl &lt;- seq(0,1,.01)\ns1 &lt;- 1/(1+exp(-z))\ns2 &lt;- pnorm(z)\n\nggplot() + \n  geom_line(aes(x=z, y=l), color=\"black\")+\n  geom_line(aes(x=z, y=s1), color=\"red\")+\n  geom_line(aes(x=z, y=s2), color=\"green\")+\n  labs(title=\"Linear and Sigmoid Functions\", x=\"z\", y=\"F(z)\")+\n  theme_minimal()+\n  annotate(\"text\", x=0, y=.75, label=\"Normal\", color=\"green\")+\n  annotate(\"text\", x=-3, y=.1, label=\"Logistic\", color=\"red\")"
+  },
+  {
+    "objectID": "slides/limiteddv25.html#non-constant-change-in-pry1-across-values-of-z",
+    "href": "slides/limiteddv25.html#non-constant-change-in-pry1-across-values-of-z",
+    "title": "Binary \\(y\\) variables",
+    "section": "Non constant change in Pr(y=1) across values of \\(z\\)",
+    "text": "Non constant change in Pr(y=1) across values of \\(z\\)\nAnimating the change in \\(Pr(y=1)\\) across values of \\(z\\) for the linear and sigmoid functions.\n\n\ncode\nlibrary(gganimate)\n\nz &lt;- seq(-5,5,.1)\nl &lt;- seq(0,1,.01)\ns1 &lt;- 1/(1+exp(-z))\ns2 &lt;- pnorm(z)\n\ndf &lt;- data.frame(z=z, l=l, s1=s1, s2=s2)\n\nggplot(df, aes(x=z, y=l)) + \n  geom_line(aes(x=z, y=l), color=\"black\")+\n  geom_line(aes(x=z, y=s1), color=\"red\")+\n  geom_line(aes(x=z, y=s2), color=\"green\")+\n  labs(title=\"Rates of change\", x=\"z\", y=\"F(z)\")+\n  theme_minimal()+\n  transition_reveal(z)"
+  },
+  {
+    "objectID": "slides/limiteddv25.html#binomial-likelihood-function",
+    "href": "slides/limiteddv25.html#binomial-likelihood-function",
+    "title": "Binary \\(y\\) variables",
+    "section": "Binomial Likelihood Function",
+    "text": "Binomial Likelihood Function\nWrite the binomial in terms of data (so observations, \\(i\\) on \\(y\\)):\n\\[ Pr(y=1| \\pi) = \\pi_i^{y_i} (1-\\pi_i)^{1-y_i} \\]\nParameterizing - writing in terms of variables and effects, \\(x_i\\widehat{\\beta}\\):\n\\[ Pr(y=1| F(x\\widehat{\\beta})) = F(x_i\\widehat{\\beta})^{y_i} (1-F(x_i\\widehat{\\beta}))^{1-y_i} \\]"
+  },
+  {
+    "objectID": "slides/limiteddv25.html#binomial-likelihood-function-1",
+    "href": "slides/limiteddv25.html#binomial-likelihood-function-1",
+    "title": "Binary \\(y\\) variables",
+    "section": "Binomial Likelihood Function",
+    "text": "Binomial Likelihood Function\nWe want to know the probability of observing all the data - so a joint probability:\n\\[\\mathcal{L} (\\pi |\\ y) = \\prod \\limits_{i=1}^{n} \\left[ \\pi_i^{y_i} (1-\\pi_i)^{1-y_i}\\right]\\] \nin terms of \\(x_i\\widehat{\\beta}\\):\n\\[\\mathcal{L} (\\pi |\\ y) = \\prod \\limits_{i=1}^{n} \\left[ F(x_i\\widehat{\\beta}) ^{y_i} (1-F(x_i\\widehat{\\beta}))^{1-y_i}\\right]\\]"
+  },
+  {
+    "objectID": "slides/limiteddv25.html#binomial-llf",
+    "href": "slides/limiteddv25.html#binomial-llf",
+    "title": "Binary \\(y\\) variables",
+    "section": "Binomial LLF",
+    "text": "Binomial LLF\nBut adding is easier than multiplying, so take the natural log of the whole thing:\n\\[\\ln \\mathcal{L} (\\pi| \\ y) = \\sum \\limits_{i=1}^{n}  \\left[ y_i \\ln ( \\pi_i) +  (1-y_i) \\ln(1-\\pi_i)\\right]\\] \nin terms of \\(x_i\\widehat{\\beta}\\)\n\\[\\ln \\mathcal{L} (\\pi| \\ y) = \\sum \\limits_{i=1}^{n}  \\left[ y_i \\ln (F(x_i\\widehat{\\beta})) +  (1-y_i) \\ln(1-F(x_i\\widehat{\\beta}))\\right]\\]"
+  },
+  {
+    "objectID": "slides/limiteddv25.html#binomial-log-likelihood",
+    "href": "slides/limiteddv25.html#binomial-log-likelihood",
+    "title": "Binary \\(y\\) variables",
+    "section": "Binomial Log-Likelihood",
+    "text": "Binomial Log-Likelihood\nThis is the binomial log-likelihood function - we estimate it by maximum likelihood - just another technology (alongside OLS, Bayesian modeling, and others), for estimating unknowns.\n\\[\\ln \\mathcal{L} (\\pi| \\ y) = \\sum \\limits_{i=1}^{n}  \\left[ y_i \\ln (F(x_i\\widehat{\\beta})) +  (1-y_i) \\ln(1-F(x_i\\widehat{\\beta}))\\right]\\]\nBut we need to fill in \\(F\\), the link function."
+  },
+  {
+    "objectID": "slides/limiteddv25.html#link-functions",
+    "href": "slides/limiteddv25.html#link-functions",
+    "title": "Binary \\(y\\) variables",
+    "section": "Link Functions",
+    "text": "Link Functions\nWe parameterized \\(\\pi_i\\):\n\\[\\pi_i= F(x \\beta)\\]\nand now need to choose an appropriate link function such that:\n\\(\\pi_i\\) is bounded [0,1]. \\(x_i \\widehat{\\beta}\\) can range \\(-\\infty, +\\infty\\) and map onto that [0,1] interval.\nA relatively large number of sigmoid shaped probability functions will satisfy these needs."
+  },
+  {
+    "objectID": "slides/limiteddv25.html#link-functions-1",
+    "href": "slides/limiteddv25.html#link-functions-1",
+    "title": "Binary \\(y\\) variables",
+    "section": "Link Functions",
+    "text": "Link Functions\nRemember, the link function maps or transforms the linear prediction on the sigmoid probability space, and obeys the bounds of 0,1.\nThe two main link functions you’ll ever see or use are the standard normal (probit)\n\\[Pr(y_i=1 | X) = \\Phi(x_i\\widehat{\\beta}) \\]\nand the logistic (logit) CDFs.\n\\[Pr(y_i=1 | X) = \\frac{1}{1+exp^{-(x_i\\widehat{\\beta})}} \\]"
+  },
+  {
+    "objectID": "slides/limiteddv25.html#probit-and-logit-llfs",
+    "href": "slides/limiteddv25.html#probit-and-logit-llfs",
+    "title": "Binary \\(y\\) variables",
+    "section": "Probit and Logit LLFs",
+    "text": "Probit and Logit LLFs\nProbit - link between \\(x\\hat{\\beta}\\) and \\(Pr(y=1)\\) is standard normal CDF:\n\\[\\ln \\mathcal{L} (Y|\\beta) = \\sum_{i=1}^{N} y_i \\ln \\Phi(\\mathbf{x_i \\beta})+ (1-y_i) \\ln[1-\\Phi(\\mathbf{x_i \\beta})] \\]\nLogit looks like this:\n\\[\\ln \\mathcal{L} (Y|\\beta) = \\sum_{i=1}^{N} \\left\\{ y_i \\ln \\left(\\frac{1}{1+e^{-\\mathbf{x_i \\beta}}}\\right)+ (1-y_i) \\ln \\left[1-\\left(\\frac{1}{1+e^{-\\mathbf{x_i \\beta}}}\\right)\\right] \\right\\}\\]"
+  },
+  {
+    "objectID": "slides/limiteddv25.html#which-link-function",
+    "href": "slides/limiteddv25.html#which-link-function",
+    "title": "Binary \\(y\\) variables",
+    "section": "Which link function?",
+    "text": "Which link function?\nSo, between the logit and probit models, which do we choose?\nUnless we have theoretical expectations that inform us about the data in the tails of the distribution (we don’t), then it makes no difference which estimation procedure you select. Choose what you find most comfortable, most readily interpretable."
+  },
+  {
+    "objectID": "slides/limiteddv25.html#example---modeling-the-democratic-peace",
+    "href": "slides/limiteddv25.html#example---modeling-the-democratic-peace",
+    "title": "Binary \\(y\\) variables",
+    "section": "Example - Modeling the Democratic Peace",
+    "text": "Example - Modeling the Democratic Peace\nHere’s a model of the democratic peace.\n\ncode\ndp &lt;- read_dta(\"/Users/dave/Documents/teaching/501/2023/slides/L7_limiteddv/code/dp.dta\")\n\nm1 &lt;-glm(dispute ~ border+deml+caprat+ally, family=binomial(link=\"logit\"), data=dp )\nm2 &lt;-glm(dispute ~ border+deml+caprat+ally, family=binomial(link=\"probit\"), data=dp )\n\n# column.labels=c(\"Model 1\", \"Model 2\"),\nstargazer(m1,m2, type=\"html\",  single.row=TRUE, header=FALSE, digits=3,   star.cutoffs=c(0.05,0.01,0.001),  dep.var.caption=\"Militarized Dispute\", dep.var.labels.include=FALSE,  covariate.labels=c(\"Shared Border\", \"Low Polity Score\", \"Capabilities Ratio\", \"Allies\"),  notes=c(\"Standard errors in parentheses\", \"Significance levels:  *** p&lt;0.001, ** p&lt;0.01, * p&lt;0.05\"), notes.append = FALSE,  align=TRUE,  font.size=\"small\")\n\n\n\n\n\n\n\n\n\n\nMilitarized Dispute\n\n\n\n\n\n\n\n\n\n\n\n\nlogistic\n\n\nprobit\n\n\n\n\n\n\n(1)\n\n\n(2)\n\n\n\n\n\n\n\n\nShared Border\n\n\n1.221*** (0.078)\n\n\n0.587*** (0.037)\n\n\n\n\nLow Polity Score\n\n\n-0.071*** (0.007)\n\n\n-0.031*** (0.003)\n\n\n\n\nCapabilities Ratio\n\n\n-0.003*** (0.0004)\n\n\n-0.001*** (0.0001)\n\n\n\n\nAllies\n\n\n-0.806*** (0.080)\n\n\n-0.350*** (0.038)\n\n\n\n\nConstant\n\n\n-3.492*** (0.075)\n\n\n-1.903*** (0.032)\n\n\n\n\n\n\n\n\nObservations\n\n\n20,990\n\n\n20,990\n\n\n\n\nLog Likelihood\n\n\n-3,500.973\n\n\n-3,511.493\n\n\n\n\nAkaike Inf. Crit.\n\n\n7,011.947\n\n\n7,032.985\n\n\n\n\n\n\n\n\nNote:\n\n\nStandard errors in parentheses\n\n\n\n\n\n\nSignificance levels: *** p&lt;0.001, ** p&lt;0.01, * p&lt;0.05\n\n\n\nNotice there are no substantive differences between the logit and probit. As in the linear model, we can make statements about direction and significance looking at the model estimates. We can’t say much about magnitude because the coefficients are not transformed by \\(F\\) - this is where we turn to quantities of interest."
+  },
+  {
+    "objectID": "slides/limiteddv25.html#confidence-intervals",
+    "href": "slides/limiteddv25.html#confidence-intervals",
+    "title": "Binary \\(y\\) variables",
+    "section": "Confidence Intervals",
+    "text": "Confidence Intervals\nEnd point transformation is straightforward as in the linear model:\n\nestimate the model.\ngenerate the linear prediction, \\(x\\hat{\\beta}\\).\ngenerate the standard error of the prediction\ngenerate linear predictions of the upper bound (\\(x\\hat{\\beta}+c*se_p\\)) and lower bound (\\(x\\hat{\\beta}-c*se_p\\)), where \\(c\\) is the critical value , \\(\\sim N(0,1)\\).\ngenerate the predictions at upper, lower, and central points by \\(F(x\\hat{\\beta}\\pm c*se_p)\\) and \\(F(x\\hat{\\beta})\\)\nplot the upper and lower quantities of interest, perhaps around the central point."
+  },
+  {
+    "objectID": "slides/limiteddv25.html#predictions",
+    "href": "slides/limiteddv25.html#predictions",
+    "title": "Binary \\(y\\) variables",
+    "section": "Predictions",
+    "text": "Predictions\nWe do this exactly as in the linear model, with the one modification that we map the linear prediction, \\(x_i\\hat{\\beta}\\) onto the probability space by the link function. Here, for instance, is the at-means approach:\n\nestimate the model\ngenerate the linear prediction, \\(x\\beta\\), using the at-means data, varying the \\(x\\) of interest, and model estimates, \\(\\widehat{\\beta}\\).\ngenerate the standard errors of the linear predictions the usual way.\ngenerate upper and lower bounds of the linear prediction.\nmap those linear predictions and the boundaries onto \\(y^*\\), the latent probability space: \\(F(x \\widehat{\\beta})\\)\nplot the predictions and measures of uncertainty against the variable of interest."
+  },
+  {
+    "objectID": "slides/limiteddv25.html#transformation-by-f",
+    "href": "slides/limiteddv25.html#transformation-by-f",
+    "title": "Binary \\(y\\) variables",
+    "section": "Transformation by \\(F\\)",
+    "text": "Transformation by \\(F\\)\nSo you’ve got the three quantities we’ve been working with all semester:\n\n\\(x\\widehat{\\beta}\\)\n\\(x\\widehat{\\beta} + 1.96*se\\)\n\\(x\\widehat{\\beta} - 1.96*se\\)\n\nAll transform the linear prediction and standard error of the linear prediction. For the logit, transform as\n\\[Pr(y=1) =  \\frac{1}{1+exp(-x\\beta)} \\] \\[ ub = \\frac{1}{1+exp(-(x\\beta + 1.96*se))} \\] \\[ lb = \\frac{1}{1+exp(-(x\\beta - 1.96*se))} \\]\nFor the probit, transform as\n\\[Pr(y=1) =  \\Phi(x\\beta) \\] \\[ ub = \\Phi(x\\beta + 1.96*se) \\] \\[ lb = \\Phi(x\\beta - 1.96*se) \\]\nAny of the prediction methods we’ve learned are the same here - just remember to transform the quantities by \\(F\\)."
+  },
+  {
+    "objectID": "slides/limiteddv25.html#at-mean-predictions-logit",
+    "href": "slides/limiteddv25.html#at-mean-predictions-logit",
+    "title": "Binary \\(y\\) variables",
+    "section": "At-mean predictions (logit)",
+    "text": "At-mean predictions (logit)\n\n\ncode\n#summary(m1)\n#confint(m1)\n\n#new data frame for MEM prediction\nmem &lt;- data.frame(deml= c(seq(-10,10,1)), \n                  border=0, caprat=median(dp$caprat), ally=0)\n\n# type=\"link\" produces the linear predictions; transform by hand below w/EPT\nmem  &lt;-data.frame(mem, predict(m1, type=\"link\", newdata=mem, se=TRUE))\n\nmem &lt;- cbind(mem,lb=plogis(mem$fit-1.96*mem$se.fit),\n             ub=plogis(mem$fit+1.96*mem$se.fit), \n             p=plogis(mem$fit))\n\nggplot(mem, aes(x=deml, y=p)) +\n  geom_line() +\n  geom_ribbon(data=mem, aes(x=deml, ymin=lb, ymax=ub),fill = \"grey70\", alpha = .4, ) +\n  labs(x=\"Polity Score\", y=\"Pr(Dispute) (95% confidence interval)\")"
+  },
+  {
+    "objectID": "slides/limiteddv25.html#average-effects-logit",
+    "href": "slides/limiteddv25.html#average-effects-logit",
+    "title": "Binary \\(y\\) variables",
+    "section": "Average effects (logit)",
+    "text": "Average effects (logit)\nAverage effects are often a better choice because they represent the data more completely than central tendency can (in the at-mean effects). Here are average effects (using the logit estimates) across the range of polity, and for pairs of states that share borders and those that do not.\n\n\ncode\n#avg effects\n\n#identify the estimation sample\ndp$used &lt;- TRUE\ndp$used[na.action(m1)] &lt;- FALSE\ndpesample &lt;- dp %&gt;%  filter(used==\"TRUE\")\n\npolity &lt;- 0\nmedxbd0 &lt;- 0\nubxbd0 &lt;- 0\nlbxbd0 &lt;- 0\n# medse &lt;- 0\n# medxbd1 &lt;- 0\n# ubxbd1 &lt;- 0\n# lbxbd1 &lt;- 0\n\nfor(i in seq(1,21,1)){\n  dpesample$border&lt;- 0\n  dpesample$deml &lt;- i-11\n  polity[i] &lt;- i-11\n  allpreds &lt;- data.frame(predict(m1, type= \"response\", se.fit=TRUE, newdata = dpesample))  \n  medxbd0[i] &lt;- median(allpreds$fit, na.rm=TRUE)\n  ubxbd0[i] &lt;- median(allpreds$fit, na.rm=TRUE)+1.96*(median(allpreds$se.fit, na.rm=TRUE))\n  lbxbd0[i] &lt;- median(allpreds$fit, na.rm=TRUE)-1.96*(median(allpreds$se.fit, na.rm=TRUE))\n}\n  \nnoborder &lt;- data.frame(polity, medxbd0, ubxbd0, lbxbd0)\n  \nfor(i in seq(1,21,1)){\n  dpesample$border&lt;- 1\n  dpesample$deml &lt;- i-11\n  polity[i] &lt;- i-11\n  allpreds &lt;- data.frame(predict(m1, type= \"response\", se.fit=TRUE, newdata = dpesample))  \n  medxbd0[i] &lt;- median(allpreds$fit, na.rm=TRUE)\n  ubxbd0[i] &lt;- median(allpreds$fit, na.rm=TRUE)+1.96*(median(allpreds$se.fit, na.rm=TRUE))\n  lbxbd0[i] &lt;- median(allpreds$fit, na.rm=TRUE)-1.96*(median(allpreds$se.fit, na.rm=TRUE))\n}\n  \nborder &lt;- data.frame(polity, medxbd0, ubxbd0, lbxbd0)\n  \nggplot() +\n  geom_ribbon(data=noborder, aes(x=polity, ymin=lbxbd0, ymax=ubxbd0),fill = \"grey70\", alpha = .4, ) +\n  geom_line(data=noborder, aes(x=polity, y=medxbd0))+\n  geom_ribbon(data=border, aes(x=polity, ymin=lbxbd0, ymax=ubxbd0),fill = \"grey70\", alpha = .4, ) +\n  geom_line(data=border, aes(x=polity, y=medxbd0))+\n  labs ( colour = NULL, x = \"Polity Score\", y =  \"Pr(Dispute)\" )+\n  theme_minimal()+\n  ggtitle(\"Average Effects\")"
+  },
+  {
+    "objectID": "slides/limiteddv25.html#simulation",
+    "href": "slides/limiteddv25.html#simulation",
+    "title": "Binary \\(y\\) variables",
+    "section": "Simulation",
+    "text": "Simulation\nSimulation is an especially good approach for nonlinear models:\n\nestimate the model.\n\\(m\\) times (say, 1000 times), simulate the distribution of \\(\\widehat{\\beta}\\).\ngenerate the \\(m\\) linear predictions, \\(x\\widehat{\\beta}\\).\ntransform by the appropriate link function (logistic, standard normal CDF).\nidentify the 2.5, 50, and 97.5 percentiles.\nplot against \\(x\\).\n\n\n\ncode\n#draws from multivariate normal using logit model estimates\nsimL &lt;- data.frame(MASS::mvrnorm(1000, coef(m1), vcov(m1)))\n#draws from multivariate normal using probit model estimates\nsimP &lt;- data.frame(MASS::mvrnorm(1000, coef(m2), vcov(m2)))\n\n#Logit predictions\nlogitprobs &lt;- data.frame(dem= numeric(0) , lb=numeric(0), med= numeric(0), ub=numeric(0))\nfor (i in seq(1,21,1)) {\nsimpreds &lt;- quantile(simL$X.Intercept.+ simL$border*0+simL$deml*(i-11)+simL$caprat*median(dp$caprat)+simL$ally*0, probs=c(.025, .5, .975))\nlogitprobs[i,] &lt;- data.frame(dem=i, lb=plogis(simpreds[1]), med=plogis(simpreds[2]), ub=plogis(simpreds[3]))\n}\n\n#Probit predictions\nprobitprobs &lt;- data.frame(dem= numeric(0) , lb=numeric(0), med= numeric(0), ub=numeric(0))\nfor (i in seq(1,21,1)) {\nsimpreds &lt;- quantile(simP$X.Intercept.+ simP$border*0+simP$deml*(i-11)+simP$caprat*median(dp$caprat)+simP$ally*0, probs=c(.025, .5, .975))\nprobitprobs[i,] &lt;- data.frame(dem=i, lb=pnorm(simpreds[1]), med=pnorm(simpreds[2]), ub=pnorm(simpreds[3]))\n}\n\nlogit &lt;- ggplot() +\n  geom_ribbon(data=logitprobs, aes(x=dem, ymin=lb, ymax=ub),fill = \"grey70\", alpha = .4, ) +\n  geom_line(data=logitprobs, aes(x=dem, y=med))+\n  labs ( colour = NULL, x = \"Polity Score\", y =  \"Pr(Dispute)\" )+\n  theme_minimal()+\n  ggtitle(\"Logit Predictions\")\n\nprobit &lt;- ggplot() +\n  geom_ribbon(data=probitprobs, aes(x=dem, ymin=lb, ymax=ub),fill = \"grey70\", alpha = .4, ) +\n  geom_line(data=probitprobs, aes(x=dem, y=med))+\n  labs ( colour = NULL, x = \"Polity Score\", y =  \"Pr(Dispute)\" )+\n  theme_minimal()+\n  ggtitle(\"Probit Predictions\")\n\nlogit+probit"
+  },
+  {
+    "objectID": "slides/limiteddv25.html#simulating-combinations-of-binary-variables",
+    "href": "slides/limiteddv25.html#simulating-combinations-of-binary-variables",
+    "title": "Binary \\(y\\) variables",
+    "section": "Simulating combinations of binary variables",
+    "text": "Simulating combinations of binary variables\nLet’s look at the differences among the four combinations of the binary variables, border and ally.\n\n\ncode\n## simulating for binary combinations ----\n\nm1 &lt;-glm(dispute ~ border+deml+caprat+ally, family=binomial(link=\"logit\"), data=dp )\n\n#draws from multivariate normal using logit model estimates\nsimL &lt;- data.frame(MASS::mvrnorm(1000, coef(m1), vcov(m1)))\n\n\nlogitprobs &lt;- data.frame(b0a0= numeric(0) , b1a0=numeric(0), b0a1= numeric(0), b1a1=numeric(0))\n\n  b0a0 &lt;- plogis(simL$X.Intercept.+ simL$border*0+simL$deml*-7+simL$caprat*median(dp$caprat)+simL$ally*0)\nb1a0 &lt;- plogis(simL$X.Intercept.+ simL$border*1+simL$deml*-7+simL$caprat*median(dp$caprat)+simL$ally*0)\nb0a1 &lt;- plogis(simL$X.Intercept.+ simL$border*0+simL$deml*-7+simL$caprat*median(dp$caprat)+simL$ally*1)\nb1a1 &lt;- plogis(simL$X.Intercept.+ simL$border*1+simL$deml*-7+simL$caprat*median(dp$caprat)+simL$ally*1)\n\nlogitprobs &lt;- data.frame(b0a0, b1a0, b0a1, b1a1)\n\nggplot() +\n  geom_density(data=logitprobs, aes(x=b0a0), fill=\"grey70\", alpha = .4, ) +\n  geom_density(data=logitprobs, aes(x=b1a0), fill=\"grey70\", alpha = .4, ) +\n  geom_density(data=logitprobs, aes(x=b0a1), fill=\"grey70\", alpha = .4, ) +\n  geom_density(data=logitprobs, aes(x=b1a1), fill=\"grey70\", alpha = .4, ) +\n  labs ( colour = NULL, x = \"Pr(Dispute)\", y =  \"Density\" ) +\n  theme_minimal()+\n  annotate(\"text\", x = .07, y = 150, label = \"No border, not allies\", color = \"black\") +\n  annotate(\"text\", x = .13, y = 70, label = \"Border, not allies\", color = \"black\") +\n  annotate(\"text\", x = .04, y = 200, label = \"No border, allies\", color = \"black\") +\n  annotate(\"text\", x = .09, y = 50, label = \"Border, allies\", color = \"black\") +\n  ggtitle(\"Logit Predictions\")"
   }
 ]
