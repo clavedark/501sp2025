@@ -135,7 +135,7 @@ The difference between this model and the OLS linear model is simply that we mus
 
 # Why leave the robust OLS model?
 
-Why not use the linear model when $y$ is binary?
+Why not use the OLS model when $y$ is binary?
 
   - because we fail to satisfy the OLS assumptions.
   - because the residuals are not Normal. 
@@ -143,7 +143,7 @@ Why not use the linear model when $y$ is binary?
   - because $y$ is limited.
 
  
-**Limited $y$ variables** are $y$s where our measurement is limited by the realities of the world. Such variables are rarely normal, often not continuous, and often observable indicators of unobservable things - this is all true of binary variables. 
+**Limited $y$ variables** are $y$s where our measurement is limited by the realities of the world. Such variables are rarely normal, often not continuous, and often observable indicators of unobservable things - this is true of most binary variables. 
 
  
 
@@ -158,11 +158,11 @@ Limited dependent variables are usually limited in the sense that we cannot obse
 
   - binary variables: 0=peace, 1=war; 0=vote, 1=don't vote.
  
-  - unordered or nominal categorical variables: type of car you prefer: Honda, Toyota, Ford, Buick; policy choices; consumer choices.
+  - unordered or nominal categorical variables: type of car you prefer: Honda, Toyota, Ford, Buick; policy choices; candidates in an election.
   
   - ordered variables that take on few values: some survey responses.
  
-  -discrete count variables; number of episodes of scarring torture in a country-year, 0, 1, 2, 3,  \ldots, $\infty$
+  - discrete count variables; number of episodes of scarring torture in a country-year, 0, 1, 2, 3, $\ldots$, $\infty$
  
   - time to failure; how long a civil war lasts; how long a patient survives disease; how long a leader survives in office.
 
@@ -217,12 +217,15 @@ olspreds <- predict(mols)
 
 df <- data.frame(logitpreds, olspreds, dispute=as.factor(dp$dispute))
 
+bucolors<-list("#005A43","#6CC24A", "#A7DA92", "#BDBEBD", "#000000" )
+
 ggplot(df, aes(x=logitpreds, y=olspreds, color=dispute)) + 
   geom_point()+
   labs(title="Predictions from Logit and OLS", x="Logit Predictions", y="OLS Predictions")+
   geom_hline(yintercept=0)+
   theme_minimal() +
-  annotate("text", x=.05, y=-.05, label="2,147 Predictions out of bounds", color="red")
+  annotate("text", x=.05, y=-.05, label="2,147 Predictions out of bounds", color="red")+
+  scale_color_manual(values=bucolors)
 
 ```
 
@@ -252,12 +255,18 @@ geom_vline(xintercept=0, linetype="dashed")
 
 
 df <- data.frame(df, mols$residuals)
- 
-ggplot(df, aes(x=mols.residuals, color=dispute)) + 
-  geom_density()+
+
+bucolors<-list("#005A43","#6CC24A", "#A7DA92", "#BDBEBD", "#000000" )
+
+#plot density of residuals color by dispute
+
+ggplot(df, aes(x=mols.residuals, fill=dispute)) + 
+  geom_density(alpha=.5)+
   labs(title="Density of OLS Residuals", x="Residuals", y="Density")+
   theme_minimal()+
-  geom_vline(xintercept=0, linetype="dashed")
+  geom_vline(xintercept=0, linetype="dashed")+
+  scale_fill_manual(values=bucolors)
+
 
 
 
@@ -272,7 +281,7 @@ ggplot(df, aes(x=mols.residuals, color=dispute)) +
 
 ## On Linearity
 
-In the linear model,  $\hat{y_i}=x_i\beta$. This makes sense because $y = y^*$. Put differently, $y$ is continuous, unbounded, (assumed) normal, and is an "unlimited" measure of the concept we intend to measure.
+In the linear model,  $\hat{y_i}=x_i\widehat{\beta}$. This makes sense because $y = y^*$. Put differently, $y$ is continuous, unbounded, (assumed) normal, and is an "unlimited" measure of the concept we intend to measure.
 
 
 In binary models, $y \neq y^*$, because our observation of $y$ is *limited* such that we can only observe its presence or absence. We have two different realizations of the same variable: $y$ is the limited but observed variable; $y^*$ is the unlimited variable we want to measure, but cannot because it is unobservable.
@@ -309,21 +318,23 @@ l <- seq(0,1,.01)
 s1 <- 1/(1+exp(-z))
 s2 <- pnorm(z)
 
+bucolors<-list("#005A43","#6CC24A", "#A7DA92", "#BDBEBD", "#000000" )
+
 ggplot() + 
-  geom_line(aes(x=z, y=l), color="black")+
-  geom_line(aes(x=z, y=s1), color="red")+
-  geom_line(aes(x=z, y=s2), color="green")+
+  geom_line(aes(x=z, y=l), color="#BDBEBD")+
+  geom_line(aes(x=z, y=s1), color="#6CC24A")+
+  geom_line(aes(x=z, y=s2), color="#005A43")+
   labs(title="Linear and Sigmoid Functions", x="z", y="F(z)")+
   theme_minimal()+
-  annotate("text", x=0, y=.75, label="Normal", color="green")+
-  annotate("text", x=-3, y=.1, label="Logistic", color="red")
+  annotate("text", x=0, y=.75, label="Normal", color="#005A43")+
+  annotate("text", x=-3, y=.1, label="Logistic", color="#6CC24A")
 
 ```
 
 
 ## Non constant change in Pr(y=1) across values of $z$
 
-Animating the change in $Pr(y=1)$ across values of $z$ for the linear and sigmoid functions.
+Animating the change in $Pr(y=1)$ across values of $z$ for the linear and sigmoid functions so we can focus on the rates of change:
 
 ```{r, warning=FALSE, message=FALSE}
 #| echo: true
@@ -340,9 +351,9 @@ s2 <- pnorm(z)
 df <- data.frame(z=z, l=l, s1=s1, s2=s2)
 
 ggplot(df, aes(x=z, y=l)) + 
-  geom_line(aes(x=z, y=l), color="black")+
-  geom_line(aes(x=z, y=s1), color="red")+
-  geom_line(aes(x=z, y=s2), color="green")+
+  geom_line(aes(x=z, y=l), color="#BDBEBD")+
+  geom_line(aes(x=z, y=s1), color="#6CC24A")+
+  geom_line(aes(x=z, y=s2), color="#005A43")+
   labs(title="Rates of change", x="z", y="F(z)")+
   theme_minimal()+
   transition_reveal(z)
