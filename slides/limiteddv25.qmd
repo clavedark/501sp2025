@@ -1,5 +1,5 @@
 ---
-title: "Binary $y$ variables"
+title: 'Binary $y$ variables'
 author: "Dave Clark"
 institute: "Binghamton University"
 date: today
@@ -13,7 +13,6 @@ format:
 editor: source
 embed-resources: true
 cache: true
-
 ---
 
 <!-- render 2 types at same time; terminal "quarto render file.qmd" -->

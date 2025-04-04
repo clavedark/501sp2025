@@ -42,7 +42,7 @@ If you're interested in how maximum likelihood estimation works, check out this 
 
 [Maximization](https://clavedark.github.io/MLEfall24/llfmax24.html)
 
-
+[How MLE works](/slides/mle-iterations25.qmd)
 
 <!-- [Panel data](panel24.qmd) -->
 

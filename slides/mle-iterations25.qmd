@@ -1,0 +1,925 @@
+---
+title: "Basic Iterative MLE Step-by-Step"
+author: "Dave Clark"
+institute: "Binghamton University"
+date: today
+date-format: long
+title-block-banner: TRUE
+bibliography: ../refs501.bib
+format: 
+  html:
+    theme: default
+    code-fold: true
+editor: source
+embed-resources: true
+cache: true
+execute:
+  echo: true
+  warning: false
+---
+
+# Introduction
+
+This document demonstrates the basic process of Maximum Likelihood Estimation (MLE) through manual iteration. We'll generate a small dataset from a normal distribution, write the log-likelihood function, and then manually optimize it by testing different parameter values to find the maximum, visualizing each step of the process.
+
+## Setup and Data Generation
+
+First, let's set a seed for reproducibility and generate a small sample from a normal distribution:
+
+```{r}
+#| label: setup
+
+# Load required libraries
+library(ggplot2)
+library(dplyr)
+library(knitr)
+library(gridExtra)
+library(gganimate)
+library(gifski)
+library(transformr)  # For smooth transitions in animations
+
+# Define color palette
+bucolors <- c("#005A43", "#6CC24A", "#A7DA92", "#BDBEBD", "#000000")
+
+# Set seed for reproducibility
+set.seed(123)
+
+# Generate a small dataset from a normal distribution
+# True parameters: mean = 10, sd = 2
+true_mean <- 10
+true_sd <- 2
+n <- 20  # sample size
+data <- rnorm(n, mean = true_mean, sd = true_sd)
+
+# Display the data
+head(data)
+summary(data)
+```
+
+Let's visualize our generated data:
+
+```{r}
+#| label: data-viz
+
+# Create data frame for plotting
+df <- data.frame(x = data)
+
+# Plot histogram with ggplot
+ggplot(df, aes(x = x)) +
+  geom_histogram(bins = 10, fill = bucolors[[1]], color = "white", alpha = 0.7) +
+  geom_vline(aes(xintercept = mean(x)), color = bucolors[[1]], linewidth = 1.2, linetype = "dashed") +
+  labs(title = "Histogram of Generated Data",
+       subtitle = paste("Sample mean =", round(mean(data), 2)),
+       x = "Value",
+       y = "Count") +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold"),
+    axis.title = element_text(face = "bold")
+  )
+```
+
+## The Log-Likelihood Function
+
+Looking at our generated data, it appears to be continuous and approximately normally distributed. Let's formalize our approach to finding the maximum likelihood estimates.
+
+For a normal distribution with parameters $\mu$ (mean) and $\sigma$ (standard deviation), the probability density function (PDF) for a single observation $x$ is:
+
+$f(x|\mu,\sigma) = \frac{1}{\sigma\sqrt{2\pi}}e^{-\frac{(x-\mu)^2}{2\sigma^2}}$
+
+Note that while $\mu$ (mean) and $\sigma$ (standard deviation) are both parameters of the normal distribution, $\pi$ is the constant 3.14 and not a parameter to be estimated. Also, we'll fix $\sigma$ at its true value for simplicity and focus on estimating $\mu$.
+
+For our sample $x_1, x_2, \ldots, x_n$, assuming independent observations, the joint density function is the product of individual densities - in other words, the probablity of observing all of these data points together given the parameters is:
+
+$L(\mu, \sigma | x) = \prod_{i=1}^{n}f(x_i|\mu,\sigma) = \prod_{i=1}^{n}\frac{1}{\sigma\sqrt{2\pi}}e^{-\frac{(x_i-\mu)^2}{2\sigma^2}}$
+
+Addition is easier than multiplication. Recalling that the log of the product is equal to the sum of the logs, we can simplify the likelihood function by taking the natural logarithm:
+
+$\log L(\mu, \sigma | x) = \sum_{i=1}^{n}\log\left(\frac{1}{\sigma\sqrt{2\pi}}e^{-\frac{(x_i-\mu)^2}{2\sigma^2}}\right)$
+
+$\log L(\mu, \sigma | x) = \sum_{i=1}^{n}\left[-\log(\sigma) - \frac{1}{2}\log(2\pi) - \frac{(x_i-\mu)^2}{2\sigma^2}\right]$
+
+Simplifying:
+
+$\log L(\mu, \sigma | x) = -n\log(\sigma) - \frac{n}{2}\log(2\pi) - \frac{1}{2\sigma^2}\sum_{i=1}^{n}(x_i - \mu)^2$
+
+# Procedure for MLE
+
+The goal of MLE is to find the parameter values that maximize the log-likelihood function. In our case, we want to find the value of $\mu$ that most likely produced the observed data. To do this, we're going to manually iterate through different values of $\mu$, calculate the log-likelihood at each step, save those log-likelihood values, and visualize the process by plotting the log-likelihoods against the trial values of $\mu$.
+
+
+
+Let's implement this function in R. For simplicity, we'll focus on estimating just the mean ($\mu$) and keep the standard deviation fixed at its true value:
+
+```{r}
+#| label: loglik-function
+
+# Log-likelihood function for normal distribution
+# Keeping sigma fixed at true value for simplicity
+log_likelihood <- function(mu, data, sigma = true_sd) {
+  n <- length(data)
+  log_lik <- -n/2 * log(2*pi) - n * log(sigma) - 
+             sum((data - mu)^2) / (2 * sigma^2)
+  return(log_lik)
+}
+```
+
+## Manual Step-by-Step Iteration
+
+Now, let's manually iterate through different values of $\mu$ to find the one that maximizes the log-likelihood. We'll start with a guess far from the actual mean and gradually move closer, documenting each step.
+
+Let's first create a function to visualize our current position on the log-likelihood curve:
+
+```{r}
+#| label: viz-function
+
+visualize_loglik <- function(mu_current, data, history = NULL, 
+                             mu_range = c(8, 12)) {
+  # Use the global bucolors variable
+  # This avoids the recursive reference issue
+  # Generate a sequence for the x-axis (possible mu values)
+  mu_values <- seq(mu_range[1], mu_range[2], by = 0.1)
+  
+  # Calculate log-likelihood for each mu value
+  ll_values <- sapply(mu_values, log_likelihood, data = data)
+  
+  # Create data frame for plotting
+  df_ll <- data.frame(mu = mu_values, log_likelihood = ll_values)
+  
+  # Create base plot
+  p <- ggplot(df_ll, aes(x = mu, y = log_likelihood)) +
+    geom_line(color = bucolors[[1]], linewidth = 1.2) +
+    labs(
+      title = "Log-Likelihood Function",
+      subtitle = paste("Current guess: μ =", round(mu_current, 4)),
+      x = "μ (Mean Parameter)",
+      y = "Log-Likelihood"
+    ) +
+    theme_minimal() +
+    theme(
+      plot.title = element_text(face = "bold"),
+      axis.title = element_text(face = "bold")
+    )
+  
+  # Add vertical line for sample mean (true MLE)
+  p <- p + geom_vline(xintercept = mean(data), 
+                      color = bucolors[[5]], 
+                      linetype = "dashed", 
+                      linewidth = 0.8)
+  
+  # Add current position
+  current_ll <- log_likelihood(mu_current, data)
+  p <- p + geom_point(
+    data = data.frame(mu = mu_current, log_likelihood = current_ll),
+    color = bucolors[[2]],
+    size = 4
+  )
+  
+  # Add history if provided
+  if (!is.null(history) && nrow(history) > 0) {
+    p <- p + geom_path(
+      data = history,
+      aes(x = mu, y = log_likelihood),
+      color = bucolors[[3]],
+      linetype = "dashed",
+      linewidth = 1
+    ) +
+    geom_point(
+      data = history,
+      aes(x = mu, y = log_likelihood),
+      color = bucolors[[3]],
+      size = 3,
+      alpha = 0.7
+    )
+    
+    # Add iteration labels
+    p <- p + geom_text(
+      data = history,
+      aes(x = mu, y = log_likelihood, label = iteration),
+      hjust = -0.5,
+      vjust = -0.5,
+      color = bucolors[[5]],
+      size = 4
+    )
+  }
+  
+  return(p)
+}
+```
+
+### Iteration 1: Initial Guess
+
+Let's start with an initial guess far from the true value:
+
+```{r}
+#| label: iteration-1
+
+# Initial guess
+mu_current <- 8.0
+
+# Calculate log-likelihood at this point
+ll_current <- log_likelihood(mu_current, data)
+
+# Start our history data frame
+history <- data.frame(
+  iteration = 1,
+  mu = mu_current,
+  log_likelihood = ll_current
+)
+
+# Display current values
+cat("Iteration 1:\n")
+cat("  μ =", mu_current, "\n")
+cat("  Log-likelihood =", ll_current, "\n")
+cat("  Sample mean (target) =", mean(data), "\n\n")
+
+# Visualize
+visualize_loglik(mu_current, data)
+```
+
+Let's examine in detail how we calculated the log-likelihood for our initial guess of μ = 8.0:
+
+```{r}
+#| label: detailed-calculation
+
+# Calculate individual log-likelihood terms for each data point
+individual_loglik <- data.frame(
+  observation = data,
+  term = -0.5 * log(2*pi) - log(true_sd) - (data - mu_current)^2 / (2 * true_sd^2)
+)
+
+# Display the calculation
+cat("Step 1: Calculate log-likelihood for each observation using μ =", mu_current, "\n\n")
+print(individual_loglik)
+
+cat("\nStep 2: Sum all individual log-likelihood terms\n")
+cat("Sum =", sum(individual_loglik$term), "\n")
+cat("This matches our function output:", ll_current, "\n\n")
+
+# Calculate a more human-readable version
+cat("To understand this value, let's compare the probability densities:\n")
+densities <- data.frame(
+  observation = data,
+  density_at_mu_8 = dnorm(data, mean = mu_current, sd = true_sd),
+  density_at_sample_mean = dnorm(data, mean = mean(data), sd = true_sd)
+)
+
+# Show first few rows
+head(densities)
+
+# Calculate ratios to see improvement potential
+cat("\nRatio of densities (sample mean / μ = 8.0):\n")
+density_ratios <- densities$density_at_sample_mean / densities$density_at_mu_8
+print(summary(density_ratios))
+cat("Values > 1 indicate the sample mean gives higher probability density\n")
+```
+
+### Iteration 2: Move Toward the Center
+
+Let's try a value closer to the center of our data:
+
+```{r}
+#| label: iteration-2
+
+# New guess
+mu_current <- 9.0
+
+# Calculate log-likelihood at this point
+ll_current <- log_likelihood(mu_current, data)
+
+# Add to history
+history <- rbind(history, 
+                data.frame(
+                  iteration = 2,
+                  mu = mu_current,
+                  log_likelihood = ll_current
+                ))
+
+# Display current values
+cat("Iteration 2:\n")
+cat("  μ =", mu_current, "\n")
+cat("  Log-likelihood =", ll_current, "\n")
+cat("  Improvement from previous:", ll_current - history$log_likelihood[1], "\n\n")
+
+# Visualize with history
+visualize_loglik(mu_current, data, history)
+```
+
+### Iteration 3: Getting Closer
+
+The log-likelihood increased, so we're moving in the right direction. Let's try a higher value:
+
+```{r}
+#| label: iteration-3
+
+# New guess
+mu_current <- 9.5
+
+# Calculate log-likelihood at this point
+ll_current <- log_likelihood(mu_current, data)
+
+# Add to history
+history <- rbind(history, 
+                data.frame(
+                  iteration = 3,
+                  mu = mu_current,
+                  log_likelihood = ll_current
+                ))
+
+# Display current values
+cat("Iteration 3:\n")
+cat("  μ =", mu_current, "\n")
+cat("  Log-likelihood =", ll_current, "\n")
+cat("  Improvement from previous:", ll_current - history$log_likelihood[2], "\n\n")
+
+# Visualize with history
+visualize_loglik(mu_current, data, history)
+```
+
+### Iteration 4: Even Closer
+
+Let's try an even higher value:
+
+```{r}
+#| label: iteration-4
+
+# New guess
+mu_current <- 10.0
+
+# Calculate log-likelihood at this point
+ll_current <- log_likelihood(mu_current, data)
+
+# Add to history
+history <- rbind(history, 
+                data.frame(
+                  iteration = 4,
+                  mu = mu_current,
+                  log_likelihood = ll_current
+                ))
+
+# Display current values
+cat("Iteration 4:\n")
+cat("  μ =", mu_current, "\n")
+cat("  Log-likelihood =", ll_current, "\n")
+cat("  Improvement from previous:", ll_current - history$log_likelihood[3], "\n\n")
+
+# Visualize with history
+visualize_loglik(mu_current, data, history)
+```
+
+### Iteration 5: Test a Higher Value
+
+Let's see if going higher still improves the likelihood:
+
+```{r}
+#| label: iteration-5
+
+# New guess
+mu_current <- 10.5
+
+# Calculate log-likelihood at this point
+ll_current <- log_likelihood(mu_current, data)
+
+# Add to history
+history <- rbind(history, 
+                data.frame(
+                  iteration = 5,
+                  mu = mu_current,
+                  log_likelihood = ll_current
+                ))
+
+# Display current values
+cat("Iteration 5:\n")
+cat("  μ =", mu_current, "\n")
+cat("  Log-likelihood =", ll_current, "\n")
+cat("  Improvement from previous:", ll_current - history$log_likelihood[4], "\n\n")
+
+# Visualize with history
+visualize_loglik(mu_current, data, history)
+```
+
+### Iteration 6: Have We Gone Too Far?
+
+Since the log-likelihood decreased, we've gone too far. Let's try a value between our last two guesses:
+
+```{r}
+#| label: iteration-6
+
+# New guess - somewhere between the last two
+mu_current <- 10.2
+
+# Calculate log-likelihood at this point
+ll_current <- log_likelihood(mu_current, data)
+
+# Add to history
+history <- rbind(history, 
+                data.frame(
+                  iteration = 6,
+                  mu = mu_current,
+                  log_likelihood = ll_current
+                ))
+
+# Display current values
+cat("Iteration 6:\n")
+cat("  μ =", mu_current, "\n")
+cat("  Log-likelihood =", ll_current, "\n")
+cat("  Improvement from previous iteration 4:", ll_current - history$log_likelihood[4], "\n\n")
+
+# Visualize with history
+visualize_loglik(mu_current, data, history)
+```
+
+### Iteration 7: Fine-Tuning
+
+Let's try a slightly higher value to see if we can get even closer to the maximum:
+
+```{r}
+#| label: iteration-7
+
+# New guess - a bit higher
+mu_current <- 10.25
+
+# Calculate log-likelihood at this point
+ll_current <- log_likelihood(mu_current, data)
+
+# Add to history
+history <- rbind(history, 
+                data.frame(
+                  iteration = 7,
+                  mu = mu_current,
+                  log_likelihood = ll_current
+                ))
+
+# Display current values
+cat("Iteration 7:\n")
+cat("  μ =", mu_current, "\n")
+cat("  Log-likelihood =", ll_current, "\n")
+cat("  Improvement from previous:", ll_current - history$log_likelihood[6], "\n\n")
+
+# Visualize with history
+visualize_loglik(mu_current, data, history)
+```
+
+### Comparing with the True MLE
+
+For a normal distribution, we know that the maximum likelihood estimator for the mean is simply the sample mean - so the "true MLE" in this case is the sample mean of the variable. Let's verify:
+
+```{r}
+#| label: true-mle
+
+# Calculate the sample mean
+sample_mean <- mean(data)
+
+# Calculate log-likelihood at the sample mean
+ll_at_sample_mean <- log_likelihood(sample_mean, data)
+
+# Add to our history
+history <- rbind(history, 
+                data.frame(
+                  iteration = 8,
+                  mu = sample_mean,
+                  log_likelihood = ll_at_sample_mean
+                ))
+
+# Display values
+cat("Sample Mean (True MLE):\n")
+cat("  μ =", sample_mean, "\n")
+cat("  Log-likelihood =", ll_at_sample_mean, "\n")
+cat("  Improvement from our best guess:", ll_at_sample_mean - max(history$log_likelihood[1:7]), "\n\n")
+
+# Final visualization
+visualize_loglik(sample_mean, data, history)
+```
+
+### Summary of Iterations
+
+Let's summarize all our iterations to see how we've progressed:
+
+```{r}
+#| label: summary-table
+
+# Create a summary table
+history$improvement <- c(NA, diff(history$log_likelihood))
+history$distance_from_mle <- abs(history$mu - sample_mean)
+
+# Format the table
+kable(history, 
+      col.names = c("Iteration", "μ", "Log-Likelihood", "Improvement", "Distance from MLE"),
+      digits = c(0, 4, 4, 4, 4),
+      caption = "Summary of MLE Iterations")
+```
+
+
+
+
+# Another Example: MLE for a Binary Variable
+
+Let's illustrate MLE with a different type of data: binary observations following a Bernoulli distribution.
+
+## Setup and Data Generation for Binary Variable
+
+We'll generate binary data (0s and 1s) with a true probability parameter p:
+
+```{r}
+#| label: binary-setup
+
+# Set seed for reproducibility
+set.seed(456)
+
+# Generate a sample from a Bernoulli distribution
+# True parameter: p = 0.7 (probability of success)
+true_p <- 0.7
+n_binary <- 50  # sample size
+binary_data <- rbinom(n_binary, size = 1, prob = true_p)
+
+# Display a summary of the data
+table(binary_data)
+mean(binary_data)  # sample proportion of 1s
+```
+
+Let's visualize the distribution of our binary data:
+
+```{r}
+#| label: binary-viz
+
+# Create a data frame for plotting
+binary_df <- data.frame(
+  value = factor(binary_data, levels = c(0, 1), labels = c("Failure (0)", "Success (1)")),
+  count = 1
+)
+
+# Create a bar plot
+ggplot(binary_df, aes(x = value, fill = value)) +
+  geom_bar() +
+  scale_fill_manual(values = c(bucolors[1], bucolors[2])) +
+  labs(title = "Distribution of Binary Data",
+       subtitle = paste("Sample proportion of successes =", round(mean(binary_data), 3)),
+       x = "Outcome",
+       y = "Count") +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold"),
+    axis.title = element_text(face = "bold"),
+    legend.position = "none"
+  )
+```
+
+## The Log-Likelihood Function for Binary Data
+
+For binary data, we use the Bernoulli distribution with parameter p (probability of success). A Bernoulli distribution is a special case of the Binomial distribution with a single trial - since we end up with $N$ cases (trials) binary models like the logit or probit are in the Binomial family.
+
+The probability density function (PDF) for a single observation x is:
+
+$f(x|p) = p^x \cdot (1-p)^{1-x}$
+
+Where x can be either 0 or 1. This formulation handles both cases:
+
+- When x = 1: f(1|p) = p
+- When x = 0: f(0|p) = 1-p
+
+For our sample $x_1, x_2, \ldots, x_n$, assuming independent observations, the joint density function (likelihood) is:
+
+$L(p | x) = \prod_{i=1}^{n}f(x_i|p) = \prod_{i=1}^{n} p^{x_i} \cdot (1-p)^{1-x_i}$
+
+Taking the logarithm, we get the log-likelihood:
+
+$\log L(p | x) = \sum_{i=1}^{n} [x_i \log(p) + (1-x_i) \log(1-p)]$
+
+<!-- This can be simplified to: -->
+
+<!-- $\log L(p | x) = \left(\sum_{i=1}^{n} x_i\right) \log(p) + \left(n - \sum_{i=1}^{n} x_i\right) \log(1-p)$ -->
+
+<!-- If we denote the sum of all successes as s, then: -->
+
+<!-- $\log L(p | x) = s \log(p) + (n - s) \log(1-p)$ -->
+
+Let's implement this in R:
+
+```{r}
+#| label: binary-loglik
+
+# Log-likelihood function for Bernoulli distribution
+binary_log_likelihood <- function(p, data) {
+  s <- sum(data)  # number of successes
+  n <- length(data)  # total number of trials
+  
+  # Calculate log-likelihood
+  log_lik <- s * log(p) + (n - s) * log(1 - p)
+  
+  return(log_lik)
+}
+```
+
+## Manual Iteration for Binary Data
+
+Let's find the maximum likelihood estimate for the probability parameter $p$ using manual iteration, starting with a guess that's far from the true value. The process is the same as what we did in the normal case above - we try different values for the parameter ($p$), calculate the log-likelihood at each step, and visualize the process by plotting the log-likelihoods against the trial values of $p$.
+
+```{r}
+#| label: binary-iteration-1
+
+# Function to visualize log-likelihood for binary data
+visualize_binary_loglik <- function(p_current, data, history = NULL) {
+  # Generate a sequence of probability values
+  p_values <- seq(0.1, 0.9, by = 0.01)
+  
+  # Calculate log-likelihood for each p value
+  ll_values <- sapply(p_values, binary_log_likelihood, data = data)
+  
+  # Create data frame for plotting
+  df_ll <- data.frame(p = p_values, log_likelihood = ll_values)
+  
+  # Create base plot
+  p <- ggplot(df_ll, aes(x = p, y = log_likelihood)) +
+    geom_line(color = bucolors[1], linewidth = 1.2) +
+    labs(
+      title = "Log-Likelihood Function (Bernoulli Distribution)",
+      subtitle = paste("Current guess: p =", round(p_current, 4)),
+      x = "p (Probability Parameter)",
+      y = "Log-Likelihood"
+    ) +
+    theme_minimal() +
+    theme(
+      plot.title = element_text(face = "bold"),
+      axis.title = element_text(face = "bold")
+    )
+  
+  # Add vertical line for sample proportion (true MLE)
+  p <- p + geom_vline(xintercept = mean(data), 
+                      color = bucolors[5], 
+                      linetype = "dashed", 
+                      linewidth = 0.8)
+  
+  # Add current position
+  current_ll <- binary_log_likelihood(p_current, data)
+  p <- p + geom_point(
+    data = data.frame(p = p_current, log_likelihood = current_ll),
+    color = bucolors[2],
+    size = 4
+  )
+  
+  # Add history if provided
+  if (!is.null(history) && nrow(history) > 0) {
+    p <- p + geom_path(
+      data = history,
+      aes(x = p, y = log_likelihood),
+      color = bucolors[3],
+      linetype = "dashed",
+      linewidth = 1
+    ) +
+    geom_point(
+      data = history,
+      aes(x = p, y = log_likelihood),
+      color = bucolors[3],
+      size = 3,
+      alpha = 0.7
+    )
+    
+    # Add iteration labels
+    p <- p + geom_text(
+      data = history,
+      aes(x = p, y = log_likelihood, label = iteration),
+      hjust = -0.5,
+      vjust = -0.5,
+      color = bucolors[5],
+      size = 4
+    )
+  }
+  
+  return(p)
+}
+
+# Initial guess
+p_current <- 0.3
+
+# Calculate log-likelihood at this point
+ll_current <- binary_log_likelihood(p_current, binary_data)
+
+# Start our history data frame
+binary_history <- data.frame(
+  iteration = 1,
+  p = p_current,
+  log_likelihood = ll_current
+)
+
+# Display current values
+cat("Iteration 1:\n")
+cat("  p =", p_current, "\n")
+cat("  Log-likelihood =", ll_current, "\n")
+cat("  Sample proportion (target) =", mean(binary_data), "\n\n")
+
+# Visualize
+visualize_binary_loglik(p_current, binary_data)
+```
+
+Let's examine in detail how we calculated the log-likelihood for our initial guess of p = 0.3:
+
+```{r}
+#| label: binary-detailed-calculation
+
+# Calculate individual log-likelihood terms for each data point
+binary_individual_loglik <- data.frame(
+  observation = binary_data,
+  term = ifelse(binary_data == 1, 
+                log(p_current),            # log(p) for successes
+                log(1 - p_current))        # log(1-p) for failures
+)
+
+# Display the first few individual terms
+cat("Step 1: Calculate log-likelihood for each observation using p =", p_current, "\n\n")
+cat("For successes (x = 1): log(p) = log(", p_current, ") =", log(p_current), "\n")
+cat("For failures (x = 0): log(1-p) = log(1 -", p_current, ") =", log(1 - p_current), "\n\n")
+
+# Display sample of calculations
+head(binary_individual_loglik, 10)
+
+cat("\nStep 2: Sum all individual log-likelihood terms\n")
+cat("Sum =", sum(binary_individual_loglik$term), "\n")
+cat("This matches our function output:", ll_current, "\n\n")
+# 
+# # Count successes and failures for clearer explanation
+# successes <- sum(binary_data)
+# failures <- length(binary_data) - successes
+# 
+# cat("Alternative calculation using sufficient statistics:\n")
+# cat("Number of successes (1s):", successes, "\n")
+# cat("Number of failures (0s):", failures, "\n")
+# cat("log L(p | x) = [successes × log(p)] + [failures × log(1-p)]\n")
+# cat("log L(", p_current, "| x) = [", successes, "×", log(p_current), "] + [", failures, "×", log(1 - p_current), "]\n")
+# cat("log L(", p_current, "| x) = [", successes * log(p_current), "] + [", failures * log(1 - p_current), "] =", ll_current, "\n\n")
+# 
+# # Calculate probabilities for comparison
+# cat("To understand this value, let's compare the probabilities:\n")
+# binary_probs <- data.frame(
+#   model = c("Using p = 0.3", "Using p = MLE"),
+#   prob_success = c(p_current, mean(binary_data)),
+#   prob_failure = c(1 - p_current, 1 - mean(binary_data)),
+#   likelihood = c(p_current^successes * (1-p_current)^failures,
+#                 mean(binary_data)^successes * (1-mean(binary_data))^failures),
+#   log_likelihood = c(ll_current, binary_log_likelihood(mean(binary_data), binary_data))
+# )
+# 
+# # Display comparison table
+# kable(binary_probs, 
+#       col.names = c("Model", "P(Success)", "P(Failure)", "Likelihood", "Log-Likelihood"),
+#       digits = c(0, 4, 4, 10, 4))
+# 
+# # Calculate improvement ratio
+# improvement_ratio <- exp(binary_log_likelihood(mean(binary_data), binary_data) - ll_current)
+# cat("\nThe MLE provides a likelihood that is", round(improvement_ratio, 2), "times higher than our initial guess.")
+```
+
+### Iteration 2: Increase the trial value
+
+Let's try a larger value:
+
+```{r}
+#| label: binary-iteration-2
+
+# New guess
+p_current <- 0.5
+
+# Calculate log-likelihood at this point
+ll_current <- binary_log_likelihood(p_current, binary_data)
+
+# Add to history
+binary_history <- rbind(binary_history, 
+                data.frame(
+                  iteration = 2,
+                  p = p_current,
+                  log_likelihood = ll_current
+                ))
+
+# Display current values
+cat("Iteration 2:\n")
+cat("  p =", p_current, "\n")
+cat("  Log-likelihood =", ll_current, "\n")
+cat("  Improvement from previous:", ll_current - binary_history$log_likelihood[1], "\n\n")
+
+# Visualize with history
+visualize_binary_loglik(p_current, binary_data, binary_history)
+```
+
+### Iteration 3: Getting Closer
+
+Let's move closer to the sample proportion:
+
+```{r}
+#| label: binary-iteration-3
+
+# New guess
+p_current <- 0.6
+
+# Calculate log-likelihood at this point
+ll_current <- binary_log_likelihood(p_current, binary_data)
+
+# Add to history
+binary_history <- rbind(binary_history, 
+                data.frame(
+                  iteration = 3,
+                  p = p_current,
+                  log_likelihood = ll_current
+                ))
+
+# Display current values
+cat("Iteration 3:\n")
+cat("  p =", p_current, "\n")
+cat("  Log-likelihood =", ll_current, "\n")
+cat("  Improvement from previous:", ll_current - binary_history$log_likelihood[2], "\n\n")
+
+# Visualize with history
+visualize_binary_loglik(p_current, binary_data, binary_history)
+```
+
+### Iteration 4: Very Close
+
+Let's try an even higher value:
+
+```{r}
+#| label: binary-iteration-4
+
+# New guess
+p_current <- 0.68
+
+# Calculate log-likelihood at this point
+ll_current <- binary_log_likelihood(p_current, binary_data)
+
+# Add to history
+binary_history <- rbind(binary_history, 
+                data.frame(
+                  iteration = 4,
+                  p = p_current,
+                  log_likelihood = ll_current
+                ))
+
+# Display current values
+cat("Iteration 4:\n")
+cat("  p =", p_current, "\n")
+cat("  Log-likelihood =", ll_current, "\n")
+cat("  Improvement from previous:", ll_current - binary_history$log_likelihood[3], "\n\n")
+
+# Visualize with history
+visualize_binary_loglik(p_current, binary_data, binary_history)
+```
+
+### Comparing with the True MLE
+
+For a Bernoulli distribution, we know that the maximum likelihood estimator for the probability p is simply the sample proportion of successes. Let's verify:
+
+```{r}
+#| label: binary-true-mle
+
+# Calculate the sample proportion (MLE)
+p_mle <- mean(binary_data)
+
+# Calculate log-likelihood at the MLE
+ll_at_mle <- binary_log_likelihood(p_mle, binary_data)
+
+# Add to our history
+binary_history <- rbind(binary_history, 
+                data.frame(
+                  iteration = 5,
+                  p = p_mle,
+                  log_likelihood = ll_at_mle
+                ))
+
+# Display values
+cat("Sample Proportion (True MLE):\n")
+cat("  p =", p_mle, "\n")
+cat("  Log-likelihood =", ll_at_mle, "\n")
+cat("  Improvement from our best guess:", ll_at_mle - max(binary_history$log_likelihood[1:4]), "\n\n")
+
+# Final visualization
+visualize_binary_loglik(p_mle, binary_data, binary_history)
+```
+
+### Summary of Binary MLE Iterations
+
+Let's summarize the iterations for the binary example:
+
+```{r}
+#| label: binary-summary-table
+
+# Create a summary table
+binary_history$improvement <- c(NA, diff(binary_history$log_likelihood))
+binary_history$distance_from_mle <- abs(binary_history$p - p_mle)
+
+# Format the table
+kable(binary_history, 
+      col.names = c("Iteration", "p", "Log-Likelihood", "Improvement", "Distance from MLE"),
+      digits = c(0, 4, 4, 4, 4),
+      caption = "Summary of MLE Iterations (Binary Data)")
+```
+
+
+## Conclusion
+
+This step-by-step demonstration illustrates how Maximum Likelihood Estimation works through manual iteration. We've shown how to:
+
+1. Start with an initial guess for the parameter (μ)
+2. Evaluate the log-likelihood at different parameter values
+3. Iteratively refine our guess to maximize the log-likelihood
+4. Visualize the search process and our progress toward the maximum
+
+For the normal distribution, we know analytically that the MLE for the mean is simply the sample mean (μ̂ = x̄), which our manual process confirmed.
+
+In real-world applications with more complex models, the same principles apply, but statistical software uses optimization algorithms (often rooted in Newton's method) to find the maximum likelihood estimates efficiently and accurately.
