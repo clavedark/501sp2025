@@ -46,7 +46,7 @@ If you're interested in how maximum likelihood estimation works, check out this 
 
 [Panel data](/slides/panel25.qmd)
 
-<!-- [Time Series](time24.qmd) -->
+[Time and Variance](/slides/timevariance25.qmd)
 
 <!-- [Variance](variance24.qmd) -->
 
