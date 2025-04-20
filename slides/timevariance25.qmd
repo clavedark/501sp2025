@@ -1034,7 +1034,11 @@ ggplot(data=cbind(vpreds, preds), aes(x=cap_1, y=preds)) + geom_line() + labs(x=
   
 Consistent with the coefficients in the variance vector, increases in capabilities increase the predicted variance in conflict behavior. States with greater capacity engage in more conflict (higher mean levels, per hypothesis one), and do so more variably (higher variance, per hypothesis two).
 
+## Aside on Measurement
 
+Be clear what you're measuring.
+
+![](surfturf.jpeg)
 
 ## References
 
