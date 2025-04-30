@@ -3182,7 +3182,7 @@
     "href": "slides/timevariance25.html#temporal-correlation",
     "title": "Time and Variance in the OLS model",
     "section": "Temporal correlation",
-    "text": "Temporal correlation\nThe nature of temporal correlations varies hugely. The focus of most basic time series analysis is autocorrelation - the error is correlated with itself at some point in the past so that,\n\\[\ncov[u_t,u_{t-k}] \\neq 0,  \\nonumber\n\\]\nBecause the errors are not independent, and because we know the rough source of their dependency, we could conceive of \\(u_t\\) as\\\n\\[\nu_t= \\rho u_{t-1} + \\varepsilon_t  ~~~\\forall t, ~~~-1 &lt; \\rho &lt; 1\n\\]\nwhere the error at \\(t\\) is a function of the error at \\(t-1\\) and \\(\\rho\\) is the coefficient indicating the effect of \\(u_{t-1}\\) on \\(u_t\\).\nThis conceptualization of \\(u_t\\) is known as a first order autoregressive process or AR(1) because we’ve assumed \\(u_t\\) is a function of \\(u_{t-1}\\) rather than some other order or lag of \\(u\\); note we could just as easily model higher order lags as AR(t) functions.\nAlso note the inclusion of an error term, \\(\\varepsilon_t\\) satisfying the GM assumptions, so:\n\\[\nE[\\varepsilon_t] =0 \\nonumber \\nonumber \\\\\nVar(\\varepsilon_t)= \\sigma^2 \\nonumber \\nonumber \\\\\nCov(\\varepsilon_t, \\varepsilon_{t-k})=0\n\\]"
+    "text": "Temporal correlation\nThe nature of temporal correlations varies hugely. The focus of most basic time series analysis is autocorrelation - the error is correlated with itself at some point in the past so that,\n\\[\ncov[u_t,u_{t-k}] \\neq 0,  \\nonumber\n\\]\nBecause the errors are not independent, and because we know the rough source of their dependency, we could conceive of \\(u_t\\) as\n\\[\nu_t= \\rho u_{t-1} + \\varepsilon_t  ~~~\\forall t, ~~~-1 &lt; \\rho &lt; 1\n\\]\nwhere the error at \\(t\\) is a function of the error at \\(t-1\\) and \\(\\rho\\) is the coefficient indicating the effect of \\(u_{t-1}\\) on \\(u_t\\).\nThis conceptualization of \\(u_t\\) is known as a first order autoregressive process or AR(1) because we’ve assumed \\(u_t\\) is a function of \\(u_{t-1}\\) rather than some other order or lag of \\(u\\); note we could just as easily model higher order lags as AR(t) functions.\nAlso note the inclusion of an error term, \\(\\varepsilon_t\\) satisfying the GM assumptions, so:\n\\[E[\\varepsilon_t] =0\\] \\[Var(\\varepsilon_t)= \\sigma^2\\] \\[Cov(\\varepsilon_t, \\varepsilon_{t-k})=0 \\]"
   },
   {
     "objectID": "slides/timevariance25.html#autoregressive-processes",
@@ -3400,5 +3400,96 @@
     "title": "Time and Variance in the OLS model",
     "section": "Weighting (WLS)",
     "text": "Weighting (WLS)\nAnother alternative is GLS, specifically “Weighted Least Squares”:\nThe intuition is simple - weight estimation by the values of the variable(s) that we think is (are) associated with nonconstant error variance. In effect, dividing the entire estimating equation by \\(x\\) will also weight the estimated variance of the error term, and thus return the model to homoskedasticity (assuming that variable is the sole source of nonconstant variance). We would benefit from doing this because we believe there are two types of cases in the data:\n\ncases with larger variances in \\(y\\) due to \\(x\\) contain less precise information.\ncases with smaller variances in \\(y\\) due to \\(x\\) contain more precise information.\n\nIdeally, what we would like to do is produce constant-variance residuals based on these differences so that their variances are equal.\nSuppose we could divide both sides of our model by \\(\\sigma_i\\) (if we knew it), the standard deviation of the residual, so\n\\[\\begin{align*}\n\\frac{Y}{\\sigma_i}=\\beta_0\\frac{1}{\\sigma_i} + \\beta_1 \\frac{X_1}{\\sigma_i} + \\beta_2 \\frac{X_2}{\\sigma_{i,t}} +\n\\frac{u_{i,t}}{\\sigma_{i,t}} \\nonumber\n\\end{align*}\\]\nThis weights each individual case by the standard deviation of its residual, so those cases with larger variances (and standard deviations) are weighted to count less, those with smaller variances are weighted to count more. And the variance of the error term itself is now:\n\\[\nE\\left[\\frac{u_{i,t}}{\\sigma_{i,t}}\\right]^2 =  \\frac{1}{\\sigma_i^2}E[u_{i,t}^2]  \\nonumber \\\\ \\nonumber \\\\\n=\\frac{1}{\\sigma_i^2}(\\sigma^2) ~~~~~\\text{because} ~~~~~E(u_i^2)=\\sigma^2  \\nonumber \\\\ \\nonumber \\\\\n=1 \\nonumber\n\\]\nBecause\n\\[\nVar(u_{i,t})={\\sigma_{i,t}}^2 X{_{i,t}} \\nonumber\n\\]\nthe variance of the error term is proportional to \\(X_i\\), so we can divide each side of the equation by \\(X_i\\) to transform the data, estimate our OLS model, and no longer violate the assumption the error variance is constant. Neat, eh?"
+  },
+  {
+    "objectID": "slides/causal25.html",
+    "href": "slides/causal25.html",
+    "title": "2SLS and Instrumental Variables",
+    "section": "",
+    "text": "One of the central challenges in regression models is the identification problem. Here, identification refers to exerting sufficient statistical control to enable causal claims. Among the things that make causal claims difficult are measurement error, omitted variables, and endogenous \\(x\\) variables (\\(x\\) correlated with \\(\\epsilon\\))."
+  },
+  {
+    "objectID": "slides/causal25.html#causal-claims",
+    "href": "slides/causal25.html#causal-claims",
+    "title": "2SLS and Instrumental Variables",
+    "section": "",
+    "text": "One of the central challenges in regression models is the identification problem. Here, identification refers to exerting sufficient statistical control to enable causal claims. Among the things that make causal claims difficult are measurement error, omitted variables, and endogenous \\(x\\) variables (\\(x\\) correlated with \\(\\epsilon\\))."
+  },
+  {
+    "objectID": "slides/causal25.html#identification",
+    "href": "slides/causal25.html#identification",
+    "title": "2SLS and Instrumental Variables",
+    "section": "Identification",
+    "text": "Identification\nA model is identified if, in an infinite sample, it is possible to learn the true value of the parameter (Keele, 2015: 314). The effort to identify a model is to generate circumstances where we can know that parameter in a finite sample. We do this by creating conditions that mimic randomization and thereby deal with the issues above."
+  },
+  {
+    "objectID": "slides/causal25.html#mimicking-randomization",
+    "href": "slides/causal25.html#mimicking-randomization",
+    "title": "2SLS and Instrumental Variables",
+    "section": "Mimicking Randomization",
+    "text": "Mimicking Randomization\nThinking of statistical control as an effort to mimic what randomization would achieve, identification strategies are efforts to structure the statistical analysis in ways that mimic the effects of randomization."
+  },
+  {
+    "objectID": "slides/causal25.html#identification-strategies",
+    "href": "slides/causal25.html#identification-strategies",
+    "title": "2SLS and Instrumental Variables",
+    "section": "Identification strategies",
+    "text": "Identification strategies\nSeveral common identification strategies:\n\ninstrumental variable models.\nnatural experiments and regression discontinuties.\nrandomized controlled trials (experiments).\ndifference in difference designs.\n\nToday, we’re focusing on instrumental variables approaches, though I’ll present empirical examples of other strategies. Let’s motivate the discussion by considering the question of crime rates and policing."
+  },
+  {
+    "objectID": "slides/causal25.html#crime-rates-and-policing",
+    "href": "slides/causal25.html#crime-rates-and-policing",
+    "title": "2SLS and Instrumental Variables",
+    "section": "Crime Rates and Policing",
+    "text": "Crime Rates and Policing\nDoes increasing the number of police in a locale reduce crime? Stating the question as a regression,\n\\[ Crime = \\beta_0 - \\beta_1(Police) + \\beta_k(X) + \\epsilon\\]\nAll else equal, we’d probably expect increased policing has a negative effect on crime rates. As usual, our \\(y\\) variable, Crime, is the endogenous variable, and we assume the \\(X\\) variables are exogenous in order to ensure \\(cov(x,\\epsilon) = 0\\).\nThat might be a bit too simplistic. It’s possible police presence increases because of high crime rates; that is:\n\\[ Police = \\beta_0 + \\beta_1(Crime) + \\beta_k(X) + \\epsilon\\]\nThe problem here is the causal arrow could flow either or both directions.\nIf Crime and Police determine each other simultaneously,\n\\[ Crime = \\beta_0 + \\beta_1(Police) + \\beta_k(X) + \\epsilon\\] \\[ Police = \\beta_0 + \\beta_1(Crime) + \\beta_k(X) + \\epsilon\\]\nthen Police is correlated with \\(\\epsilon\\). As we’ve noted many times, if \\(cov(x,\\epsilon) \\neq 0\\) we have an endogeneity problem; the estimates of \\(\\beta\\) are biased (for all the \\(\\beta\\)s in the model, not just the one of interest).\nIn the regression,\n\\[ Crime = \\beta_0 + \\beta_1(Police) + \\beta_k(X) + \\epsilon\\]\nPolice is an endogenous regressor.\nLet’s rewrite generically:\n\\[ y_1 = \\beta_0 + \\beta_1(y_2) + \\beta_k(X) + \\epsilon\\]\n\\[ y_2 = \\gamma_0 + \\gamma_1(y_1) + \\gamma_k(X) + \\upsilon\\]\n\\[ y_1 = \\beta_0 + [\\gamma_0 + \\gamma_1(y_1) + \\gamma_k(X) + \\upsilon] + \\beta_k(X) + \\epsilon\\]"
+  },
+  {
+    "objectID": "slides/causal25.html#causes-of-endogeneity",
+    "href": "slides/causal25.html#causes-of-endogeneity",
+    "title": "2SLS and Instrumental Variables",
+    "section": "Causes of endogeneity",
+    "text": "Causes of endogeneity\nLet’s slow a bit here - endogeneity, specifically \\(cov(x,\\epsilon) \\neq 0\\) arises for three reasons:\n\nMeasurement error\nOmitted variables\nSimultaneity\n\nThe policing example illustrates simultaneity, but it’s also possible the model suffers either or both of the other problems."
+  },
+  {
+    "objectID": "slides/causal25.html#instrumental-variables",
+    "href": "slides/causal25.html#instrumental-variables",
+    "title": "2SLS and Instrumental Variables",
+    "section": "Instrumental Variables",
+    "text": "Instrumental Variables\nOne way to deal with the endogenous regressor, \\(y_2\\) is to use an instrumental variables model.\nThinking of the original model,\n\\[ y_1 = \\beta_0 + \\beta_1(y_2) + \\beta_k(X) + \\epsilon\\]\nwe need to find a variable to use as an instrument for \\(y_2\\) to measure the part of \\(y_2\\) that’s not correlated with the error."
+  },
+  {
+    "objectID": "slides/causal25.html#instrumental-variables-1",
+    "href": "slides/causal25.html#instrumental-variables-1",
+    "title": "2SLS and Instrumental Variables",
+    "section": "Instrumental Variables",
+    "text": "Instrumental Variables\nAn instrumental variable is a regressor, \\(z\\) that meets two conditions:\n\n\\(z\\) is uncorrelated with \\(\\epsilon\\); that is, the instrument, \\(z\\) is not correlated with omitted variables or effects including the reverse effect of crime on policing. By extension, \\(z\\) is not correlated with \\(y_1\\).\n\\(z\\) is partially correlated with \\(y_2\\), the endogenous regressor.\n\nSo \\(z\\) is uncorrelated with \\(y_1\\), but correlated with \\(y_2\\)"
+  },
+  {
+    "objectID": "slides/causal25.html#whats-the-instrument-for",
+    "href": "slides/causal25.html#whats-the-instrument-for",
+    "title": "2SLS and Instrumental Variables",
+    "section": "What’s the instrument for?",
+    "text": "What’s the instrument for?\nSince the problem is \\(y_2\\) is correlated with the error, the idea is to predict \\(y_2\\) so we can measure the part of \\(y_2\\) that’s due to \\(z\\), separating it from the part of \\(y_2\\) that’s correlated with \\(\\epsilon\\).\nIf we estimate the regression\n\\[ y_2 = \\beta_0 + \\beta_1(z) + \\beta_k(X) \\]\nwhere \\(z\\) is the instrument, and \\(X\\) are the other predictors from the original model, the predicted values, \\(\\widehat{y_2}\\) will measure the part of \\(y_2\\) that’s not in the error - the part that’s due to the instrument and other \\(X\\) variables from the original regression of interest, and not due to whatever source of endogeneity is in the error."
+  },
+  {
+    "objectID": "slides/causal25.html#stage-least-squares",
+    "href": "slides/causal25.html#stage-least-squares",
+    "title": "2SLS and Instrumental Variables",
+    "section": "2 Stage Least Squares",
+    "text": "2 Stage Least Squares\nThe IV model we’re describing is the 2SLS model - there are other types of IV models, but the principles of instrumenting are the same. For 2SLS you won’t be surprised to know we estimate two regressions."
+  },
+  {
+    "objectID": "slides/causal25.html#first-stage-regression",
+    "href": "slides/causal25.html#first-stage-regression",
+    "title": "2SLS and Instrumental Variables",
+    "section": "First stage regression",
+    "text": "First stage regression\nThe equation regressing \\(y_2\\), the endogenous regressor, on the instrument is the “first stage” regression:\n\\[ y_2 = \\beta_0 + \\beta_1(z) + \\beta_k(X) \\]\nHere, \\(z\\) is the excluded instrument; the \\(X\\) variables are the included instruments. This regression is the “first stage” where we generate a new, purged variable, \\(\\widehat{y_2}\\) to use instead of \\(y_2\\) in the original regression of interest."
+  },
+  {
+    "objectID": "slides/causal25.html#second-stage-regression",
+    "href": "slides/causal25.html#second-stage-regression",
+    "title": "2SLS and Instrumental Variables",
+    "section": "Second stage regression",
+    "text": "Second stage regression\nNow we have a new and “purged” version of \\(y_2\\) called \\(\\widehat{y_2}\\). This new variable will not be correlated with the error in our original regression, so we can use OLS\n\\[y_i = \\beta_0 + \\beta_1(\\widehat{y_2}) + \\beta_k(X) + \\epsilon\\]"
   }
 ]

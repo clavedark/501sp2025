@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Dave Clark">
-<meta name="dcterms.date" content="2025-04-23">
+<meta name="dcterms.date" content="2025-04-30">
 
 <title>Time and Variance in the OLS model – 501 - Spring 2025</title>
 <style>
@@ -246,7 +246,7 @@ window.Quarto = {
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">April 23, 2025</p>
+        <p class="date">April 30, 2025</p>
       </div>
     </div>
     
@@ -363,18 +363,14 @@ tr:nth-child(odd) {
 <p><span class="math display">\[
 cov[u_t,u_{t-k}] \neq 0,  \nonumber
 \]</span></p>
-<p>Because the errors are not independent, and because we know the rough source of their dependency, we could conceive of <span class="math inline">\(u_t\)</span> as\</p>
+<p>Because the errors are not independent, and because we know the rough source of their dependency, we could conceive of <span class="math inline">\(u_t\)</span> as</p>
 <p><span class="math display">\[
 u_t= \rho u_{t-1} + \varepsilon_t  ~~~\forall t, ~~~-1 &lt; \rho &lt; 1
 \]</span></p>
 <p>where the error at <span class="math inline">\(t\)</span> is a function of the error at <span class="math inline">\(t-1\)</span> and <span class="math inline">\(\rho\)</span> is the coefficient indicating the effect of <span class="math inline">\(u_{t-1}\)</span> on <span class="math inline">\(u_t\)</span>.</p>
 <p>This conceptualization of <span class="math inline">\(u_t\)</span> is known as a <strong>first order autoregressive process</strong> or AR(1) because we’ve assumed <span class="math inline">\(u_t\)</span> is a function of <span class="math inline">\(u_{t-1}\)</span> rather than some other order or lag of <span class="math inline">\(u\)</span>; note we could just as easily model higher order lags as AR(t) functions.</p>
 <p>Also note the inclusion of an error term, <span class="math inline">\(\varepsilon_t\)</span> satisfying the GM assumptions, so:</p>
-<p><span class="math display">\[
-E[\varepsilon_t] =0 \nonumber \nonumber \\
-Var(\varepsilon_t)= \sigma^2 \nonumber \nonumber \\
-Cov(\varepsilon_t, \varepsilon_{t-k})=0
-\]</span></p>
+<p><span class="math display">\[E[\varepsilon_t] =0\]</span> <span class="math display">\[Var(\varepsilon_t)= \sigma^2\]</span> <span class="math display">\[Cov(\varepsilon_t, \varepsilon_{t-k})=0 \]</span></p>
 </section>
 <section id="autoregressive-processes" class="level2">
 <h2 class="anchored" data-anchor-id="autoregressive-processes">Autoregressive Processes</h2>

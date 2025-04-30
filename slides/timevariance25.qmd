@@ -110,7 +110,7 @@ cov[u_t,u_{t-k}] \neq 0,  \nonumber
 $$
 
 
-Because the errors are not independent, and because we know the rough source of their dependency, we could conceive of $u_t$ as\\
+Because the errors are not independent, and because we know the rough source of their dependency, we could conceive of $u_t$ as
 
 $$
 u_t= \rho u_{t-1} + \varepsilon_t  ~~~\forall t, ~~~-1 < \rho < 1
@@ -126,11 +126,9 @@ This conceptualization of $u_t$ is known as a **first order autoregressive proce
 
 Also note the inclusion of an error term, $\varepsilon_t$ satisfying the GM assumptions, so:
 
-$$
-E[\varepsilon_t] =0 \nonumber \nonumber \\
-Var(\varepsilon_t)= \sigma^2 \nonumber \nonumber \\
-Cov(\varepsilon_t, \varepsilon_{t-k})=0 
-$$
+$$E[\varepsilon_t] =0$$
+$$Var(\varepsilon_t)= \sigma^2$$
+$$Cov(\varepsilon_t, \varepsilon_{t-k})=0 $$
 
 
 ## Autoregressive Processes
