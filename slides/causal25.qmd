@@ -86,28 +86,78 @@ Several common identification strategies:
   - difference in difference designs.
 
 
-Today, we're focusing on instrumental variables approaches, though I'll present empirical examples of other strategies. Let's motivate the discussion by considering the question of crime rates and policing. 
-
+Today, we're focusing on instrumental variables approaches. Let's motivate the discussion by considering the question of crime rates and policing. 
 
 
 
 ## Crime Rates and Policing
 
-Does increasing the number of police in a locale reduce crime? Stating the question as a regression, 
+Does increasing the number of police in a locale reduce crime? Some work prior to 1997 suggests it does not reduce crime. @levitt1997using suggests that those findings may be due to endogeneity, specifically because the estimates are biased by the fact that crime may affect the number of police. 
+
+There's a significant literature on this and significant debate over Levitt's data and model. Nevertheless, Levitt's use of instrumental variables is a good example of the method, and helped direct economics (and the social sciences more generally) toward an awareness of the endogeneity problem and how endogenity threatens our ability to make causal claims. 
+
+Let's start by stating the question as a regression, 
 
 $$ Crime = \beta_0 - \beta_1(Police) + \beta_k(X) + \epsilon$$
 
-All else equal, we'd probably expect increased policing has a negative effect on crime rates. As usual, our $y$ variable, Crime, is the endogenous variable, and we assume the $X$ variables are exogenous in order to ensure $cov(x,\epsilon) = 0$. 
+All else equal, we'd probably expect increased policing to have a negative effect on crime rates. As usual, our $y$ variable, Crime, is the endogenous variable, and we assume the $X$ variables are exogenous in order to ensure $cov(x,\epsilon) = 0$. Here's such a model using data from @levitt1997using.
 
 
+```{r, results='asis', message=FALSE, warning=FALSE}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
 
-That might be a bit too simplistic. It's possible police presence increases *because of* high crime rates; that is: 
+library(haven)
+library(stargazer)
+library(AER)
+library(plm)
+library(dplyr)
+#Levitt 1997 data:
+crime_data <- read_dta("~/downloads/zip/data/crime2.dta")
+
+# Models using levels (not differences)
+# First create logged variables if not already created
+crime_data <- crime_data %>%
+ mutate(
+   lviolent = log(murder + rape + robbery + assault + 1),
+   lsworn = log(sworn + 1),
+   elecy = mayor * governor
+ )
+
+# Create dataset with complete cases for levels
+analysis_data_levels <- crime_data %>%
+ dplyr::select(lviolent, lsworn, unemp, sta_welf, sta_educ, 
+        citybla, cityfemh, elecy, city, year) %>%
+ na.omit()
+
+# Model 1: OLS with levels
+ols_levels <- lm(lviolent ~ lsworn + unemp + sta_welf + sta_educ + 
+                 citybla + cityfemh, 
+               data = analysis_data_levels)
+
+stargazer(ols_levels,
+          title = "The Effect of Change in Police on Crime Levels: OLS Results",
+          dep.var.labels = c("log(Violent Crime)"),
+          column.labels = c("OLS"),
+          covariate.labels = c("Δ log(Sworn Officers)", 
+                               "Unemployment Rate",
+                               "Welfare Spending", 
+                               "Education Spending",
+                               "% Black Population",
+                               "% Female-Headed HH"),
+          type = "html",
+          digits = 3,
+          no.space = TRUE)
+```
+
+The OLS model above suggests that increasing the number of sworn officers in a city is associated with an increase in the rate of violent crime; not at all what we would expect.
+
+This is both surprising and perhaps a bit too simplistic. It's possible police presence increases *because of* high crime rates. That is: 
 
 $$ Police = \beta_0 + \beta_1(Crime) + \beta_k(X) + \epsilon$$
 
-The problem here is the causal arrow could flow either or both directions. 
-
-
+The problem here is the causal arrow could flow either or both directions. This is one form of endogeneity known as **simultaneity**.
 
 
 If Crime and Police determine each other simultaneously,
@@ -115,7 +165,7 @@ If Crime and Police determine each other simultaneously,
 $$ Crime = \beta_0 + \beta_1(Police) + \beta_k(X) + \epsilon$$
 $$ Police = \beta_0 + \beta_1(Crime) + \beta_k(X) + \epsilon$$
 
-then Police is correlated with $\epsilon$. As we've noted many times, if $cov(x,\epsilon) \neq 0$ we have an endogeneity problem; the estimates of $\beta$ are biased (for all the $\beta$s in the model, not just the one of interest).
+then Police is correlated with $\epsilon$. As we've noted, if $cov(x,\epsilon) \neq 0$ we have an endogeneity problem; the estimates of $\beta$ are biased (for all the $\beta$s in the model, not just the one of interest).
 
 
 
@@ -152,7 +202,7 @@ The policing example illustrates simultaneity, but it's also possible the model 
 
 ## Instrumental Variables
 
-One way to deal with the endogenous regressor, $y_2$  is to use an *instrumental variables model*.
+One way to deal with the endogenous regressor, $y_2$  is to use an **instrumental variables model**.
 
 Thinking of the original model, 
 
@@ -160,9 +210,7 @@ $$ y_1 = \beta_0 + \beta_1(y_2) + \beta_k(X) + \epsilon$$
 
 we need to find a variable to use as an instrument for $y_2$ to measure the part of $y_2$ that's not correlated with the error. 
 
-
-
-## Instrumental Variables
+::: {.callout-note title="Instrumental Variables"}
 
 An instrumental variable is a regressor, $z$ that meets two conditions:
 
@@ -172,7 +220,7 @@ An instrumental variable is a regressor, $z$ that meets two conditions:
 
 So $z$ is uncorrelated with $y_1$, but correlated with $y_2$
 
- 
+::: 
 
 ## What's the instrument for?
 
@@ -182,7 +230,7 @@ If we estimate the regression
 
 $$ y_2 = \beta_0 + \beta_1(z) + \beta_k(X) $$
 
-where $z$ is the instrument, and $X$ are the other predictors from the original model, the predicted values, $\widehat{y_2}$ will measure the part of $y_2$ that's not in the error - the part that's due to the instrument and other $X$ variables from the original regression of interest, and not due to whatever source of endogeneity is in the error. 
+where $z$ is the **excluded instrument**, and $X$ are the other predictors from the original model (**included instruments**), the predicted values, $\widehat{y_2}$ will measure the part of $y_2$ that's not in the error - the part that's due to the instrument and other $X$ variables from the original regression of interest, and not due to whatever source of endogeneity is in the error. 
 
 
 
@@ -206,6 +254,119 @@ Here, $z$ is the excluded instrument; the $X$ variables are the included instrum
 Now  we have  a new and "purged" version of $y_2$ called $\widehat{y_2}$. This new variable will not be correlated with the error in our original regression, so we can use OLS 
 
 $$y_i = \beta_0 + \beta_1(\widehat{y_2}) + \beta_k(X) + \epsilon$$
+
+## Policing and Crime Rates
+
+It's fairly clear we may have a simultaneity problem in the policing and crime rates example. Policing may affect crime rates, but crime rates may also affect number of police officers.
+
+We need to identify an instrument for the endogenous regressor, Police. The instrument should be a variable correlated with sworn police, but uncorrelated with crime rates. Levitt (1997) uses elections as an instrument for police. The idea is that elections are correlated with the number of police officers, but not with crime rates. In election years, incumbents should put more cops on the streets so they appear to be tough on crime. But elections themselves are not correlated with crime rates (unless you think of politicians running in elections as committing crimes, but this is another story). 
+
+The idea, per the equations above, is that we estimate a regression predicting "sworn police" using the instrument, "elections" and other variables. 
+
+$$ Police = \beta_0 + \beta_1(Elections) + \beta_k(X) + \epsilon$$
+
+
+Next, generate the predicted values ($\widehat{Police}$) from this regression. We now have a new variable, $\widehat{Police}$ that is purged of the relationship between police and crime - note that crime is not in this regression, so any relationship between police and crime should be in the error term.
+
+Then, we estimate the original regression of interest, but using $\widehat{Police}$ instead of Police. This is the **second stage** regression
+
+$$ Crime = \beta_0 + \beta_1\widehat{Police} + \beta_k(X) + \epsilon$$
+
+It is common that the $X$ variables in the two equations are the same - in the **first stage** equation, the $X$ variables are called "included instruments" and the $z$ variable (elections, in this case) is called the "excluded instrument." The $X$ variables are included in both equations, but the $z$ variable is only in the first stage equation.
+
+## 2SLS two ways
+
+Let's estimate this two stage least squares model manually using the Levitt (1997) data and following the narrative above. Let's also estimate it as a system of equations using the `ivreg` function from the AER package. The latter will produce correct standard errors for the estimates, while the former will not. Doing this manually, though, demonstrates the logic of the model.
+
+The table below reports: 
+
+  - the first stage regression predicting sworn police using the instrument (elections) and other variables.
+  - the second stage regression predicting crime using the predicted values from the first stage and other variables. Our measure of Police here is the instrumented or corrected version of Police, $\widehat{Police}$.
+  - the 2SLS regression using the `ivreg` function from the AER package. This is a system of equations that estimates the two equations simultaneously. 
+  - the OLS regression reported above for comparison.
+
+```{r, results='asis', message=FALSE, warning=FALSE}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+# Load required packages
+library(haven)
+library(stargazer)
+library(AER)
+library(dplyr)
+
+# Read the data
+crime_data <- read_dta("~/downloads/zip/data/crime2.dta")
+
+# Create variables for the level models
+crime_data <- crime_data %>%
+  mutate(
+    # Create violent crime sum and logs
+    violent = as.numeric(murder + rape + robbery + assault),
+    lviolent = log(pmax(violent, 1)),  # Use pmax to avoid log(0)
+    lsworn = log(pmax(sworn, 1)),      # Use pmax to avoid log(0)
+    
+    # Create the instrument
+    elecy = as.numeric(mayor) * as.numeric(governor)
+  )
+
+# Create analysis dataset with only complete rows
+analysis_data <- crime_data %>%
+  dplyr::select(lviolent, lsworn, unemp, sta_welf, sta_educ, 
+         citybla, cityfemh, elecy) %>%
+  na.omit()
+
+# Model 1: OLS (ignoring endogeneity)
+ols_model <- lm(lviolent ~ lsworn + unemp + sta_welf + sta_educ + 
+                  citybla + cityfemh, 
+                data = analysis_data)
+
+# Model 2: Manual 2SLS
+# First stage
+first_stage <- lm(lsworn ~ elecy + unemp + sta_welf + sta_educ + 
+                    citybla + cityfemh, 
+                  data = analysis_data)
+
+# Get predicted values
+analysis_data$lsworn_hat <- fitted(first_stage)
+
+# Second stage
+second_stage <- lm(lviolent ~ lsworn_hat + unemp + sta_welf + sta_educ + 
+                     citybla + cityfemh, 
+                   data = analysis_data)
+
+# Model 3: Simultaneous 2SLS using ivreg
+iv_model <- ivreg(lviolent ~ lsworn + unemp + sta_welf + sta_educ + 
+                    citybla + cityfemh | 
+                    elecy + unemp + sta_welf + sta_educ + 
+                    citybla + cityfemh,
+                  data = analysis_data)
+
+# Display results in stargazer
+stargazer(first_stage, second_stage, iv_model, ols_levels,
+          title = "The Effect of Police on Crime: 2SLS Results (Levels)",
+          dep.var.labels = c("log(Sworn Officers)", "log(Violent Crime)"),
+          column.labels = c("First Stage", "Second Stage", "2SLS", "OLS"),
+ covariate.labels = c("Electoral Cycle Instrument",
+                               "Δ log(Sworn Officers) [predicted]",
+                               "Δ log(Sworn Officers)",
+                               "Unemployment Rate",
+                               "Welfare Spending", 
+                               "Education Spending",
+                               "% Black Population",
+                               "% Female-Headed HH"),
+          type = "html",
+          digits = 3,
+          no.space = TRUE)
+
+ 
+
+```
+
+This certainly shows that if you change things, things change. The 2sls models do not indicate policing reduces crime, but do indicate that the relationship is not positive and significant as the OLS model suggests - this is certainly more consistent with what we'd expect than the OLS model results are. 
+
+
 
 
 <!-- ## References -->

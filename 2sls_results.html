@@ -1,0 +1,33 @@
+
+<table style="text-align:center"><caption><strong>2SLS Regression Results</strong></caption>
+<tr><td colspan="4" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"></td><td colspan="3"><em>Dependent variable:</em></td></tr>
+<tr><td></td><td colspan="3" style="border-bottom: 1px solid black"></td></tr>
+<tr><td style="text-align:left"></td><td>Log Police per Capita</td><td colspan="2">Log Violent Crime Rate</td></tr>
+<tr><td style="text-align:left"></td><td><em>OLS</em></td><td><em>OLS</em></td><td><em>instrumental</em></td></tr>
+<tr><td style="text-align:left"></td><td><em></em></td><td><em></em></td><td><em>variable</em></td></tr>
+<tr><td style="text-align:left"></td><td>First Stage</td><td>Second Stage</td><td>ivreg</td></tr>
+<tr><td style="text-align:left"></td><td>(1)</td><td>(2)</td><td>(3)</td></tr>
+<tr><td colspan="4" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">Mayoral Election</td><td>-0.056<sup>***</sup></td><td></td><td></td></tr>
+<tr><td style="text-align:left"></td><td>(0.018)</td><td></td><td></td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">Log Population</td><td></td><td>1.393<sup>**</sup></td><td></td></tr>
+<tr><td style="text-align:left"></td><td></td><td>(0.549)</td><td></td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">Trend</td><td></td><td></td><td>1.393<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td>(0.418)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">Predicted Log Police per Capita</td><td>0.210<sup>***</sup></td><td>-0.098</td><td>-0.098</td></tr>
+<tr><td style="text-align:left"></td><td>(0.012)</td><td>(0.118)</td><td>(0.090)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">trend</td><td>0.007<sup>***</sup></td><td>0.027<sup>***</sup></td><td>0.027<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.001)</td><td>(0.005)</td><td>(0.003)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td></tr>
+<tr><td colspan="4" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">Instrumented Variable</td><td></td><td></td><td>lpolpc</td></tr>
+<tr><td style="text-align:left">Observations</td><td>1,324</td><td>1,324</td><td>1,324</td></tr>
+<tr><td style="text-align:left">R<sup>2</sup></td><td>0.219</td><td>0.241</td><td>0.559</td></tr>
+<tr><td style="text-align:left">Adjusted R<sup>2</sup></td><td>0.217</td><td>0.240</td><td>0.558</td></tr>
+<tr><td style="text-align:left">Residual Std. Error (df = 1320)</td><td>0.300</td><td>0.516</td><td>0.393</td></tr>
+<tr><td style="text-align:left">F Statistic (df = 3; 1320)</td><td>123.409<sup>***</sup></td><td>139.988<sup>***</sup></td><td></td></tr>
+<tr><td colspan="4" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"><em>Note:</em></td><td colspan="3" style="text-align:right"><sup>*</sup>p<0.1; <sup>**</sup>p<0.05; <sup>***</sup>p<0.01</td></tr>
+<tr><td style="text-align:left"></td><td colspan="3" style="text-align:right">Standard errors in parentheses.</td></tr>
+</table>

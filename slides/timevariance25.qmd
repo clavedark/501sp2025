@@ -13,7 +13,8 @@ format:
 editor: source
 #embed-resources: true
 cache: true
-
+filters:
+  - parse-latex
 ---
 
 <!-- render 2 types at same time; terminal "quarto render file.qmd" -->
@@ -326,7 +327,7 @@ And since $\rho$ is bounded by -1 and +1, *d* must be bounded by 0 and 4.
 
 Here are the criteria for evaluating Durbin-Watson statistics: 
 
-
+```{=latex}
 \begin{table}[!ht]
 \begin{center}
 \caption{Durbin-Watson {\it d} Decision Criteria} \label{tab:dwcriteria}
@@ -349,7 +350,7 @@ no AR(1)  &  do not reject & $d_U<d<4-d_U$  \\
 \end{tabular}
 \end{center}
 \end{table}
-
+```
 
 ### Breusch-Godfrey LM Test
 

@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Dave Clark">
-<meta name="dcterms.date" content="2025-04-30">
+<meta name="dcterms.date" content="2025-05-01">
 
 <title>Time and Variance in the OLS model – 501 - Spring 2025</title>
 <style>
@@ -246,7 +246,7 @@ window.Quarto = {
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">April 30, 2025</p>
+        <p class="date">May 1, 2025</p>
       </div>
     </div>
     
@@ -375,7 +375,7 @@ u_t= \rho u_{t-1} + \varepsilon_t  ~~~\forall t, ~~~-1 &lt; \rho &lt; 1
 <section id="autoregressive-processes" class="level2">
 <h2 class="anchored" data-anchor-id="autoregressive-processes">Autoregressive Processes</h2>
 <p>Let’s think about the errors <span class="math inline">\(u_t\)</span> for all <span class="math inline">\(t\)</span> in the AR scheme:</p>
-<p><span class="math display">\[\begin{align*}
+<p><span class="math display">\[\begin{aligned}
 u_t= \rho u_{t-1} + \varepsilon_t
 = \rho(\rho u_{t-2} +\varepsilon_{t-1}) + \varepsilon_t  \nonumber \\
 = \rho^2 u_{t-2} + \rho \varepsilon_{t-1} + \varepsilon_t  \nonumber \\
@@ -384,20 +384,20 @@ u_t= \rho u_{t-1} + \varepsilon_t
 \vdots \nonumber \\
 = \rho^s u_{t-s} + \rho^{s-1} \varepsilon_{t-s+1} + \rho^{s-2} \varepsilon_{t-s+2}+ \ldots + \rho \varepsilon_{t-1} + \varepsilon_t  \nonumber \\ \nonumber \\
 u_t= \sum \limits_{s=0}^{\infty} \rho^s u_{t-s}
-\end{align*}\]</span></p>
+\end{aligned}\]</span></p>
 <p>You can see the effect of the lagged residuals up to <span class="math inline">\(s\)</span> on <span class="math inline">\(u_t\)</span>; since <span class="math inline">\(|\rho| &lt; 1\)</span>, then <span class="math inline">\(|\rho^2| &lt; |\rho|\)</span>, and so forth, so the effect of each successive lag (<span class="math inline">\(t-2, t-3, \ldots, t-s\)</span>) is smaller than the previous lag, eventually decaying to zero.</p>
 </section>
 <section id="variance-covariance-matrix-of-widehatbeta" class="level2">
 <h2 class="anchored" data-anchor-id="variance-covariance-matrix-of-widehatbeta">Variance-Covariance matrix of <span class="math inline">\(\widehat{\beta}\)</span></h2>
 <p>If the errors are correlated, then the variance-covariance matrix is certain to be troubled by that correlation if it is not corrected. In fact,</p>
-<p><span class="math display">\[\begin{align*}
+<p><span class="math display">\[\begin{aligned}
 Var(u_t)= \frac{\sigma^2}{1-\rho^2} \\
 Cov(u_t, u_{t-1})= \rho \sigma^2 \\
 Cov(u_t, u_{t-2})= \rho^2 \sigma^2 \\
 Cov(u_t, u_{t-3})= \rho^3 \sigma^2 \\
 \vdots \\
 Cov(u_t, u_{t-s})= \rho^s \sigma^2 \\
-\end{align*}\]</span></p>
+\end{aligned}\]</span></p>
 <p>so it’s easy to see that if <span class="math inline">\(\rho=0\)</span>, then:</p>
 <p><span class="math display">\[
 u_t= \varepsilon_t \nonumber \\
@@ -454,10 +454,10 @@ cov(u_{t}, u_{t-k})=0 \nonumber
 <section id="regression-based-detection" class="level2">
 <h2 class="anchored" data-anchor-id="regression-based-detection">Regression-based detection</h2>
 <p>Most regression based detection methods are rooted in regressing the residuals on lags of the residuals - call this an “autocorrelation functions.” Write the autocorrelation function:</p>
-<p><span class="math display">\[\begin{eqnarray}
+<p><span class="math display">\[\begin{aligned}
 u_t= \rho u_{t-1} + \varepsilon_t  ~~~\forall t, ~~~-1 &lt; \rho &lt; 1
 \nonumber
-\end{eqnarray}\]</span></p>
+\end{aligned}\]</span></p>
 <p>We can estimate this <em>auxiliary regression</em> using the residuals and their lagged values. The coefficient on <span class="math inline">\(u_{t-1}\)</span> is our estimate <span class="math inline">\(\hat{\rho}\)</span>. To meet the OLS assumption, <span class="math inline">\(\hat{\rho}\)</span> should be zero.</p>
 </section>
 <section id="regression-based-methods" class="level2">
@@ -508,6 +508,47 @@ d= 2(1-\hat{\rho})  \nonumber
 \]</span></p>
 <p>And since <span class="math inline">\(\rho\)</span> is bounded by -1 and +1, <em>d</em> must be bounded by 0 and 4.</p>
 <p>Here are the criteria for evaluating Durbin-Watson statistics:</p>
+<div class="center">
+<div id="tab:dwcriteria">
+<table class="caption-top table">
+<caption>Durbin-Watson <span><em>d</em></span> Decision Criteria</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Null Hypothesis</th>
+<th style="text-align: right;">Decision</th>
+<th style="text-align: right;">Value of Test <span><em>d</em></span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">no positive AR(1)</td>
+<td style="text-align: right;">reject</td>
+<td style="text-align: right;"><span class="math inline">\(0&lt;d&lt;d_L\)</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">no positive AR(1)</td>
+<td style="text-align: right;">no decision</td>
+<td style="text-align: right;"><span class="math inline">\(d_L \leq d \leq d_U\)</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">no negative AR(1)</td>
+<td style="text-align: right;">reject</td>
+<td style="text-align: right;"><span class="math inline">\(4-d_L &lt; d &lt; 4\)</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">no negative AR(1)</td>
+<td style="text-align: right;">no decision</td>
+<td style="text-align: right;"><span class="math inline">\(4-d_u \leq d \leq 4-d-L\)</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">no AR(1)</td>
+<td style="text-align: right;">do not reject</td>
+<td style="text-align: right;"><span class="math inline">\(d_U&lt;d&lt;4-d_U\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </section>
 <section id="breusch-godfrey-lm-test" class="level3">
 <h3 class="anchored" data-anchor-id="breusch-godfrey-lm-test">Breusch-Godfrey LM Test</h3>
@@ -1137,14 +1178,14 @@ LM \chi^2_{k} = n \cdot R^2_{\hat{u_i^2}} \nonumber
 <section id="robust-standard-errors" class="level2">
 <h2 class="anchored" data-anchor-id="robust-standard-errors">Robust Standard Errors</h2>
 <p>Building on earlier work by Friedhelm Eicker and Peter Huber, <span class="citation" data-cites="white1980heteroskedasticity">White (<a href="#ref-white1980heteroskedasticity" role="doc-biblioref">1980</a>)</span> showed that it’s actually pretty simple to correct this problem, effectively to correct the variance (and standard error) of <span class="math inline">\(\beta\)</span> by using the residuals from the regression of <span class="math inline">\(y\)</span> on <span class="math inline">\(X\)</span> - in the bivariate case,</p>
-<p><span class="math display">\[\begin{align*}
+<p><span class="math display">\[\begin{aligned}
 \text{White's Robust Variance}(\hat{\beta})=\frac{\sum \limits_{i=1}^{n}(x_i-\bar{x})^2\widehat{\hat{u}_i}^{2}}{SST_x} \nonumber
-\end{align*}\]</span></p>
+\end{aligned}\]</span></p>
 <p>This computation weights the estimated variance of <span class="math inline">\(\hat{\beta}\)</span> by the residual thus accounting for the empirical source of the nonconstancy.</p>
 <p>This is marginally more complicated in the multiple regression case where the variance of <span class="math inline">\(\beta_j\)</span> is given by:</p>
-<p><span class="math display">\[\begin{align*}
+<p><span class="math display">\[\begin{aligned}
 \text{White's Robust Variance}(\hat{\beta_j})=\frac{\sum \limits_{i=1}^{n} \hat{r}^2_{ij} \hat{u_i}^{2}}{SSR_j} \nonumber
-\end{align*}\]</span></p>
+\end{aligned}\]</span></p>
 <p>where we sum the residuals from the regression of <span class="math inline">\(x_j\)</span> on the other independent variables multiplied by <span class="math inline">\(u_i^2\)</span>, the residuals from the original regression, and divide by the sum squared residual from this auxiliary regression.</p>
 <p>This technique (which has been derived by several different econometricians including those named above) can be written mathematically in several different ways and computed in least squares or in maximum likelihood. It is probably most commonly known either as the White or White-Huber or Robust variance estimator.</p>
 <section id="panel-data" class="level3">
@@ -1165,10 +1206,10 @@ LM \chi^2_{k} = n \cdot R^2_{\hat{u_i^2}} \nonumber
 </ul>
 <p>Ideally, what we would like to do is produce constant-variance residuals based on these differences so that their variances are equal.</p>
 <p>Suppose we could divide both sides of our model by <span class="math inline">\(\sigma_i\)</span> (if we knew it), the standard deviation of the residual, so</p>
-<p><span class="math display">\[\begin{align*}
+<p><span class="math display">\[\begin{aligned}
 \frac{Y}{\sigma_i}=\beta_0\frac{1}{\sigma_i} + \beta_1 \frac{X_1}{\sigma_i} + \beta_2 \frac{X_2}{\sigma_{i,t}} +
 \frac{u_{i,t}}{\sigma_{i,t}} \nonumber
-\end{align*}\]</span></p>
+\end{aligned}\]</span></p>
 <p>This weights each individual case by the standard deviation of its residual, so those cases with larger variances (and standard deviations) are weighted to count less, those with smaller variances are weighted to count more. And the variance of the error term itself is now:</p>
 <p><span class="math display">\[
 E\left[\frac{u_{i,t}}{\sigma_{i,t}}\right]^2 =  \frac{1}{\sigma_i^2}E[u_{i,t}^2]  \nonumber \\ \nonumber \\

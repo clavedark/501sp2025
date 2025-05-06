@@ -50,4 +50,4 @@ If you're interested in how maximum likelihood estimation works, check out this 
 
 <!-- [Variance](variance24.qmd) -->
 
-<!-- [Instrumental variables](causal24.qmd) -->
+[Instrumental variables](/slides/causal25.qmd)
