@@ -2,13 +2,12 @@
 title: "Introduction to Bivariate Linear Regression"
 author: "Dave Clark"
 institute: "Binghamton University"
-date: today
+date: "February 16, 2025"
 date-format: long
 title-block-banner: TRUE
 format:
   html:
     embed-resources: true
-  pdf: default
 editor: source  
 #number-sections: true
 #cache: true
@@ -658,7 +657,7 @@ Finally, let's examine how both economic development and political system jointl
 
 # Fit multivariate model
 m5 <- lm(IMR ~ lngdp + polity, data=censor)
-modelsummary(m4)
+modelsummary(m5)
 
 ```
 

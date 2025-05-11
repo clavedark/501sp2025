@@ -2,7 +2,7 @@
 title: "Thinking About Data"
 author: "Dave Clark"
 institute: "Binghamton University"
-date: today
+date: "January 21, 2025"
 date-format: long
 title-block-banner: TRUE
 bibliography: ../refs501.bib
@@ -165,15 +165,16 @@ The data generating process is the complete description of how the observed data
 ## Can the DGP exist?
 
   - can the units experience the causal claim in question? 
-  - does the data represent the enter DGP or just part of it? 
   
-## A Terrible Map
+### A Terrible Map
 
 ![](terriblemap.png)
 
 ---
 
-## War outcomes 
+  - does the data represent the entire DGP or just part of it? 
+  
+### War outcomes 
 
 | Outcome | Autocrat | Democrat | Total |
 |:------|:-----:|:------:|:------:|
@@ -187,12 +188,24 @@ From @Lake92, p. 31
 
 ## Observability
 
+- are we observing the entire phenomenon?
+
 ![](selection.jpeg)
 
 
 ---
 
 ## Asking the right question
+
+-  are we asking the right question? Are we making Type 3 errors - finding the right answer to the wrong question? @kennedy2002sinning(p. 572) writes: 
+
+>A type III error, introduced in Kimball (1957), occurs when a
+>researcher produces the right answer to the wrong question. A
+>corollary of this rule, as noted by Chatfield (1995, p. 9), is
+>that an approximate answer to the right question is worth a
+>great deal more than a precise answer to the wrong question.
+
+
 
 ![](squirrels.png)
 
@@ -259,6 +272,8 @@ In general, the level of measurement of $y$ (so the type and amount of informati
 
 ## Describe these data
 
+Continuous or discrete; what can you say about these data from their observed distribution? 
+
 ::: panel-tabset
 ### Alcohol consumption
 
@@ -322,6 +337,8 @@ p + facet_wrap(era ~ .) +
 ```
 
 ## Overstaying Terms
+
+Two variables - Polity, and the number of efforts (successful, unsuccessful) by state leaders to overstay their terms in office.
 
 ```{r, message=FALSE, warning=FALSE}
 #| echo: true

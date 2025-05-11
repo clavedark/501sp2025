@@ -2,7 +2,7 @@
 title: "Basic probability"
 author: "Dave Clark"
 institute: "Binghamton University"
-date: today
+date: "January 8, 2025"
 date-format: long
 format: html
 #editor: visual
@@ -33,11 +33,12 @@ Inferential models depend on probability distributions:
 
 -   inference - is essential because of the unknowns. Inference is possible because of the probability distribution characterizing the unknowns.
 
+- probability distributions allow us to measure our uncertainty about quantities from our models.
+
 ## Probability Distributions
 
 Probability distributions permit statements about relative scale, frequency, and uncertainty.
 
-$~$
 
 If the relation between $x$ and $y$ is measured by $\widehat{\beta}$, we need to know whether or not to take $\widehat{\beta}$ seriously - is it representative of the population relationship between $x$ and $y$?
 
@@ -116,7 +117,7 @@ The Probability Density Function or PDF describes the probability a random varia
 
 ------------------------------------------------------------------------
 
-## PDF (Density)
+
 
 ::: {.callout-note icon="false"}
 ### Example
@@ -126,7 +127,7 @@ Suppose we toss a fair coin 1 time and want to describe the probability distribu
 
 ------------------------------------------------------------------------
 
-## PDF (Density)
+
 
 -   While establishing the probability of a value of a discrete variable is possible, establishing the probability of a particular value of a continuous variable is not.
 
@@ -294,7 +295,7 @@ Pr(x=0)= 1-Pr(x=1) \\
 = 1-\pi   
 $$
 
-## Bernoulli
+### Bernoulli PDF
 
 The PDF is:
 
@@ -307,7 +308,7 @@ or
 
 $$f(x) = \pi^{x}(1-\pi)^{1-x} $$
 
-## Bernoulli
+### Bernoulli CDF
 
 The CDF is:
 
@@ -329,7 +330,7 @@ $~$
 
 There are two essential parts to the binomial PDF - the probability of success, and the number of ways a success can occur.
 
-## Binomial
+### Binomial PDF
 
 The probability of success is the Bernoulli probability:
 
@@ -347,7 +348,7 @@ $$
 
 Notice the notation for the n-tuple.
 
-## Binomial
+
 
 The PDF combines these:
 
@@ -361,7 +362,7 @@ $$
 
 There are $n$ trials, $x$ is the number of successes, and $n-x$ is the number of failures. Each event in the n-tuple arises with the Bernoulli probability.
 
-## Binomial
+
 
 ::: {.callout-note icon="false"}
 ### Example
@@ -379,7 +380,6 @@ Pr(x=2) =\frac{4!}{2!(4-2)!} (.5)^{2}(.5)^{2} \\
 $$
 :::
 
-## Binomial
 
 ::: {.callout-note icon="false"}
 ### Example
@@ -407,6 +407,8 @@ $$
 
 ## Binomial family distributions
 
+The binomial family is large - here a a few examples:
+
 -   the geometric distribution describes repeated Bernoulli trials with probability of success $\pi$, until the first success.
 
 -   the negative binomial describes the number of Bernoulli failures prior to the first success - it can be thought of as a counting process up to the first success.
@@ -423,7 +425,7 @@ The Normal distribution is the most widely used distribution in the social scien
 
 -   Estimation techniques we often employ assume the disturbance term is normally distributed; one result is the coefficients are either normally distributed or t-distributed.
 
-## Normal PDF
+### Normal PDF
 
 The normal PDF: $$
 Pr(Y=y_{i})=\frac{1}{\sqrt{2 \pi \sigma^{2}}} exp \left[\frac{-(y_{i}-\mu_{i})^{2}}{2\sigma^{2}}\right] 
@@ -475,7 +477,7 @@ ggplot() +
 ```
 :::
 
-## Standard Normal
+## The Standard Normal
 
 A useful special case of the Normal is the standard normal, $z \sim \text{Normal}(0,1)$. The PDF for the standard normal is given by
 
@@ -543,9 +545,6 @@ highchart() %>%
 
 
 
-
-
-
 ```
 
 
@@ -565,9 +564,7 @@ highchart() %>%
 
 Linear regression is such an inferential model; we have a number of sources of uncertainty. We represent that uncertainty in the model via the disturbance term, $\epsilon$.
 
-$~$
-
-In order to know things about $\epsilon$ and other parts of the model, we assume that the disturbances are normally distributed; $y$ should be normal too.
+In order to know things about $\epsilon$, we assume that the disturbances are normally distributed; $y$ should be normal too.
 
 ## Normality and Centrality
 
@@ -597,11 +594,11 @@ knitr::include_app(url = "https://clavedark.shinyapps.io/centrallimittheorem/", 
 
 ## CLT - Why is this valuable?
 
--   If we assume repeated sampling and/or infinitely large samples, we can assume normality.
+-   In our models if we assume repeated sampling and/or infinitely large samples, we can assume normality of the estimates, $\widehat{\beta}$.
 
 -   We know the properties of the Normal intimately well. We can use this knowledge to evaluate where some value of $x$ lies on the Normal CDF, what the probability less than that value is - we can figure out what the probability of observing that value is (on the PDF).
 
--   As we'll see, $\widehat{\beta}$ is normally distributed in the OLS model (it is in MLE as well). The CLT and what we know about normality facilitate inference.
+-   Because of CLT, we can assume $\widehat{\beta}$ is normally distributed in the OLS model (it is in MLE as well). The CLT and what we know about normality facilitate inference.
 
 ## Inference
 
@@ -610,3 +607,5 @@ Inference is our effort to measure and characterize our uncertainty about the mo
 -   uncertainty is the most important thing we estimate in inferential models.
 
 -   characterizing uncertainty relies on probability theory.
+
+-   if the $\widehat{\beta}$ are normally distributed, we can use the properties of the normal distribution to characterize our uncertainty about them. We can use the normal distribution to draw inferences regarding how likely or unlikely it is that a particular value of $\widehat{\beta}$ is the true value of $\beta$.

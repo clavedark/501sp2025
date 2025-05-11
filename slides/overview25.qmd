@@ -2,7 +2,7 @@
 title: "Course overview"
 author: "Dave Clark"
 institute: "Binghamton University"
-date: today
+date: "January 19, 2025"
 date-format: long
 title-block-banner: TRUE
 format: html
@@ -189,11 +189,11 @@ We're going to examine the covariates of violence against civilians during the C
 
 ### Data
 
-Let's look at ACLED event data, and data on states of emergency during the COVID period from Lundgren et al (2020).
+Let's look at [https://acleddata.com](ACLED event data), and data on states of emergency during the COVID period from @lundgren2020emergency.
 
-The next figure plots protests and repression since mid-2019, the onset of the pandemic marked at March 15, 2020.
+The next two figures plots protests and repression since mid-2019, the onset of the pandemic marked at March 15, 2020.
 
-The blue lines are local regressions showing trends; while protests return to pre-pandemic levels (similar to the years prior), repression increases since the onset of COVID-19.
+The green lines are local regressions showing trends; while protests return to pre-pandemic levels (similar to the years prior), repression increases since the onset of COVID-19.
 
 ------------------------------------------------------------------------
 
@@ -475,6 +475,8 @@ soe <- soe %>%
 
 ### States of Emergency during the Pandemic
 
+Here are the onsets of states of emergency declared during the pandemic (from @lundgren2020emergency).
+
 ```{r}
 #| echo: true
 #| code-fold: true
@@ -535,11 +537,14 @@ Controlling for:
 -   the Human Development Index
 -   the 7 day average number of protests.
 
+
 ------------------------------------------------------------------------
 
 ### Modeling Repression and SoEs
 
-```{r}
+This is a linear regression model estimated using OLS. 
+
+```{r, warning=FALSE, message=FALSE, results='asis'}
 #| echo: true
 #| code-fold: true
 #| code-summary: "code" 
@@ -568,14 +573,33 @@ analysisdata <- analysisdata %>%
 m1 <- lm(data=analysisdata, `Violence against civilians` ~ cumSOE  + lnd + aged_65_older+human_development_index + protest7day )
 #summary(m1)  
 
-library(sjPlot)
-tab_model(m1, show.se=TRUE,  p.style="stars", show.ci=FALSE)
+library(stargazer)
+
+stargazer(m1, type = "html", 
+          title = "Predictors of Violence Against Civilians",
+          dep.var.labels = c("Violence against Civilians"),
+          covariate.labels = c("Intercept", "State of Emergency", "ln(New COVID deaths)", "% age 65 +", "Human Development Index", "Protests, 7 day avg"),
+          omit.stat = c("f", "ser"),
+          single.row = TRUE,
+          intercept.bottom = FALSE,
+          digits.extra = 0,
+          star.char = c("*", "**", "***"),
+          star.cutoffs = c(0.05, 0.01, 0.001),
+          notes.append = FALSE,
+          notes.label = "",
+          notes.align = "l",
+          no.space=TRUE
+)
+
+
 
 ```
 
 ------------------------------------------------------------------------
 
 ### Another look
+
+Tables of estimates are one way to present results; here's an alternative using a coefficient plot.  
 
 ```{r}
 #| echo: true
@@ -584,12 +608,18 @@ tab_model(m1, show.se=TRUE,  p.style="stars", show.ci=FALSE)
 
 #coefficient plot
 ggcoef_model(
-  m1,show_p_values = FALSE,
-  signif_stars = FALSE, exponentiate =FALSE, intercept=TRUE,
-  colour=NULL, include = c("cumSOE", "lnd", "aged_65_older", "human_development_index", "protest7day")
+  m1,
+  show_p_values = FALSE,
+  signif_stars = FALSE, 
+  exponentiate =FALSE, 
+  intercept=TRUE,
+  stripped_rows = FALSE,
+  colour=NULL, 
+  include = c("cumSOE", "lnd", "aged_65_older", "human_development_index", "protest7day")
 )+
-  xlab("Average Marginal Effects") +
+  xlab("Estimates and Confidence Intervals") +
   ggtitle("Predictors of Violence Against Civilians") 
+
 
 ```
 
@@ -601,9 +631,11 @@ The estimates indicate:
 
 -   if all the $X$ variables are set to zero, the expected violence against civilians is 0.93 (the intercept). *Can we reasonably set all the* $X$ variables to zero?
 
--   the difference between a state with a SoE and without is different from zero, but quite small; 0.26 uses of violence.
+-   the difference between a state with a SoE and without is different from zero, but quite small; 0.26 uses of violence over a 7 day period.
 
--   more deaths from COVID are associated with more violence against civilians; $ln(\beta) = .02$. Exponentiate that, and the effect on violence is 1.02, so large compared to anything else in the model.
+-   more deaths from COVID are associated with more violence against civilians. The coefficient is 0.015, meaning that for every increase of 100 deaths, we expect a 1.5% increase in violence against civilians. This is the largest (perhaps only) interesting result in the model.
+
+
 
 ------------------------------------------------------------------------
 
@@ -613,13 +645,15 @@ Let's generate predictions from the model by simulating the distribution of $\wi
 
 -   sample 1000 times from a multivariate normal distribution with mean $\widehat{\beta}$s and variances of $var(\widehat{\beta})$.
 
--   plug those simulated $\widehat{\beta}$s into the equation using mean/median/mode values for the $X$s.
+-   plug those simulated $\widehat{\beta}$s into the equation using mean/median/mode values for the $x$s.
+
+- save the appropriate predictions - 2.5%, 50%, and 97.5% quantiles of the distribution of $\widehat{y}$.
 
 ------------------------------------------------------------------------
 
 ### Simulating quantities
 
-First, set $SoE = 0$; vary $covid~deaths = ln(1 \ldots 28000)$, $\%~age~ 65 = 6$ (the median), $HDI = .74$ (the median), and $protests = 2$ (the median).
+First, set $SoE = 0$; vary $covid~deaths = ln(1 \ldots 3000)$, $\%~age~ 65 = 6$ (the median), $HDI = .74$ (the median), and $protests = 2$ (the median).
 
 $$ \widehat{y} = \beta_0 + \beta_1*   0 +\beta_2*log(p) + \beta_3*6 +\beta_4*.74+ \beta_5*2 $$
 
@@ -646,7 +680,7 @@ predictions <- data.frame ( lb0 = numeric(0),med0= numeric(0),
       ub0= numeric(0),lb1= numeric(0),med1= numeric(0),ub1= 
       numeric(0), deaths = numeric(0))
 
-for (p in seq(0,28000,100)) {
+for (p in seq(0,3000,100)) {
   
   xbRA0  <- quantile(B$b0 + B$b1*0 + B$b2*log(p) + B$b3*6 +B$b4*.74+ 
                        B$b5*2, probs=c(.025,.5,.975))
@@ -656,38 +690,7 @@ for (p in seq(0,28000,100)) {
   xbRA1<- data.frame(t(xbRA1))
   predictions[p:p,] <- data.frame(xbRA0, xbRA1, p)
 }
-predictions$deaths <- log(predictions$deaths)
-
-#plot 
-ggplot()+
-  geom_ribbon(data=predictions, aes(x=deaths, ymin=lb0, ymax=ub0),fill = "grey70", alpha = .4, ) +
-  geom_ribbon(data=predictions, aes(x=deaths, ymin=lb1, ymax=ub1), fill= "grey60",  alpha = .4, ) +
-  geom_line(data= predictions, aes(x=deaths, y=med0))+
-  geom_line(data= predictions, aes(x=deaths, y=med1))+
-  labs ( colour = NULL, x = "ln(New COVID Deaths)", y =  "Expected Repression Episodes" ) +
-  annotate("text", x = 5.5, y = .82, label = "State of Emergency", size=3.5, colour="gray30")+
-  annotate("text", x = 6.5, y = .55, label = "No State of Emergency", size=3.5, colour="gray30")
-
-```
-
-------------------------------------------------------------------------
-
-### Discussion
-
-SoE states have higher levels of violence against civilians, but the difference is very small, making me think we haven't found anything particularly interesting here.
-
--   Covid deaths is associated with more violence; though violence nearly doubles over the range of deaths (x-axis), the range is huge - from 1 to 28,000. If we transform the x-axis to deaths rather than $ln(deaths)$, we can see this effect is pretty isolated.
-
-------------------------------------------------------------------------
-
-### Simulated effects (again)
-
-```{r warning=FALSE, message=FALSE}
-#| echo: true
-#| code-fold: true
-#| code-summary: "code" 
-#| 
-predictions$deaths <- exp(predictions$deaths)
+predictions$lndeaths <- log(predictions$deaths)
 
 #plot 
 ggplot()+
@@ -696,8 +699,8 @@ ggplot()+
   geom_line(data= predictions, aes(x=deaths, y=med0))+
   geom_line(data= predictions, aes(x=deaths, y=med1))+
   labs ( colour = NULL, x = "New COVID Deaths", y =  "Expected Repression Episodes" ) +
-  annotate("text", x = 5000, y = 1, label = "State of Emergency", size=3.5, colour="gray30")+
-  annotate("text", x = 10000, y = .65, label = "No State of Emergency", size=3.5, colour="gray30")
+  annotate("text", x = 500, y = .82, label = "State of Emergency", size=3.5, colour="gray30")+
+  annotate("text", x = 1000, y = .55, label = "No State of Emergency", size=3.5, colour="gray30")
 
 ```
 
@@ -705,8 +708,18 @@ ggplot()+
 
 ### Discussion
 
-The increase in violence occurs almost entirely between zero and 5000 COVID deaths. We can speculate on why this might be; doing so might lead us to wonder how useful this model is.
+-   SoE states have higher levels of violence against civilians, but the difference is very small, making me think we haven't found anything particularly interesting here.
 
-$~$ $~$
+-   Covid deaths are associated with more violence; the effect is small over the range plotted here. Recall, the actual range is 0-28,000 in the model, driven by a couple of extreme outliers. I'm only plotting out to 3000 deaths in the predictions.
 
-Much of our focus this semester will be on evaluating how useful models are, and figuring out ways to build useful models.
+
+ 
+
+------------------------------------------------------------------------
+
+This model mainly tells us there's a difference between SoE and non-SoE states - that difference in terms of repression events over a seven day period is relatively small. Moreover, it's possible (even likely) repression leads to states of emergency - it's also likely repression leads to protests in some cases - in other words, the causal arrow likely flows the opposite direction. 
+
+This probably is not a terribly useful model, but it serves the purposes of showing us the basic modeling enterprise, and points to some interesting questions we'll know how to model by the end of the semester. Specifically, we'll know how to model causal effects that might run both directions - doing so may well produce a more useful model. In any event, that model will still be wrong. 
+
+Our goal this semester is to learn to build useful models, and to understand the data generation process that underlies those models.
+ 
