@@ -200,10 +200,10 @@ From @Lake92, p. 31
 -  are we asking the right question? Are we making Type 3 errors - finding the right answer to the wrong question? @kennedy2002sinning(p. 572) writes: 
 
 >A type III error, introduced in Kimball (1957), occurs when a
->researcher produces the right answer to the wrong question. A
->corollary of this rule, as noted by Chatfield (1995, p. 9), is
->that an approximate answer to the right question is worth a
->great deal more than a precise answer to the wrong question.
+researcher produces the right answer to the wrong question. A
+corollary of this rule, as noted by Chatfield (1995, p. 9), is
+that an approximate answer to the right question is worth a
+great deal more than a precise answer to the wrong question.
 
 
 

@@ -35,13 +35,13 @@ library(mvtnorm)
 
 Perhaps the most useful and important, though  difficult skill to learn in science is how to choose a method of inquiry (say, a model). For one thing, there is a huge array of methods to choose from, and they’ll each have their proponents and their detractors. Within that noisy environment, there is always, always a complexity bias - the fancier, more difficult, more esoteric the model, the better it must be. 
 
-For another, inquiry is also faddish. In the early 1990s, everthing was "collinear." In the early 2000s, everything suffered selection bias and needed a Heckman-style model. More recently, everything is "endogenous," a term thrown around very loosely, with few suggestions as to remedies. Whatever the current fad is, expect Reviewer #2 to criticize your paper on those grounds, no matter how irrelevant. 
+For another, inquiry is faddish. In the early 1990s, everthing was "collinear." In the early 2000s, everything suffered selection bias and needed a Heckman-style model. More recently, everything is "endogenous," a term thrown around very loosely, with few suggestions as to remedies. Whatever the current fad is, expect Reviewer #2 to criticize your paper on those grounds, no matter how irrelevant. 
 
 
 ![](peerreview.jpg)
 
 
-How does a scholar learn to navigate this methodological battlefield, to choose appropriate methods, to get persuasive and reasonable answers from their models, and persuade others they’re reasonable enough they warrant publication? I think a good starting point is to truly adopt and internalize George Box’s observation that “all models are wrong, some are useful.” The contest is not to be “right” but to make choices in a correct way that lead to a *useful model*. 
+How does a scholar learn to navigate this methodological minefield, to choose appropriate methods, to get persuasive and reasonable answers from their models, and persuade others they’re reasonable enough they warrant publication? I think a good starting point is to adopt and truly internalize George Box’s observation that “all models are wrong, some are useful.” The contest is not to be “right” but to make choices in a correct way that lead to a *useful model*. 
 
 Thinking about models as useful or not useful, say on a “usefulness” continuum, invites us to think about what makes them useful, and to reflect on what our analytic goals are. For instance, are we mainly interested in prediction? Are we primarily interested in discovery or description? Are we focused on testing hypotheses or establishing causal patterns? These are related but different sorts of inquiry - they usually imply different types of methods. A method that’s useful for one type of question may not be useful for another. 
 
@@ -59,7 +59,8 @@ So what do we do? Seek out challenges - new methods, new literatures and argumen
 
 It's easy to be overwhelmed by methods of inquiry, but important to recognize those methods as tools in a very broad toolbox. Only some of those are useful for the questions you’re asking. 
 
-![](software.jpeg)
+![](software.jpeg){fig-alt="Software as cars"}
+
 
 
 

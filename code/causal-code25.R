@@ -4,7 +4,7 @@ library(stargazer)
 library(AER)
 library(plm)
 library(dplyr)
-
+rm(list = ls())
 # Read the data
 crime_data <- read_dta("~/downloads/zip/data/crime2.dta")
 
@@ -92,6 +92,11 @@ print(instrument_f)
 library(lmtest)
 cat("\nWu-Hausman test:\n")
 summary(iv_model, diagnostics = TRUE)
+
+
+
+
+
 
 
 rm(list = ls())

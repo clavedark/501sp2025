@@ -2,7 +2,7 @@
 title: "Inference"
 author: "Dave Clark"
 institute: "Binghamton University"
-date: today
+date: "February 26, 2025"
 date-format: long
 title-block-banner: TRUE
 bibliography: ../refs501.bib
@@ -226,18 +226,12 @@ library(dplyr)
 
 Two types of inferential errors are possible in this hypothesis testing structure. A Type I error is the rejection of a true null hypothesis. It is a false positive, so a fire alarm when there's no fire.
 
-The probability of a Type I error is $\alpha$, the significance level. A Type II error is the failure to reject a false null hypothesis. It is a false negative, so a silent fire alarm when there is a fire. The probability of a Type II error is denoted $\beta$. The power of the test is $1 - \beta$; this is the probability of correctly rejecting a false null hypothesis. The power of a fire alarm is it probability of going off when there is a fire, so rejected the false null that there is no fire.
-
-It's worth noting @kennedy2002sinning discusses the Type III error: 
-
-> A type III error, introduced in Kimball (1957), occurs when a
+The probability of a Type I error is $\alpha$, the significance level. A Type II error is the failure to reject a false null hypothesis. It is a false negative, so a silent fire alarm when there is a fire. The probability of a Type II error is denoted $\beta$. The power of the test is $1 - \beta$; this is the probability of correctly rejecting a false null hypothesis. The power of a fire alarm is it probability goes off when there is a fire, so rejecting the false null that there is no fire.^[I've noted previously that @kennedy2002sinning discusses the Type III error: "A type III error, introduced in Kimball (1957), occurs when a
 researcher produces the right answer to the wrong question. A
 corollary of this rule, as noted by Chatfield (1995, p. 9), is
 that an approximate answer to the right question is worth a
-great deal more than a precise answer to the wrong question.
-
-This is from Peter Kennedy's very good paper "Sinning in the Basement." 
-
+great deal more than a precise answer to the wrong question."
+]
 
 
 ```{r}
